@@ -16,7 +16,7 @@ namespace padi {
     public:
         explicit GridPlaceable(sf::Vector2i const& pos) : m_position(pos) { }
 
-        sf::Vector2i getPosition() const { return m_position; }
+        [[nodiscard]] sf::Vector2i getPosition() const { return m_position; }
     private:
         friend class Map;
         sf::Vector2i m_position{0,0};
@@ -27,7 +27,7 @@ namespace padi {
             int a_sum = a.x + a.y, b_sum = b.x + b.y;
             return a_sum < b_sum || (a_sum == b_sum && a.x < b.x);
         }
-        bool equal(sf::Vector2i const& a, sf::Vector2i const& b) const {
+        static bool equal(sf::Vector2i const& a, sf::Vector2i const& b) {
             return a.x == b.x && a.y == b.y;
         }
     };

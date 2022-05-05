@@ -5,6 +5,8 @@
 
 #include "Animation.h"
 #include "Entity.h"
+#include "Apollo.h"
+#include "Actions.h"
 
 namespace padi {
 
@@ -19,24 +21,20 @@ namespace padi {
 
         void populate(const Map *map, sf::Vertex *pVertex) const override;
 
-        sf::Vector2i getSize() const override;
+        [[nodiscard]] sf::Vector2i getSize() const override;
 
         sf::Color m_color{255, 255, 255};
         std::shared_ptr<padi::Animation> m_animation;
     };
 
     class LivingEntity
-            : public padi::Entity {
+            : public padi::Entity
+            , public std::enable_shared_from_this<LivingEntity> {
 
     public:
-        explicit LivingEntity(const sf::Vector2i &pos);
+        explicit LivingEntity(padi::AnimationSet const* moveset, const sf::Vector2i &pos);
 
-        // TODO : These are debug functions
-        void setAnimation(std::shared_ptr<padi::Animation> anim);
-
-        void setSlaveAnimation(std::shared_ptr<padi::Animation> anim);
-
-        sf::Vector2i getSize() const override;
+        [[nodiscard]] sf::Vector2i getSize() const override;
 
         void populate(const padi::Map *map, sf::Vertex *pVertex) const override;
 
@@ -45,6 +43,8 @@ namespace padi {
         void setColor(sf::Color const &color);
 
     private:
+        padi::FrameListener m_frameListener;
+        padi::AnimationSet const*  m_moveset;
         sf::Color m_color{255, 255, 255};
         std::shared_ptr<padi::Animation> m_animation;
         std::shared_ptr<padi::Animation> m_slaveAnimation;

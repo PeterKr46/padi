@@ -24,8 +24,6 @@ namespace padi {
         return m_anchors.at(frame);
     }
 
-    SimpleAnimation::~SimpleAnimation() = default;
-
     sf::Vector2i ReverseAnimation::getResolution() const {
         return m_original->getResolution();
     }

@@ -30,7 +30,8 @@ namespace padi {
 
         Map* getMap();
 
-        void addFrameListener(FrameListener & func);
+        void addFrameListener(FrameListener* func);
+        void removeFrameListener(FrameListener* func);
 
     protected:
 
@@ -42,7 +43,7 @@ namespace padi {
         std::shared_ptr<padi::SlaveEntity> m_selector;
         sf::VertexArray m_vertices;
         sf::Texture m_tileset;
-        std::vector<FrameListener> m_activeTriggers;
+        std::vector<FrameListener*> m_activeTriggers;
     };
 
 } // padi

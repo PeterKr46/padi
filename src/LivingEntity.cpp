@@ -8,8 +8,8 @@
 #include "Map.h"
 #include "Stage.h"
 
-padi::LivingEntity::LivingEntity(const sf::Vector2i &pos) : Entity(pos) {
-
+padi::LivingEntity::LivingEntity(padi::AnimationSet const* moveset, const sf::Vector2i &pos) : Entity(pos), m_moveset(moveset) {
+    m_animation = m_moveset->at("idle");
 }
 
 void padi::LivingEntity::populate(const Map *map, sf::Vertex *pVertex) const {
@@ -29,33 +29,47 @@ void padi::LivingEntity::populate(const Map *map, sf::Vertex *pVertex) const {
     for (int i = 0; i < 4; ++i) pVertex[i].color = m_color;
 }
 
+std::pair<std::shared_ptr<padi::Animation>,std::shared_ptr<padi::Animation>> determineAnims(padi::AnimationSet const* context, sf::Vector2i const& dir) {
+    std::pair<std::shared_ptr<padi::Animation>,std::shared_ptr<padi::Animation>> result{nullptr,nullptr};
+    if(dir.x > 0) {
+        result.first    = context->at("move_x_from");
+        result.second   = context->at("move_x_to");
+    }
+    else if(dir.x < 0) {
+        result.second   = std::make_shared<padi::ReverseAnimation>(context->at("move_x_from"));
+        result.first    = std::make_shared<padi::ReverseAnimation>(context->at("move_x_to"));
+    }
+    if(dir.y > 0) {
+        result.first    = context->at("move_y_from");
+        result.second   = context->at("move_y_to");
+    }
+    else if(dir.y < 0) {
+        result.second   = std::make_shared<padi::ReverseAnimation>(context->at("move_y_from"));
+        result.first    = std::make_shared<padi::ReverseAnimation>(context->at("move_y_to"));
+    }
+    return result;
+}
 
 bool padi::LivingEntity::move(Stage *stage, const sf::Vector2i &dir) {
-    if (!m_slaves.empty()) return false;
+    if (!m_slaves.empty() || stage->getMap()->getCurrentCycleFrames() != 0) return false;
     m_slaves.push_back(std::make_shared<padi::SlaveEntity>(getPosition() + dir));
-    m_slaves.front()->m_animation = m_slaveAnimation;
+    auto anims = determineAnims(m_moveset, dir);
+    m_animation = anims.first;
+    m_slaves.front()->m_animation = anims.second;
     m_slaves.front()->m_color = m_color;
     stage->getMap()->addEntity(m_slaves.front());
-    auto col = m_color;
-    padi::FrameListener f = [&](padi::Stage *stage) {
-        std::cout << stage->getMap()->getCurrentCycleFrames() << ": " << int(col.r) << "," << int(col.g) << ","
-                  << int(col.b) << std::endl;
+    m_frameListener = [this, dir](padi::Stage *stage) {
         if(stage->getMap()->getCurrentCycleFrames() == 11) {
             stage->getMap()->removeEntity(m_slaves.front());
+            stage->getMap()->moveEntity(shared_from_this(), m_slaves.front()->getPosition());
+            m_animation = m_moveset->at("idle");
+            m_slaves.clear();
             return false;
         }
         return true;
     };
-    stage->addFrameListener(f);
+    stage->addFrameListener(&m_frameListener);
     return true;
-}
-
-void padi::LivingEntity::setAnimation(std::shared_ptr<padi::Animation>anim) {
-    m_animation = std::move(anim);
-}
-
-void padi::LivingEntity::setSlaveAnimation(std::shared_ptr<padi::Animation>anim) {
-    m_slaveAnimation = std::move(anim);
 }
 
 sf::Vector2i padi::LivingEntity::getSize() const {

@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "src/Stage.h"
 #include "src/LivingEntity.h"
+#include "src/Apollo.h"
 
 int main()
 {
@@ -16,50 +17,20 @@ int main()
 
     map.scale(4.f, 4.5f);
 
-    auto roll_XA = std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {0, 0}, {0, 48}, 12));
-    auto roll_XB = std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {16, 8}, {0, 48}, 12));
-    auto roll_YA = std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {64, 0}, {0, 48}, 12));
-    auto roll_YB = std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {48, 8}, {0, 48}, 12));
+    padi::Apollo apollo;
+    if(apollo.initializeContext("cube")) {
+        apollo.addAnimation("cube", "move_x_from", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {0, 0}, {0, 48}, 12)));
+        apollo.addAnimation("cube", "move_x_to", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {16, 8}, {0, 48}, 12)));
 
-    {
+        apollo.addAnimation("cube", "move_y_from", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {64, 0}, {0, 48}, 12)));
+        apollo.addAnimation("cube", "move_y_to", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {48, 8}, {0, 48}, 12)));
 
-        auto livingEntity = std::make_shared<padi::LivingEntity>(sf::Vector2i{1, 1});
-        livingEntity->setAnimation(std::make_shared<padi::ReverseAnimation>(roll_XA));
-        livingEntity->setSlaveAnimation(std::make_shared<padi::ReverseAnimation>(roll_XB));
-        livingEntity->setColor({255, 255, 255});
-        livingEntity->move(&map, {1, 0});
-        map.getMap()->addEntity(livingEntity);
-
-    }{
-
-        auto livingEntity = std::make_shared<padi::LivingEntity>(sf::Vector2i{0, 1});
-        livingEntity->setAnimation(roll_XA);
-        livingEntity->setSlaveAnimation(roll_XB);
-        livingEntity->setColor({127, 255, 127});
-        livingEntity->move(&map, {1, 0});
-        map.getMap()->addEntity(livingEntity);
-
+        apollo.addAnimation("cube", "idle", std::make_shared<padi::StaticAnimation>(sf::Vector2i {32,32}, sf::Vector2f {0,0}));
     }
-    {
 
-        auto livingEntity = std::make_shared<padi::LivingEntity>(sf::Vector2i{1, 1});
-        livingEntity->setAnimation(std::make_shared<padi::ReverseAnimation>(roll_YA));
-        livingEntity->setSlaveAnimation(std::make_shared<padi::ReverseAnimation>(roll_YB));
-        livingEntity->setColor({255, 255, 127});
-        livingEntity->move(&map, {0, 1});
-        map.getMap()->addEntity(livingEntity);
-
-    }
-    {
-
-        auto livingEntity = std::make_shared<padi::LivingEntity>(sf::Vector2i{1, 0});
-        livingEntity->setAnimation(roll_YA);
-        livingEntity->setSlaveAnimation(roll_YB);
-        livingEntity->setColor({127, 255, 255});
-        livingEntity->move(&map, {0, 1});
-        map.getMap()->addEntity(livingEntity);
-
-    }
+    auto livingEntity = std::make_shared<padi::LivingEntity>(apollo.lookupChar("cube"), sf::Vector2i{1, 1});
+    livingEntity->setColor({255, 255, 255});
+    map.getMap()->addEntity(livingEntity);
 
     sf::Vector2f clickPos{0,0};
     bool clicked{false};
@@ -91,6 +62,10 @@ int main()
             if(!sf::Mouse::isButtonPressed(sf::Mouse::Right))
                 clicked = false;
         }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) livingEntity->move(&map, sf::Vector2i{-1, 0});
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) livingEntity->move(&map, sf::Vector2i{1, 0});
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) livingEntity->move(&map, sf::Vector2i{0, -1});
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) livingEntity->move(&map, sf::Vector2i{0, 1});
 
         window.clear();
         window.draw(map);

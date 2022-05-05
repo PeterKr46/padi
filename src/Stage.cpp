@@ -91,7 +91,7 @@ namespace padi {
             // TODO - if the FPS drops, we end up with frame event skips. this is not robust
             auto iter = m_activeTriggers.begin();
             while (iter != m_activeTriggers.end()) {
-                if (!(*iter)(this)) {
+                if (!(**iter)(this)) {
                     iter = m_activeTriggers.erase(iter);
                 }
                 else {
@@ -106,7 +106,11 @@ namespace padi {
         return &m_map;
     }
 
-    void Stage::addFrameListener(FrameListener &func) {
+    void Stage::addFrameListener(FrameListener* func) {
         m_activeTriggers.emplace_back(std::move(func));
+    }
+
+    void Stage::removeFrameListener(FrameListener *func) {
+        m_activeTriggers.erase(std::find(m_activeTriggers.begin(), m_activeTriggers.end(),func));
     }
 } // padi

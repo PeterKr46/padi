@@ -13,7 +13,7 @@ namespace padi {
 
         virtual void populate(Map const* map, sf::Vertex *pVertex) const;
 
-        virtual sf::Vector2i getSize() const = 0;
+        [[nodiscard]] virtual sf::Vector2i getSize() const = 0;
 
     };
 }
