@@ -13,8 +13,8 @@
 namespace padi {
 
     class CycleListener;
-
     class LevelGenerator;
+    class Cursor;
 
     class Level
             : public sf::Drawable {
@@ -35,6 +35,8 @@ namespace padi {
 
         padi::Map *getMap();
 
+        uint8_t getCurrentCycleFrame() const;
+
         bool addCycleBeginListener(std::shared_ptr<CycleListener> const &listener);
 
         bool addFrameBeginListener(std::shared_ptr<CycleListener> const &listener);
@@ -47,7 +49,13 @@ namespace padi {
 
         size_t getVBOCapacity() const;
 
-    private:
+        void initCursor(std::string const& anim);
+        sf::Vector2i getCursorLocation() const;
+        void moveCursor(sf::Vector2i const & pos);
+        void hideCursor();
+        void showCursor();
+
+        std::shared_ptr<padi::Cursor> getCursor() const;
 
     protected:
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
@@ -77,6 +85,7 @@ namespace padi {
         } m_cycleListeners;
 
         padi::Map m_map;
+        std::shared_ptr<padi::Cursor> m_cursor;
     };
 
     class CycleListener {

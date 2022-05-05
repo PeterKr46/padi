@@ -3,9 +3,9 @@
 //
 #pragma once
 
-#include "Level.h"
 #include <SFML/Window/Keyboard.hpp>
-#include "../entity/LivingEntity.h"
+#include "../entity/StaticEntity.h"
+#include "Level.h"
 
 namespace padi {
 
@@ -15,6 +15,9 @@ namespace padi {
         explicit Cursor(std::shared_ptr<padi::Animation> anim);
 
         void update(padi::Level *level);
+
+        void lock();
+        void unlock();
 
     private:
         bool m_locked{false};

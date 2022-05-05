@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <array>
+#include <iostream>
 #include <SFML/System/Vector2.hpp>
 #include "map/Tile.h"
 

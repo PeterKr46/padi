@@ -11,6 +11,8 @@ namespace padi {
         states.texture = &m_sprites;
 
         states.transform.translate(target.getView().getCenter() - target.getView().getSize() / 2.f);
+        // TODO
+        states.transform.scale(sf::Vector2f(target.getView().getSize().y / 256,target.getView().getSize().y / 256));
 
         // draw the vertex array
         target.draw(&m_vbo[0], m_numVerts, sf::PrimitiveType::Quads, states);

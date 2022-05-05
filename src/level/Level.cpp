@@ -6,6 +6,7 @@
 #include "Level.h"
 #include "../Constants.h"
 #include "../Controls.h"
+#include "Cursor.h"
 
 namespace padi {
 
@@ -82,6 +83,7 @@ namespace padi {
         }
 
         window->setView(m_view);
+        m_cursor->update(this);
     }
 
     void Level::draw(sf::RenderTarget &target, sf::RenderStates states) const {
@@ -159,6 +161,38 @@ namespace padi {
 
     size_t Level::getVBOCapacity() const {
         return m_vbo.getVertexCount();
+    }
+
+    uint8_t Level::getCurrentCycleFrame() const {
+        return m_cycle.frame;
+    }
+
+    void Level::moveCursor(sf::Vector2i const & pos) {
+        m_map.moveEntity(m_cursor, pos);
+    }
+
+    sf::Vector2i Level::getCursorLocation() const {
+        return m_cursor->getPosition();
+    }
+
+    void Level::hideCursor() {
+        m_map.removeEntity(m_cursor);
+        m_cursor->lock();
+    }
+
+    void Level::showCursor() {
+        // Move is more robust here because I'm lazy
+        m_map.moveEntity(m_cursor, m_cursor->getPosition());
+        m_cursor->unlock();
+    }
+
+    void Level::initCursor(std::string const& key) {
+        m_cursor = std::make_shared<padi::Cursor>(m_apollo.lookupAnim(key));
+        m_cursor->lock();
+    }
+
+    std::shared_ptr<padi::Cursor> Level::getCursor() const{
+        return m_cursor;
     }
 
 } // padi
