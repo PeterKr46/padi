@@ -14,6 +14,8 @@
 #include "SFML/Graphics/RenderTarget.hpp"
 #include "SFML/System/Time.hpp"
 #include "Map.h"
+#include "Entity.h"
+#include "LivingEntity.h"
 
 namespace padi {
     class Stage
@@ -30,6 +32,7 @@ namespace padi {
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
+        padi::SlaveEntity m_selector{{1,1}};
         sf::VertexArray m_vertices;
         sf::Texture m_tileset;
     };

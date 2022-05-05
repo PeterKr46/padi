@@ -5,8 +5,10 @@
 
 #include <queue>
 #include <map>
+#include <functional>
 #include "SFML/Graphics/Transformable.hpp"
 #include "SFML/Graphics/VertexArray.hpp"
+#include "SFML/System/Clock.hpp"
 
 namespace padi {
 
@@ -14,7 +16,7 @@ namespace padi {
     public:
         explicit GridPlaceable(sf::Vector2i const& pos) : m_position(pos) { }
 
-        sf::Vector2i getPosition() const { return m_position; };
+        sf::Vector2i getPosition() const { return m_position; }
     private:
         friend class Map;
         sf::Vector2i m_position{0,0};
@@ -38,13 +40,12 @@ namespace padi {
     public:
         explicit Tile(sf::Vector2i const& pos);
         void populate(Map const& context, sf::Vertex* quad) const;
+
+        size_t m_detail{0};
+        sf::Color m_color{255,255,255};
     };
 
-    class Entity : public GridPlaceable{
-    public:
-        explicit Entity(sf::Vector2i const& pos);
-        void populate(Map const &map, sf::Vertex *pVertex) const;
-    };
+    class Entity;
 
     class Map
         : public sf::Transformable {
@@ -60,27 +61,33 @@ namespace padi {
 
         bool addTile(Tile* tile);
 
-        size_t getEntities(sf::Vector2i const& pos, std::vector<Entity*>& entities);
         size_t getEntities(sf::Vector2i const& pos, std::vector<Entity*>& entities) const;
 
-        void addEntity(Entity* entity);
-        void addEntity(Entity* entity, sf::Vector2i const& where);
+        void addEntity(Entity* entity, size_t lower_by = 0);
+        void addEntity(Entity* entity, sf::Vector2i const& where, size_t lower_by = 0);
 
         bool removeEntity(const Entity* entity);
         bool removeEntity(const Entity* entity, sf::Vector2i const& where);
 
-        bool moveEntity(Entity* entity, sf::Vector2i const& pos1, sf::Vector2i const& pos2);
+        bool moveEntity(Entity* entity, sf::Vector2i const& pos2, size_t lower_by = 0);
 
         size_t numQuads() const;
 
         size_t populate(sf::VertexArray & array, size_t vertexOffset, sf::Vector2i const & tile_size);
 
-        const sf::Vector2i& getTileSize() const;
+        sf::Vector2i getTileSize() const;
+
+        sf::Time getCurrentCycleTime() const;
+        int getCurrentCycleFrames() const;
+
+        void for_each(const std::function<void(Tile*)>&);
 
     private:
-        ManhattanMap<Tile *> m_tiles;
-        ManhattanMap<std::vector<Entity *>> m_entities;
+        ManhattanMap<std::pair<Tile*, std::vector<Entity *>>> m_tiles;
         sf::Vector2i m_tileSize{32,32};
+
+        sf::Clock m_cycle;
+        sf::Time m_cycleCarry;
     };
 
 

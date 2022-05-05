@@ -3,7 +3,7 @@ project(padi)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(PERLIN_NOISE lib/PerlinNoise/PerlinNoise.hpp src/Map.cpp src/Map.h)
+set(PERLIN_NOISE lib/PerlinNoise/PerlinNoise.hpp src/Map.cpp src/Map.h src/LivingEntity.cpp src/LivingEntity.h src/DelayedAction.h src/Animation.cpp src/Animation.h src/Entity.h src/Entity.cpp)
 
 add_subdirectory(lib/SFML)
 

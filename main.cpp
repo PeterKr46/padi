@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "src/Stage.h"
+#include "src/LivingEntity.h"
 
 int main()
 {
@@ -10,11 +11,56 @@ int main()
 
 
     padi::Stage map;
-    if (!map.generate("T32_Hover.png", sf::Vector2u(32, 32), 100))
+    if (!map.generate("spritesheet.png", sf::Vector2u(32, 32), 32))
         return -1;
-    map.scale(4.f, 4.f);
 
-    sf::Vector2i selected{2,2};
+    map.scale(1.f, 1.f);
+
+    auto roll_XA = padi::StripAnimation({32, 32}, {0, 0}, {0, 48}, 12);
+    auto roll_XB = padi::StripAnimation({32, 32}, {16, 8}, {0, 48}, 12);
+    auto roll_YA = padi::StripAnimation({32, 32}, {64, 0}, {0, 48}, 12);
+    auto roll_YB = padi::StripAnimation({32, 32}, {48, 8}, {0, 48}, 12);
+
+    {
+
+        auto livingEntity = new padi::LivingEntity({1, 1});
+        livingEntity->setAnimation(new padi::ReverseAnimation(&roll_XA));
+        livingEntity->setSlaveAnimation(new padi::ReverseAnimation(&roll_XB));
+        livingEntity->setColor({127, 255, 127});
+        livingEntity->move(map.map, {1, 0});
+        map.map.addEntity(livingEntity);
+
+    }{
+
+        auto livingEntity = new padi::LivingEntity({0, 1});
+        livingEntity->setAnimation(&roll_XA);
+        livingEntity->setSlaveAnimation(&roll_XB);
+        livingEntity->setColor({127, 255, 127});
+        livingEntity->move(map.map, {1, 0});
+        map.map.addEntity(livingEntity);
+
+    }
+    {
+
+        auto livingEntity = new padi::LivingEntity({1, 1});
+        livingEntity->setAnimation(new padi::ReverseAnimation(&roll_YA));
+        livingEntity->setSlaveAnimation(new padi::ReverseAnimation(&roll_YB));
+        livingEntity->setColor({127, 255, 127});
+        livingEntity->move(map.map, {0, 1});
+        map.map.addEntity(livingEntity);
+
+    }
+    {
+
+        auto livingEntity = new padi::LivingEntity({1, 0});
+        livingEntity->setAnimation(&roll_YA);
+        livingEntity->setSlaveAnimation(&roll_YB);
+        livingEntity->setColor({127, 255, 127});
+        livingEntity->move(map.map, {0, 1});
+        map.map.addEntity(livingEntity);
+
+    }
+
     sf::Vector2f clickPos{0,0};
     bool clicked{false};
     sf::Clock clock;
