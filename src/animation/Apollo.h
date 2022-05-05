@@ -26,7 +26,7 @@ namespace padi {
         [[nodiscard]] std::shared_ptr<padi::Animation> lookupAnim(std::string const& animName) const;
         [[nodiscard]] std::shared_ptr<padi::Animation> lookupAnim(std::string const& ctxName, std::string const& animName) const;
 
-        [[nodiscard]] const padi::AnimationSet* lookupChar(std::string const& charName) const;
+        [[nodiscard]] const padi::AnimationSet* lookupContext(std::string const& charName) const;
     private:
         std::map<std::string, std::shared_ptr<padi::Animation>> m_generalSet;
         std::map<std::string, AnimationSet> m_contextMap;

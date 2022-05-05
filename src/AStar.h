@@ -6,7 +6,6 @@
 #include <vector>
 #include <array>
 #include "SFML/System/Vector2.hpp"
-#include "Stage.h"
 
 namespace padi {
 
@@ -25,8 +24,7 @@ namespace padi {
         return abs(a.x - b.x) + abs(a.y - b.y);
     }
 
-    std::vector<sf::Vector2i> FindPath(padi::Stage *stage, sf::Vector2i const &from, sf::Vector2i const &to) {
-        auto map = stage->getMap();
+    std::vector<sf::Vector2i> FindPath(padi::Map *map, sf::Vector2i const &from, sf::Vector2i const &to) {
         auto t = map->getTile(from);
         auto result = std::vector<sf::Vector2i>();
 
@@ -72,7 +70,7 @@ namespace padi {
         if (cameFrom.find(to) != cameFrom.end()) {
             auto p = to;
             while (p != from) {
-                result.push_back(p);
+                result.push_back(p - cameFrom.at(p));
                 p = cameFrom.at(p);
             }
             std::reverse(result.begin(), result.end());

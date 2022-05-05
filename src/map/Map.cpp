@@ -6,12 +6,12 @@
 
 #include <cmath>
 
-#include "Entity.h"
+#include "../entity/Entity.h"
 
 namespace padi {
 
     sf::Vector2i Map::mapWorldPosToTile(const sf::Vector2f &world) const {
-        sf::Vector2f local = getTransform().getInverse().transformPoint(world) + sf::Vector2f (m_tileSize.x / 2.f, m_tileSize.y / 4.f);
+        sf::Vector2f local = world + sf::Vector2f (m_tileSize.x / 2.f, m_tileSize.y / 4.f);
         return {int(2 * local.y + (local.x - m_tileSize.x / 2)) / m_tileSize.x, int(2 * local.y - (local.x - m_tileSize.x / 2)) / m_tileSize.x};
     }
 
@@ -90,11 +90,7 @@ namespace padi {
         return total;
     }
 
-    size_t Map::populate(sf::VertexArray &array, size_t vertexOffset, const sf::Vector2i &tile_size) {
-        m_cycleCarry += m_cycle.restart();
-        while(m_cycleCarry.asMilliseconds() >= 1000) {
-            m_cycleCarry -= sf::seconds(1);
-        }
+    size_t Map::populate(sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
 
         size_t quads = numQuads();
         if(array.getVertexCount() <= vertexOffset + quads * 4) {
@@ -106,11 +102,11 @@ namespace padi {
 
         while(tileIter != m_tiles.end()) {
             if(tileIter->second.first) {
-                tileIter->second.first->populate(*this, &array[vertexOffset + idx * 4]);
+                tileIter->second.first->populate(this, array, vertexOffset + idx * 4, frame);
                 idx++;
             }
             for (auto &entity: tileIter->second.second) {
-                entity->populate(this, &array[vertexOffset + idx * 4]);
+                entity->populate(this, array, vertexOffset + idx * 4, frame);
                 idx++;
             }
             tileIter = std::next(tileIter);
@@ -120,14 +116,6 @@ namespace padi {
 
     sf::Vector2i Map::getTileSize() const {
         return m_tileSize;
-    }
-
-    sf::Time Map::getCurrentCycleTime() const {
-        return m_cycleCarry;
-    }
-
-    int Map::getCurrentCycleFrames() const {
-        return std::floor(m_cycleCarry.asSeconds() * 12);
     }
 
     void Map::for_each(const std::function<void(std::shared_ptr<padi::Tile>)>& func) {
@@ -148,9 +136,22 @@ namespace padi {
         addEntity(e, e->getPosition(), lower_by);
     }
 
-    void Tile::populate(const Map &context, sf::Vertex *quad) const {
-        sf::Vector2f anchor = context.mapTilePosToWorld(getPosition());
-        sf::Vector2f tileSize = {static_cast<float>(context.getTileSize().x), static_cast<float>(context.getTileSize().y)};
+    void Map::removeTile(const sf::Vector2i &p) {
+        auto iter = m_tiles.find(p);
+        if(iter != m_tiles.end()) {
+            m_tiles.erase(iter);
+        }
+    }
+
+    Tile::Tile(const sf::Vector2i &pos) : GridObject(pos) {
+
+    }
+
+    size_t Tile::populate(const padi::Map *context, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
+        sf::Vertex* quad = &array[vertexOffset];
+
+        sf::Vector2f anchor = context->mapTilePosToWorld(getPosition());
+        sf::Vector2f tileSize = {static_cast<float>(context->getTileSize().x), static_cast<float>(context->getTileSize().y)};
         quad[0].position = anchor+sf::Vector2f(-tileSize.x / 2,-tileSize.y / 2);
         quad[1].position = anchor+sf::Vector2f(tileSize.x / 2,-tileSize.y / 2);
         quad[2].position = anchor+sf::Vector2f(tileSize.x / 2,tileSize.y / 2);
@@ -165,10 +166,7 @@ namespace padi {
         quad[1].texCoords = sf::Vector2f(128 + 32, 0 + m_detail * tileSize.y);
         quad[2].texCoords = sf::Vector2f(128 + 32, 32 + m_detail * tileSize.y);
         quad[3].texCoords = sf::Vector2f(128 + 0, 32 + m_detail * tileSize.y);
-    }
-
-    Tile::Tile(const sf::Vector2i &pos) : GridPlaceable(pos) {
-
+        return 4;
     }
 
 } // padi

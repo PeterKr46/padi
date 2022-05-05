@@ -1,22 +1,38 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
-#include "src/Stage.h"
-#include "src/LivingEntity.h"
-#include "src/Apollo.h"
+#include "src/entity/LivingEntity.h"
+#include "src/animation/Apollo.h"
 #include "src/AStar.h"
+#include "lib/PerlinNoise/PerlinNoise.hpp"
 
-int main()
-{
+int main() {
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "PAdI");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
 
-
-    padi::Stage map;
-    if (!map.generate("spritesheet.png", sf::Vector2u(32, 32), 32))
-        return -1;
-
-    map.scale(4.f, 4.5f);
+    padi::Level level({10, 10});
+    sf::Texture tex;
+    tex.loadFromFile("../media/complete_sheet.png");
+    level.setMasterSheet(tex);
+    //level.scale(4,4);
+    level.centerView({0,0});
+    {
+        const siv::PerlinNoise::seed_type seed = 123456u;
+        const siv::PerlinNoise perlin{ seed };
+        sf::Vector2i tile;
+        for (tile.x = 0; tile.x < 10; tile.x++) {
+            for (tile.y = 0; tile.y < 10; tile.y++) {
+                auto z = float(perlin.octave2D_01(tile.x * 0.2, tile.y * 0.2, 5));
+                auto t = std::make_shared<padi::Tile>(tile);
+                t->m_color.r = z * 255;
+                t->m_color.g = z * 255;
+                t->m_color.b = z * 255;
+                level.getMap()->addTile(t);
+            }
+        }
+    }
+    sf::Font f{};
+    f.setSmooth(false);
+    f.loadFromFile("../media/prstartk.ttf");
+    sf::Text t("Hello, world.",f,7);
 
     padi::Apollo apollo;
     if(apollo.initializeContext("cube")) {
@@ -26,7 +42,7 @@ int main()
         apollo.addAnimation("cube", "move_y_from", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {64, 0}, {0, 48}, 12)));
         apollo.addAnimation("cube", "move_y_to", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {48, 8}, {0, 48}, 12)));
 
-        apollo.addAnimation("cube", "idle", std::make_shared<padi::StaticAnimation>(sf::Vector2i {32,32}, sf::Vector2f {0,0}));
+        apollo.addAnimation("cube", "idle", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {0, 560}, {0, 32}, 12)));
     }
     if(apollo.initializeContext("tetrahedron")) {
         apollo.addAnimation("tetrahedron", "move_x_from", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {192, 0}, {0, 48}, 12)));
@@ -39,23 +55,40 @@ int main()
     }
 
     apollo.addAnimation("air_strike",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {288, 0}, {0, 32}, 12)));
+    apollo.addAnimation("air_strike_large",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 48}, {384, 0}, {0, 48}, 12)));
+    apollo.addAnimation("fire",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 40}, {352, 0}, {0, 40}, 12)));
+    apollo.addAnimation("q_mark",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 36}, {416, 0}, {0, 36}, 12)));
+    apollo.addAnimation("debug",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {992, 0}, {0, 32}, 12)));
 
-    auto airStrike = std::make_shared<padi::SlaveEntity>(sf::Vector2i {8,8});
-    airStrike->m_animation = apollo.lookupAnim("air_strike");
-    map.getMap()->addEntity(airStrike);
-
-    auto livingEntity = std::make_shared<padi::LivingEntity>(apollo.lookupChar("cube"), sf::Vector2i{1, 1});
+    {
+        int offset = 2;
+        for (auto anim: {"air_strike", "air_strike_large", "fire", "q_mark", "debug"}) {
+            auto slave = std::make_shared<padi::SlaveEntity>(sf::Vector2i{++offset, 0});
+            slave->m_animation = apollo.lookupAnim(anim);
+            level.getMap()->addEntity(slave);
+        }
+    }
+    
+    auto livingEntity = std::make_shared<padi::LivingEntity>(apollo.lookupContext("cube"), sf::Vector2i{1, 1});
     livingEntity->setColor({255, 255, 255});
-    map.getMap()->addEntity(livingEntity);
+    level.getMap()->addEntity(livingEntity);
+    level.addCycleBeginListener(livingEntity);
+    level.addCycleEndListener(livingEntity);
 
-    auto randomEntity = std::make_shared<padi::LivingEntity>(apollo.lookupChar("tetrahedron"), sf::Vector2i{10, 10});
-    livingEntity->setColor({255, 255, 255});
-    map.getMap()->addEntity(randomEntity);
+    auto randomEntity = std::make_shared<padi::LivingEntity>(apollo.lookupContext("tetrahedron"), sf::Vector2i{10, 10});
+    randomEntity->setColor({255, 255, 255});
+    level.getMap()->addEntity(randomEntity);
+    
+    std::vector<sf::Vector2i> path;
+    
+    auto fire = std::make_shared<padi::SlaveEntity>(sf::Vector2i{2, 2});
+    fire->m_animation = apollo.lookupAnim("fire");
+    fire->m_color = sf::Color(255, 127, 0);
+    
+    auto strike = std::make_shared<padi::SlaveEntity>(sf::Vector2i{0, 0});
+    strike->m_animation = apollo.lookupAnim("air_strike_large");
+    strike->m_color = sf::Color(255, 127, 127);
 
-    auto path = padi::FindPath(&map, {0,0}, {2,2});
-
-    sf::Vector2f clickPos{0,0};
-    bool clicked{false};
     sf::Clock clock;
     size_t frames = 0;
     sf::Clock frame_clock;
@@ -68,58 +101,53 @@ int main()
             if (event.type == sf::Event::Closed)
                 window.close();
         }
-        sf::Vector2f wPos{-1,-1};
-        //if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            wPos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        sf::Vector2f wPos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        sf::Vector2i tPos = level.getMap()->mapWorldPosToTile(wPos);
         //}
-        map.update(wPos, clock.getElapsedTime());
-        if(!clicked && sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
-            clicked = true;
-            clickPos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-        }
-        else if(clicked) {
-            sf::Vector2f curPos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-            map.move(curPos-clickPos);
-            clickPos=curPos;
-            if(!sf::Mouse::isButtonPressed(sf::Mouse::Right))
-                clicked = false;
-        }
+        level.update(&window);
 
-        auto tPos = map.getMap()->mapWorldPosToTile(map.getTransform().getInverse().transformPoint(wPos));
-        if(sf::Mouse::isButtonPressed(sf::Mouse::Left) && (path.empty() || (!path.empty() && path.back() != tPos))) {
-            path = padi::FindPath(&map,livingEntity->getPosition(), tPos);
+        t.setPosition(level.getMap()->mapTilePosToWorld(tPos) - t.getLocalBounds().getSize());
+        t.setString(std::to_string(tPos.x) + " " + std::to_string(tPos.y));
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Left) && path.empty()) {
+            path = padi::FindPath(level.getMap(),livingEntity->getPosition(), tPos);
         }
         if(!path.empty()) {
-            if(livingEntity->move(&map, path.front() - livingEntity->getPosition())) {
+            if(livingEntity->moveIntent(path.front())) {
                 path.erase(path.begin());
+                t.setString(std::to_string(path.size()) + " more steps");
             }
         }
 
-        //if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) livingEntity->move(&map, sf::Vector2i{-1, 0});
-        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) livingEntity->move(&map, sf::Vector2i{1, 0});
-        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) livingEntity->move(&map, sf::Vector2i{0, -1});
-        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) livingEntity->move(&map, sf::Vector2i{0, 1});
+        //if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) livingEntity->moveIntent(&map, sf::Vector2i{-1, 0});
+        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) livingEntity->moveIntent(&map, sf::Vector2i{1, 0});
+        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) livingEntity->moveIntent(&map, sf::Vector2i{0, -1});
+        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) livingEntity->moveIntent(&map, sf::Vector2i{0, 1});
 
-        if(map.getMap()->getCurrentCycleFrames() == 0) {
-            sf::Vector2i dir;
-            switch (rand() & 0b11) {
-                case 0: dir={1,0}; break;
-                case 1: dir={-1,0}; break;
-                case 2: dir={0,1}; break;
-                case 3: dir={0,-1}; break;
-            }
-            if(randomEntity->move(&map, dir)) {
-                auto tile = map.getMap()->getTile(randomEntity->getPosition());
-                if(tile) {
-                    tile->m_color -= sf::Color(randomEntity->getColor().r / 16, randomEntity->getColor().g / 16,
-                                               randomEntity->getColor().b / 16);
-                    tile->m_color.a = 255;
-                }
-            }
-        }
+        //if(map.getMap()->getCurrentCycleFrames() == 0) {
+        //    sf::Vector2i dir;
+        //    switch (rand() & 0b11) {
+        //        case 0: dir={1,0}; break;
+        //        case 1: dir={-1,0}; break;
+        //        case 2: dir={0,1}; break;
+        //        case 3: dir={0,-1}; break;
+        //    }
+        //    if(randomEntity->moveIntent(&map, dir)) {
+        //        auto tile = map.getMap()->getTile(randomEntity->getPosition());
+        //        if(tile) {
+        //            tile->m_color -= sf::Color(randomEntity->getColor().r / 16, randomEntity->getColor().g / 16,
+        //                                       randomEntity->getColor().b / 16);
+        //            tile->m_color.a = 255;
+        //            if(tile->m_color.r+tile->m_color.g+tile->m_color.b < 128) {
+        //                map.getMap()->removeTile(randomEntity->getPosition());
+        //            }
+        //        }
+        //    }
+        //}
+        level.populateVBO();
 
         window.clear();
-        window.draw(map);
+        window.draw(level);
+        window.draw(t);
         window.display();
         float t = frame_clock.restart().asSeconds();
         if(t > 0.013) {
@@ -131,7 +159,7 @@ int main()
         ++frames;
     }
     printf("Slowest frame took %.3f s, i.e. %.3f FPS\n", longest, 1.f/longest);
-    printf("%i entities final\n", map.getMap()->numQuads());
+    printf("%i entities final\n", level.getMap()->numQuads());
     printf("%i frames total in %.3f seconds\n", frames, clock.getElapsedTime().asSeconds());
     printf("%.3f fps avg", float(frames) / clock.getElapsedTime().asSeconds());
     return 0;

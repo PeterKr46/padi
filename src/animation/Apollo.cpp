@@ -13,7 +13,7 @@ namespace padi {
         return iter->second;
     }
 
-    const padi::AnimationSet *Apollo::lookupChar(const std::string &charName) const {
+    const padi::AnimationSet *Apollo::lookupContext(const std::string &charName) const {
         auto iter = m_contextMap.find(charName);
         if (iter == m_contextMap.end()) return nullptr;
         return &iter->second;

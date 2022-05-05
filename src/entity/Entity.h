@@ -4,14 +4,14 @@
 
 #pragma once
 
-#include "Map.h"
+#include "../map/Map.h"
 
 namespace padi {
-    class Entity : public padi::GridPlaceable {
+    class Entity : public padi::GridObject {
     public:
         explicit Entity(sf::Vector2i const &pos);
 
-        virtual void populate(Map const* map, sf::Vertex *pVertex) const;
+        size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const override;
 
         [[nodiscard]] virtual sf::Vector2i getSize() const = 0;
 
