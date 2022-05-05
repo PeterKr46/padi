@@ -14,6 +14,9 @@ namespace padi {
     typedef std::map<std::string, std::shared_ptr<padi::Animation>> AnimationSet;
 
     class Apollo {
+        /**
+         * I just felt like naming it this (:
+         */
     public:
 
         void loadFromFile(std::string const& path);

@@ -5,6 +5,7 @@
 
 #include "../map/Map.h"
 #include "SFML/Graphics/RenderWindow.hpp"
+#include "../animation/Apollo.h"
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
@@ -13,28 +14,36 @@ namespace padi {
 
     class CycleListener;
 
+    class LevelGenerator;
+
     class Level
             : public sf::Drawable {
+        friend class LevelGenerator;
+
     public:
+        explicit Level(sf::Vector2i const &area, sf::Vector2i const &tile_size = {32, 32});
 
-        explicit Level(sf::Vector2i const& area, sf::Vector2i const& tile_size = {32,32});
+        void update(sf::RenderWindow *window);
 
-        void setMasterSheet(sf::Texture & texture);
-
-        void update(sf::RenderWindow* window);
         void populateVBO();
 
         void lockView(bool locked);
+
         bool isViewLocked() const;
 
-        bool centerView(sf::Vector2i const& position);
+        bool centerView(sf::Vector2i const &position);
 
         padi::Map *getMap();
 
-        bool addCycleBeginListener(std::shared_ptr<CycleListener> const& listener);
-        bool addFrameBeginListener(std::shared_ptr<CycleListener> const& listener);
-        bool addFrameEndListener(std::shared_ptr<CycleListener> const& listener);
-        bool addCycleEndListener(std::shared_ptr<CycleListener> const& listener);
+        bool addCycleBeginListener(std::shared_ptr<CycleListener> const &listener);
+
+        bool addFrameBeginListener(std::shared_ptr<CycleListener> const &listener);
+
+        bool addFrameEndListener(std::shared_ptr<CycleListener> const &listener);
+
+        bool addCycleEndListener(std::shared_ptr<CycleListener> const &listener);
+
+        const Apollo* getApollo() const;
 
     private:
 
@@ -47,6 +56,7 @@ namespace padi {
 
         // Sprite master - anything drawn in the context of this level should be on here.
         sf::Texture m_sprites;
+        padi::Apollo m_apollo;
         sf::VertexArray m_vbo;
 
         struct {
@@ -54,7 +64,7 @@ namespace padi {
             uint64_t carried_uS{0};
             uint8_t frame{0};
         } m_cycle;
-        
+
         struct {
             std::vector<std::shared_ptr<CycleListener>> cycleBegin;
             std::vector<std::shared_ptr<CycleListener>> cycleEnd;
@@ -68,10 +78,13 @@ namespace padi {
 
     class CycleListener {
     public:
-        virtual bool onCycleBegin(Level*) { return false; }
-        virtual bool onCycleEnd(Level*) { return false; }
-        virtual bool onFrameBegin(Level*, uint8_t frame) { return false; }
-        virtual bool onFrameEnd(Level*, uint8_t frame) { return false; }
+        virtual bool onCycleBegin(Level *) { return false; }
+
+        virtual bool onCycleEnd(Level *) { return false; }
+
+        virtual bool onFrameBegin(Level *, uint8_t frame) { return false; }
+
+        virtual bool onFrameEnd(Level *, uint8_t frame) { return false; }
     };
 
 } // padi

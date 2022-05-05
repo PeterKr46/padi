@@ -22,10 +22,10 @@ namespace padi {
             } else if (padi::Controls::isKeyDown(sf::Keyboard::Right)) {
                 level->getMap()->moveEntity(m_entity, m_entity->getPosition() + padi::Right + padi::Up);
             } else if (padi::Controls::isKeyDown(sf::Keyboard::Up)) {
-                auto up = (m_entity->getPosition().x + m_entity->getPosition().y) % 2 == 0 ? padi::Left : padi::Up;
+                auto up = (abs(m_entity->getPosition().x) + abs(m_entity->getPosition().y)) % 2 == 0 ? padi::Left : padi::Up;
                 level->getMap()->moveEntity(m_entity, m_entity->getPosition() + up);
             } else if (padi::Controls::isKeyDown(sf::Keyboard::Down)) {
-                auto down = (m_entity->getPosition().x + m_entity->getPosition().y) % 2 == 1 ? padi::Right : padi::Down;
+                auto down = (abs(m_entity->getPosition().x) + abs(m_entity->getPosition().y)) % 2 == 1 ? padi::Right : padi::Down;
                 level->getMap()->moveEntity(m_entity, m_entity->getPosition() + down);
             }
             if (padi::Controls::isAnyKeyPressed<sf::Keyboard::Key *>(&arrows[0], &arrows[4])) {
@@ -37,7 +37,7 @@ namespace padi {
     }
 
     Cursor::Cursor(std::shared_ptr<padi::Animation> anim) {
-        m_entity = std::make_shared<padi::SlaveEntity>(sf::Vector2i{4, 4});
+        m_entity = std::make_shared<padi::SlaveEntity>(sf::Vector2i{0, 0});
         m_entity->m_animation = std::move(anim);
     }
 

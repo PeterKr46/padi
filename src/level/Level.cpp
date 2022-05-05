@@ -4,6 +4,7 @@
 
 #include "Level.h"
 #include "../Constants.h"
+#include "../Controls.h"
 
 namespace padi {
 
@@ -57,8 +58,17 @@ namespace padi {
             }
             handleFrameBegin(m_cycleListeners.frameBegin, this, m_cycle.frame);
         }
-        // TODO
-        m_view.setSize(window->getSize().x / 3, window->getSize().y / 3);
+        if(m_view.getSize().x == 0) {
+            m_view.setSize(window->getSize().x, window->getSize().y);
+        }
+
+        // Zoom Hotkeys
+        if (padi::Controls::isKeyDown(sf::Keyboard::Comma)) {
+            m_view.setSize(m_view.getSize().x / 2, m_view.getSize().y / 2);
+        } else if (padi::Controls::isKeyDown(sf::Keyboard::Period)) {
+            m_view.setSize(m_view.getSize().x * 2, m_view.getSize().y * 2);
+        }
+
         window->setView(m_view);
     }
 
@@ -91,14 +101,11 @@ namespace padi {
         return &m_map;
     }
 
-    void Level::setMasterSheet(sf::Texture & tex) {
-        this->m_sprites = tex;
-    }
-
     Level::Level(const sf::Vector2i &area, const sf::Vector2i &tile_size) {
         // resize the vertex array to fit the level size
         m_vbo.setPrimitiveType(sf::PrimitiveType::Quads);
         m_vbo.resize(area.x * area.y * 4);
+        m_view.setSize(0,0);
     }
 
     void Level::populateVBO() {
@@ -139,6 +146,10 @@ namespace padi {
             return true;
         }
         return false;
+    }
+
+    const Apollo *Level::getApollo() const {
+        return &m_apollo;
     }
 
 } // padi

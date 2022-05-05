@@ -54,7 +54,7 @@ namespace padi {
             for (auto d: adjacency) {
                 auto neighbor = bestGuess.second + d;
                 auto neighborTile = map->getTile(neighbor);
-                if (neighborTile && neighborTile->m_color.r + neighborTile->m_color.g + neighborTile->m_color.b > 300 ) {
+                if (neighborTile && neighborTile->m_color.r + neighborTile->m_color.g + neighborTile->m_color.b > 96 ) {
                     auto score = geodesicDistance.find(neighbor);
                     if (score == geodesicDistance.end()) {
                         frontier.push({bestGuess.first + 1 + L1(neighbor, to), neighbor});

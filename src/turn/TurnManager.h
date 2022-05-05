@@ -4,7 +4,7 @@
 #pragma once
 namespace padi {
     class TurnManager {
-
+    public:
 
     };
 }

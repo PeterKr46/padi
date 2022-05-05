@@ -14,7 +14,8 @@ namespace padi {
     class LevelGenerator {
     public:
 
-        LevelGenerator& loadSpriteMaster(std::string const& path);
+        LevelGenerator& withSpritesheet(std::string const& path);
+        LevelGenerator& withApollo(std::string const& path);
         LevelGenerator& withSeed(uint64_t seed);
         LevelGenerator& withArea(sf::Vector2i const& size);
         Level generate();
@@ -23,7 +24,8 @@ namespace padi {
 
         siv::PerlinNoise m_perlin;
 
-        sf::Texture m_spriteMaster;
+        std::string m_spritesheetPath;
+        std::string m_apolloPath;
 
         sf::Vector2i m_targetArea{8,8};
         sf::Vector2i m_tileSize{32,32};
