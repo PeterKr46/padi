@@ -1,0 +1,25 @@
+# Main Apollo File
+# block <co;ntext>
+# anim <key>    <width> <height> <posx> <posy> <stepx> <stepy> <frames> [repeat]
+anim cursor             32 32   160 0   0 32    6   1
+anim air_strike         32 32   288 0   0 32    12
+anim air_strike_large   32 48   384 0   0 48    12
+anim fire               32 40   352 0   0 40    12
+anim q_mark             32 36   416 0   0 36    12
+anim debug              32 41   992 0   0 32    12
+anim button             18 24   96 0    0 24    4   2
+
+block cube
+anim move_x_from    32 32   0 0     0 48    12
+anim move_x_to      32 32   16 8    0 48    12
+anim move_y_from    32 32   64 0    0 48    12
+anim move_y_to      32 32   48 8    0 48    12
+anim idle           32 32   0 560   0 32    12
+
+block tetrahedron
+anim move_x_from    32 32   192 0   0 48    12
+anim move_x_to      32 32   208 8   0 48    12
+anim move_y_from    32 32   256 0   0 48    12
+anim move_y_to      32 32   240 8   0 48    12
+# filthy static animation hack...
+anim idle           32 32   192 0   0 0     12

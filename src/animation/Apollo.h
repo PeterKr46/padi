@@ -16,19 +16,19 @@ namespace padi {
     class Apollo {
     public:
 
+        void loadFromFile(std::string const& path);
+
         bool initializeContext(std::string const&);
 
         void addAnimation(std::string const& name, std::shared_ptr<padi::Animation> anim);
         bool addAnimation(std::string const& context, std::string const& animName, const std::shared_ptr<padi::Animation>& anim);
-
-        // TODO - cleaner multi-anim context creation
 
         [[nodiscard]] std::shared_ptr<padi::Animation> lookupAnim(std::string const& animName) const;
         [[nodiscard]] std::shared_ptr<padi::Animation> lookupAnim(std::string const& ctxName, std::string const& animName) const;
 
         [[nodiscard]] const padi::AnimationSet* lookupContext(std::string const& charName) const;
     private:
-        std::map<std::string, std::shared_ptr<padi::Animation>> m_generalSet;
+        AnimationSet m_generalSet;
         std::map<std::string, AnimationSet> m_contextMap;
     };
 

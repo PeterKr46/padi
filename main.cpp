@@ -25,7 +25,7 @@ int main() {
     sf::Text t("Hello, world.",f,7);
 
     padi::Apollo apollo;
-    if(apollo.initializeContext("cube")) {
+    /*if(apollo.initializeContext("cube")) {
         apollo.addAnimation("cube", "move_x_from", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {0, 0}, {0, 48}, 12)));
         apollo.addAnimation("cube", "move_x_to", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {16, 8}, {0, 48}, 12)));
 
@@ -50,7 +50,8 @@ int main() {
     apollo.addAnimation("fire",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 40}, {352, 0}, {0, 40}, 12)));
     apollo.addAnimation("q_mark",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 36}, {416, 0}, {0, 36}, 12)));
     apollo.addAnimation("debug",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 41}, {992, 0}, {0, 32}, 12)));
-    apollo.addAnimation("button",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({18, 24}, {96, 0}, {0, 24}, 4, 2)));
+    apollo.addAnimation("button",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({18, 24}, {96, 0}, {0, 24}, 4, 2)));*/
+    apollo.loadFromFile("../media/strips.apollo");
 
     {
         int offset = 2;
@@ -62,12 +63,11 @@ int main() {
     }
 
     std::shared_ptr<padi::LivingEntity> livingEntity;
-    for(int i = 0; i < 4; ++i) {
-        livingEntity = std::make_shared<padi::LivingEntity>(apollo.lookupContext("cube"), sf::Vector2i{rand() % 24, rand() % 24});
-        livingEntity->setColor({255, 255, 255});
-        auto leSpawn = std::make_shared<padi::SpawnEvent>(livingEntity, apollo.lookupAnim("air_strike_large"));
-        leSpawn->dispatch(&level);
-    }
+    livingEntity = std::make_shared<padi::LivingEntity>(apollo.lookupContext("cube"),
+                                                        sf::Vector2i{rand() % 24, rand() % 24});
+    livingEntity->setColor({255, 255, 255});
+    auto leSpawn = std::make_shared<padi::SpawnEvent>(livingEntity, apollo.lookupAnim("air_strike_large"));
+    leSpawn->dispatch(&level);
 
     auto button = std::make_shared<padi::Button>(sf::Vector2i{4,4}, apollo.lookupAnim("button"));
     level.getMap()->addUIObject(button);
