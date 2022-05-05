@@ -15,12 +15,11 @@
 #include "SFML/System/Time.hpp"
 
 namespace padi {
-    class WorldMap
+    class Stage
             : public sf::Drawable, public sf::Transformable {
 
     public:
-        bool load(const std::string &tileset, sf::Vector2u tileSize, const int *tiles, unsigned int width,
-                  unsigned int height);
+        bool generate(const std::string &tileset, sf::Vector2u tileSize, unsigned int radius);
 
         void update(sf::Vector2f & mouse_pos, sf::Time time);
 

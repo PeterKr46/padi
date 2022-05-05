@@ -1,6 +1,6 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
-#include "src/WorldMap.h"
+#include "src/Stage.h"
 
 int main()
 {
@@ -8,16 +8,9 @@ int main()
     sf::CircleShape shape(100.f);
     shape.setFillColor(sf::Color::Green);
 
-    const int level[] = {
-        1,1,1,1,1,
-        1,1,1,1,1,
-        3,2,1,0,-1,
-        1,1,1,0,-1,
-        1,1,1,0,-1,
-    };
 
-    padi::WorldMap map;
-    if (!map.load("T32_Hover.png", sf::Vector2u(32, 32), level, 32, 32))
+    padi::Stage map;
+    if (!map.generate("T32_Hover.png", sf::Vector2u(32, 32), 16))
         return -1;
     map.scale(4.f, 4.f);
 
