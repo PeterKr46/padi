@@ -31,7 +31,7 @@ namespace padi {
 
         m_selector.m_animation = new SimpleAnimation(padi::StripAnimation({32, 32}, {160,0}, {0,32}, 6, 1));
 
-        map.addEntity(&m_selector);
+        m_map.addEntity(&m_selector);
         // populate the vertex array, with one quad per tile
         sf::Vector2i tile{0,0};
         for (tile.x = 0; tile.x < size.x; tile.x++)
@@ -45,10 +45,10 @@ namespace padi {
                 t->m_color.r = z * 255;
                 t->m_color.g = z * 255;
                 t->m_color.b = z * 255;
-                map.addTile(t);
+                m_map.addTile(t);
                 //}
             }
-        map.populate(m_vertices, 0, {32,32});
+        m_map.populate(m_vertices, 0, {32, 32});
         return true;
     }
 
@@ -64,23 +64,45 @@ namespace padi {
     }
 
     void Stage::update(sf::Vector2f &mouse_pos, sf::Time loop_state) {
-        int frame = int(loop_state.asSeconds() * 12) % 12;
-        auto pos = map.mapWorldPosToTile(getTransform().getInverse().transformPoint(mouse_pos));
+        auto pos = m_map.mapWorldPosToTile(getTransform().getInverse().transformPoint(mouse_pos));
 
-        Tile* tile = map.getTile(pos);
-        /*if((tile = map.getTile(pos)) == nullptr) {
+
+        Tile* tile = m_map.getTile(pos);
+        /*if((tile = m_map.getTile(pos)) == nullptr) {
             tile = new Tile(pos);
-            map.addTile(tile);
+            m_map.addTile(tile);
         }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
             tile->m_color.b = 255;
-            //map.populate(m_vertices, 0, {32,32});
+            //m_map.populate(m_vertices, 0, {32,32});
         }*/
          if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num0)) tile->m_detail = 0;
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) tile->m_detail = 1;
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) tile->m_detail = 2;
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) tile->m_detail = 3;
-        map.moveEntity(&m_selector, pos, ~0u);
-        map.populate(m_vertices, 0, {32,32});
+        m_map.moveEntity(&m_selector, pos, ~0u);
+
+        m_map.populate(m_vertices, 0, {32, 32});
+
+        if (m_map.getCurrentCycleFrames() != mdb_lastFrame) {
+            auto iter = m_activeTriggers.begin();
+            while (iter != m_activeTriggers.end()) {
+                if (!(*iter)(this)) {
+                    iter = m_activeTriggers.erase(iter);
+                }
+                else {
+                    iter++;
+                }
+            }
+            mdb_lastFrame = m_map.getCurrentCycleFrames();
+        }
+    }
+
+    Map *Stage::getMap() {
+        return &m_map;
+    }
+
+    void Stage::addFrameListener(FrameListener &func) {
+        m_activeTriggers.emplace_back(std::move(func));
     }
 } // padi

@@ -16,6 +16,7 @@
 #include "Map.h"
 #include "Entity.h"
 #include "LivingEntity.h"
+#include "Actions.h"
 
 namespace padi {
     class Stage
@@ -26,15 +27,22 @@ namespace padi {
 
         void update(sf::Vector2f & mouse_pos, sf::Time time);
 
-        Map map;
+
+        Map* getMap();
+
+        void addFrameListener(FrameListener & func);
 
     protected:
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
+        unsigned char mdb_lastFrame{0};
+
+        padi::Map m_map;
         padi::SlaveEntity m_selector{{1,1}};
         sf::VertexArray m_vertices;
         sf::Texture m_tileset;
+        std::vector<FrameListener> m_activeTriggers;
     };
 
 } // padi

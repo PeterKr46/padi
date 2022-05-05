@@ -5,21 +5,23 @@
 
 #include "Animation.h"
 #include "Entity.h"
-#include "Map.h"
 
 namespace padi {
+
+    class Map;
+    class Stage;
 
     class SlaveEntity
             : public padi::Entity {
     public:
         explicit SlaveEntity(const sf::Vector2i &pos);
 
-        void populate(const Map &map, sf::Vertex *pVertex) const override;
+        void populate(const Map *map, sf::Vertex *pVertex) const override;
 
         sf::Vector2i getSize() const override;
 
         sf::Color m_color{255, 255, 255};
-        padi::Animation *m_animation{nullptr};
+        padi::Animation const*m_animation{nullptr};
     };
 
     class LivingEntity
@@ -29,22 +31,22 @@ namespace padi {
         explicit LivingEntity(const sf::Vector2i &pos);
 
         // TODO : These are debug functions
-        void setAnimation(Animation *anim);
+        void setAnimation(Animation const *anim);
 
-        void setSlaveAnimation(Animation *anim);
+        void setSlaveAnimation(Animation const *anim);
 
         sf::Vector2i getSize() const override;
 
-        void populate(const Map &map, sf::Vertex *pVertex) const override;
+        void populate(const padi::Map *map, sf::Vertex *pVertex) const override;
 
-        bool move(Map &map, sf::Vector2i const &dir);
+        bool move(padi::Stage* map, sf::Vector2i const &dir);
 
-        void setColor(sf::Color const& color);
+        void setColor(sf::Color const &color);
 
     private:
         sf::Color m_color{255, 255, 255};
-        padi::Animation *m_animation{nullptr};
-        padi::Animation *m_slaveAnimation{nullptr};
+        padi::Animation const *m_animation{nullptr};
+        padi::Animation const *m_slaveAnimation{nullptr};
         std::vector<SlaveEntity> m_slaves;
     };
 }

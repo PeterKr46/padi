@@ -11,7 +11,7 @@ namespace padi {
     public:
         explicit Entity(sf::Vector2i const &pos);
 
-        virtual void populate(Map const &map, sf::Vertex *pVertex) const;
+        virtual void populate(Map const* map, sf::Vertex *pVertex) const;
 
         virtual sf::Vector2i getSize() const = 0;
 

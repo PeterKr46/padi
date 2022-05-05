@@ -44,6 +44,7 @@ namespace padi {
     StripAnimation(const sf::Vector2i &resolution, const sf::Vector2i &anchor0, const sf::Vector2i &step,
                    size_t num_frames, size_t repeat) {
         auto frames = std::vector<sf::Vector2f>();
+        frames.reserve(num_frames * (repeat+1));
         for (size_t loop = 0; loop <= repeat; ++loop) {
             for (size_t i = 0; i < num_frames; ++i) {
                 frames.emplace_back(float(anchor0.x + (step.x * i)),

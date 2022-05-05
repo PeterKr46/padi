@@ -69,7 +69,7 @@ namespace padi {
             auto rmAt = std::find(iter->second.second.begin(), iter->second.second.end(), entity);
             if (rmAt != iter->second.second.end()) { // Check entry in vector
                 iter->second.second.erase(rmAt);
-                if(!iter->second.first && iter->second.second.empty()) { // Remove empty position from map
+                if(!iter->second.first && iter->second.second.empty()) { // Remove empty position from m_map
                     m_tiles.erase(iter);
                 }
                 return true;
@@ -126,7 +126,7 @@ namespace padi {
                 idx++;
             }
             for (auto &entity: tileIter->second.second) {
-                entity->populate(*this, &array[vertexOffset + idx * 4]);
+                entity->populate(this, &array[vertexOffset + idx * 4]);
                 idx++;
             }
             tileIter = std::next(tileIter);

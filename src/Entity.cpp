@@ -10,8 +10,8 @@ namespace padi {
 
     }
 
-    void Entity::populate(Map const &context, sf::Vertex *quad) const {
-        sf::Vector2f anchor = context.mapTilePosToWorld(getPosition());
+    void Entity::populate(Map const *context, sf::Vertex *quad) const {
+        sf::Vector2f anchor = context->mapTilePosToWorld(getPosition());
         sf::Vector2i size = getSize();
         quad[0].position = anchor + sf::Vector2f(-size.x / 2, -size.y / 2);
         quad[1].position = anchor + sf::Vector2f(size.x / 2, -size.y / 2);
