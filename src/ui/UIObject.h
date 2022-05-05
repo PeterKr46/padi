@@ -16,7 +16,7 @@ namespace padi {
         explicit UIObject(sf::IntRect const& rect);
 
         [[nodiscard]] virtual size_t numQuads() const;
-        virtual size_t populate(const padi::UIContext* ctx, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const;
+        virtual size_t populate(const padi::UIContext* ctx, sf::VertexArray &array, size_t vertexOffset, uint8_t frame);
 
     protected:
         sf::FloatRect m_bound = sf::FloatRect{0,0,32,32};

@@ -40,12 +40,16 @@ namespace padi {
 
     void UIContext::addObject(const std::shared_ptr<padi::UIObject>& obj) {
         m_objects.push_back(obj);
+        m_focused = obj;
     }
 
     void UIContext::removeObject(const std::shared_ptr<padi::UIObject> &obj) {
         auto iter = std::find(m_objects.begin(), m_objects.end(), obj);
         if(iter != m_objects.end()) {
             m_objects.erase(iter);
+        }
+        if(obj == m_focused) {
+            m_focused = nullptr;
         }
     }
 
@@ -56,5 +60,9 @@ namespace padi {
 
     const padi::Apollo *UIContext::getApollo() const {
         return &m_apollo;
+    }
+
+    bool UIContext::isFocused(const std::shared_ptr<padi::UIObject>& obj) const {
+        return m_focused == obj;
     }
 } // padi

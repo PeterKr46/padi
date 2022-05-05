@@ -1,4 +1,5 @@
 # Main Apollo File
 # block <context>
 # anim <key>            <w><h>  <x><y> [<stepx> <stepy> <frames>] [repeat]
-anim scalable_button    32 32   0 0  0 32 4 2
+anim scalable_button    32 32   0 0     0 32 4
+anim switch             32 32   32 0    0 32 2

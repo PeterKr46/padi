@@ -17,6 +17,7 @@
 #include "src/entity/OneshotEntity.h"
 #include "src/ui/UIContext.h"
 #include "src/ui/Button.h"
+#include "src/ui/Switch.h"
 
 
 int main() {
@@ -60,8 +61,9 @@ int main() {
 
     auto uiCtx = padi::UIContext();
     uiCtx.initTextures("../media/ui.apollo", "../media/ui_sheet.png");
-    auto uiBtn = std::make_shared<padi::Button>(&uiCtx);
-    uiCtx.addObject(uiBtn);
+    uiCtx.addObject(std::make_shared<padi::Button>(&uiCtx));
+    auto uiSwitch = std::make_shared<padi::Switch>(&uiCtx);
+    uiCtx.addObject(uiSwitch);
 
     std::vector<sf::Vector2i> path;
 
