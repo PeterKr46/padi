@@ -3,6 +3,8 @@
 //
 
 #include "LivingEntity.h"
+
+#include <utility>
 #include "Map.h"
 #include "Stage.h"
 
@@ -30,22 +32,30 @@ void padi::LivingEntity::populate(const Map *map, sf::Vertex *pVertex) const {
 
 bool padi::LivingEntity::move(Stage *stage, const sf::Vector2i &dir) {
     if (!m_slaves.empty()) return false;
-    m_slaves.emplace_back(getPosition() + dir);
-    m_slaves.front().m_animation = m_slaveAnimation;
-    m_slaves.front().m_color = m_color;
-    stage->getMap()->addEntity(&m_slaves.front());
+    m_slaves.push_back(std::make_shared<padi::SlaveEntity>(getPosition() + dir));
+    m_slaves.front()->m_animation = m_slaveAnimation;
+    m_slaves.front()->m_color = m_color;
+    stage->getMap()->addEntity(m_slaves.front());
     auto col = m_color;
-    padi::FrameListener f = [col](padi::Stage *stage) { std::cout << stage->getMap()->getCurrentCycleFrames() << ": " << int(col.r) << "," << int(col.g) << "," << int(col.b) << std::endl; return false; };
+    padi::FrameListener f = [&](padi::Stage *stage) {
+        std::cout << stage->getMap()->getCurrentCycleFrames() << ": " << int(col.r) << "," << int(col.g) << ","
+                  << int(col.b) << std::endl;
+        if(stage->getMap()->getCurrentCycleFrames() == 11) {
+            stage->getMap()->removeEntity(m_slaves.front());
+            return false;
+        }
+        return true;
+    };
     stage->addFrameListener(f);
     return true;
 }
 
-void padi::LivingEntity::setAnimation(padi::Animation const *anim) {
-    m_animation = anim;
+void padi::LivingEntity::setAnimation(std::shared_ptr<padi::Animation>anim) {
+    m_animation = std::move(anim);
 }
 
-void padi::LivingEntity::setSlaveAnimation(padi::Animation const *anim) {
-    m_slaveAnimation = anim;
+void padi::LivingEntity::setSlaveAnimation(std::shared_ptr<padi::Animation>anim) {
+    m_slaveAnimation = std::move(anim);
 }
 
 sf::Vector2i padi::LivingEntity::getSize() const {

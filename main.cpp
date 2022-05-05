@@ -16,25 +16,25 @@ int main()
 
     map.scale(4.f, 4.5f);
 
-    auto roll_XA = padi::StripAnimation({32, 32}, {0, 0}, {0, 48}, 12);
-    auto roll_XB = padi::StripAnimation({32, 32}, {16, 8}, {0, 48}, 12);
-    auto roll_YA = padi::StripAnimation({32, 32}, {64, 0}, {0, 48}, 12);
-    auto roll_YB = padi::StripAnimation({32, 32}, {48, 8}, {0, 48}, 12);
+    auto roll_XA = std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {0, 0}, {0, 48}, 12));
+    auto roll_XB = std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {16, 8}, {0, 48}, 12));
+    auto roll_YA = std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {64, 0}, {0, 48}, 12));
+    auto roll_YB = std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {48, 8}, {0, 48}, 12));
 
     {
 
-        auto livingEntity = new padi::LivingEntity({1, 1});
-        livingEntity->setAnimation(new padi::ReverseAnimation(&roll_XA));
-        livingEntity->setSlaveAnimation(new padi::ReverseAnimation(&roll_XB));
+        auto livingEntity = std::make_shared<padi::LivingEntity>(sf::Vector2i{1, 1});
+        livingEntity->setAnimation(std::make_shared<padi::ReverseAnimation>(roll_XA));
+        livingEntity->setSlaveAnimation(std::make_shared<padi::ReverseAnimation>(roll_XB));
         livingEntity->setColor({255, 255, 255});
         livingEntity->move(&map, {1, 0});
         map.getMap()->addEntity(livingEntity);
 
     }{
 
-        auto livingEntity = new padi::LivingEntity({0, 1});
-        livingEntity->setAnimation(&roll_XA);
-        livingEntity->setSlaveAnimation(&roll_XB);
+        auto livingEntity = std::make_shared<padi::LivingEntity>(sf::Vector2i{0, 1});
+        livingEntity->setAnimation(roll_XA);
+        livingEntity->setSlaveAnimation(roll_XB);
         livingEntity->setColor({127, 255, 127});
         livingEntity->move(&map, {1, 0});
         map.getMap()->addEntity(livingEntity);
@@ -42,9 +42,9 @@ int main()
     }
     {
 
-        auto livingEntity = new padi::LivingEntity({1, 1});
-        livingEntity->setAnimation(new padi::ReverseAnimation(&roll_YA));
-        livingEntity->setSlaveAnimation(new padi::ReverseAnimation(&roll_YB));
+        auto livingEntity = std::make_shared<padi::LivingEntity>(sf::Vector2i{1, 1});
+        livingEntity->setAnimation(std::make_shared<padi::ReverseAnimation>(roll_YA));
+        livingEntity->setSlaveAnimation(std::make_shared<padi::ReverseAnimation>(roll_YB));
         livingEntity->setColor({255, 255, 127});
         livingEntity->move(&map, {0, 1});
         map.getMap()->addEntity(livingEntity);
@@ -52,9 +52,9 @@ int main()
     }
     {
 
-        auto livingEntity = new padi::LivingEntity({1, 0});
-        livingEntity->setAnimation(&roll_YA);
-        livingEntity->setSlaveAnimation(&roll_YB);
+        auto livingEntity = std::make_shared<padi::LivingEntity>(sf::Vector2i{1, 0});
+        livingEntity->setAnimation(roll_YA);
+        livingEntity->setSlaveAnimation(roll_YB);
         livingEntity->setColor({127, 255, 255});
         livingEntity->move(&map, {0, 1});
         map.getMap()->addEntity(livingEntity);

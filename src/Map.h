@@ -53,23 +53,20 @@ namespace padi {
         sf::Vector2i mapWorldPosToTile(sf::Vector2f const& world) const;
         sf::Vector2f mapTilePosToWorld(sf::Vector2i const& tile, int z = 0) const;
 
-        Tile* getTile(sf::Vector2i const& pos);
-        const Tile* getTile(sf::Vector2i const& pos) const;
+        std::shared_ptr<padi::Tile> getTile(sf::Vector2i const& pos) const;
+        std::shared_ptr<padi::Tile> getTile(int x, int y) const;
 
-        Tile* getTile(int x, int y);
-        const Tile* getTile(int x, int y) const;
+        bool addTile(std::shared_ptr<padi::Tile> tile);
 
-        bool addTile(Tile* tile);
+        size_t getEntities(sf::Vector2i const& pos, std::vector<std::shared_ptr<Entity>>& entities) const;
 
-        size_t getEntities(sf::Vector2i const& pos, std::vector<Entity*>& entities) const;
+        void addEntity(std::shared_ptr<Entity> entity, size_t lower_by = 0);
+        void addEntity(const std::shared_ptr<Entity>& entity, sf::Vector2i const& where, size_t lower_by = 0);
 
-        void addEntity(Entity* entity, size_t lower_by = 0);
-        void addEntity(Entity* entity, sf::Vector2i const& where, size_t lower_by = 0);
+        bool removeEntity(const std::shared_ptr<Entity>& entity);
+        bool removeEntity(const std::shared_ptr<Entity>& entity, sf::Vector2i const& where);
 
-        bool removeEntity(const Entity* entity);
-        bool removeEntity(const Entity* entity, sf::Vector2i const& where);
-
-        bool moveEntity(Entity* entity, sf::Vector2i const& pos2, size_t lower_by = 0);
+        bool moveEntity(const std::shared_ptr<Entity>& entity, sf::Vector2i const& pos2, size_t lower_by = 0);
 
         size_t numQuads() const;
 
@@ -80,10 +77,10 @@ namespace padi {
         sf::Time getCurrentCycleTime() const;
         int getCurrentCycleFrames() const;
 
-        void for_each(const std::function<void(Tile*)>&);
+        void for_each(const std::function<void(std::shared_ptr<padi::Tile>)>&);
 
     private:
-        ManhattanMap<std::pair<Tile*, std::vector<Entity *>>> m_tiles;
+        ManhattanMap<std::pair<std::shared_ptr<Tile>, std::vector<std::shared_ptr<Entity>>>> m_tiles;
         sf::Vector2i m_tileSize{32,32};
 
         sf::Clock m_cycle;

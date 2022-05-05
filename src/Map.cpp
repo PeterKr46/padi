@@ -19,31 +19,19 @@ namespace padi {
         return {float(tile.x - tile.y) * 0.5f * m_tileSize.x, float(tile.x + tile.y - z) * 0.25f * m_tileSize.y};
     }
 
-    Tile *Map::getTile(sf::Vector2i const &pos) {
+    std::shared_ptr<padi::Tile> Map::getTile(const sf::Vector2i &pos) const {
         auto iter = m_tiles.find(pos);
         if (iter != m_tiles.end()) {
             return iter->second.first;
         }
-        return nullptr;
+        return {nullptr};
     }
 
-    const Tile *Map::getTile(const sf::Vector2i &pos) const {
-        auto iter = m_tiles.find(pos);
-        if (iter != m_tiles.end()) {
-            return iter->second.first;
-        }
-        return nullptr;
-    }
-
-    Tile *Map::getTile(int x, int y) {
+    std::shared_ptr<padi::Tile> Map::getTile(int x, int y) const {
         return getTile({x, y});
     }
 
-    const Tile *Map::getTile(int x, int y) const {
-        return getTile({x, y});
-    }
-
-    size_t Map::getEntities(const sf::Vector2i &pos, std::vector<Entity *> &out) const {
+    size_t Map::getEntities(const sf::Vector2i &pos, std::vector<std::shared_ptr<Entity>> &out) const {
         auto iter = m_tiles.find(pos);
         if (iter != m_tiles.end()) {
             std::copy(iter->second.second.begin(), iter->second.second.end(), out.begin());
@@ -52,18 +40,18 @@ namespace padi {
         return 0;
     }
 
-    bool Map::moveEntity(Entity *entity, const sf::Vector2i &pos2, size_t lower_by) {
+    bool Map::moveEntity(const std::shared_ptr<Entity>& entity, const sf::Vector2i &pos2, size_t lower_by) {
         removeEntity(entity);
         addEntity(entity, pos2, lower_by);
         entity->m_position = pos2;
         return true; // TODO ?
     }
 
-    bool Map::removeEntity(const Entity *entity) {
+    bool Map::removeEntity(const std::shared_ptr<Entity>& entity) {
         return removeEntity(entity, entity->getPosition());
     }
 
-    bool Map::removeEntity(const Entity *entity, const sf::Vector2i &pos) {
+    bool Map::removeEntity(const std::shared_ptr<Entity>& entity, const sf::Vector2i &pos) {
         auto iter = m_tiles.find(pos);
         if (iter != m_tiles.end()) { // Check entry at pos
             auto rmAt = std::find(iter->second.second.begin(), iter->second.second.end(), entity);
@@ -78,7 +66,7 @@ namespace padi {
         return false;
     }
 
-    void Map::addEntity(Entity *entity, const sf::Vector2i &where, size_t lower_by) {
+    void Map::addEntity(const std::shared_ptr<Entity>& entity, const sf::Vector2i &where, size_t lower_by) {
         // potentially assert tile existence?
         auto iter = m_tiles.find(where);
         if (iter != m_tiles.end()) { // Check entry at pos
@@ -90,10 +78,6 @@ namespace padi {
             }
             entity->m_position = where;
         }
-    }
-
-    void Map::addEntity(Entity *e, size_t lower_by) {
-        addEntity(e, e->getPosition(), lower_by);
     }
 
     size_t Map::numQuads() const {
@@ -138,14 +122,6 @@ namespace padi {
         return m_tileSize;
     }
 
-    bool Map::addTile(Tile* t) {
-        if(m_tiles.find(t->getPosition()) == m_tiles.end()) {
-            m_tiles[t->getPosition()] = {t,{}};
-            return true;
-        }
-        return false;
-    }
-
     sf::Time Map::getCurrentCycleTime() const {
         return m_cycleCarry;
     }
@@ -154,10 +130,22 @@ namespace padi {
         return std::floor(m_cycleCarry.asSeconds() * 12);
     }
 
-    void Map::for_each(const std::function<void(Tile*)>& func) {
+    void Map::for_each(const std::function<void(std::shared_ptr<padi::Tile>)>& func) {
         for(const auto& [key, value] : m_tiles) {
             func(value.first);
         }
+    }
+
+    bool Map::addTile(std::shared_ptr<padi::Tile> t) {
+        if(m_tiles.find(t->getPosition()) == m_tiles.end()) {
+            m_tiles[t->getPosition()] = {t,{}};
+            return true;
+        }
+        return false;
+    }
+
+    void Map::addEntity(const std::shared_ptr<Entity> e, size_t lower_by) {
+        addEntity(e, e->getPosition(), lower_by);
     }
 
     void Tile::populate(const Map &context, sf::Vertex *quad) const {

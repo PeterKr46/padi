@@ -9,6 +9,7 @@
 namespace padi {
 
     class Map;
+
     class Stage;
 
     class SlaveEntity
@@ -21,7 +22,7 @@ namespace padi {
         sf::Vector2i getSize() const override;
 
         sf::Color m_color{255, 255, 255};
-        padi::Animation const*m_animation{nullptr};
+        std::shared_ptr<padi::Animation> m_animation;
     };
 
     class LivingEntity
@@ -31,22 +32,22 @@ namespace padi {
         explicit LivingEntity(const sf::Vector2i &pos);
 
         // TODO : These are debug functions
-        void setAnimation(Animation const *anim);
+        void setAnimation(std::shared_ptr<padi::Animation> anim);
 
-        void setSlaveAnimation(Animation const *anim);
+        void setSlaveAnimation(std::shared_ptr<padi::Animation> anim);
 
         sf::Vector2i getSize() const override;
 
         void populate(const padi::Map *map, sf::Vertex *pVertex) const override;
 
-        bool move(padi::Stage* map, sf::Vector2i const &dir);
+        bool move(padi::Stage *map, sf::Vector2i const &dir);
 
         void setColor(sf::Color const &color);
 
     private:
         sf::Color m_color{255, 255, 255};
-        padi::Animation const *m_animation{nullptr};
-        padi::Animation const *m_slaveAnimation{nullptr};
-        std::vector<SlaveEntity> m_slaves;
+        std::shared_ptr<padi::Animation> m_animation;
+        std::shared_ptr<padi::Animation> m_slaveAnimation;
+        std::vector<std::shared_ptr<padi::SlaveEntity>> m_slaves;
     };
 }

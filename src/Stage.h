@@ -39,7 +39,7 @@ namespace padi {
         unsigned char mdb_lastFrame{0};
 
         padi::Map m_map;
-        padi::SlaveEntity m_selector{{1,1}};
+        std::shared_ptr<padi::SlaveEntity> m_selector;
         sf::VertexArray m_vertices;
         sf::Texture m_tileset;
         std::vector<FrameListener> m_activeTriggers;

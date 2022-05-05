@@ -29,9 +29,10 @@ namespace padi {
         const siv::PerlinNoise::seed_type seed = 123456u;
         const siv::PerlinNoise perlin{ seed };
 
-        m_selector.m_animation = new SimpleAnimation(padi::StripAnimation({32, 32}, {160,0}, {0,32}, 6, 1));
+        m_selector = std::make_shared<SlaveEntity>(sf::Vector2i(1,1));
+        m_selector->m_animation = std::make_shared<SimpleAnimation>(padi::StripAnimation({32, 32}, {160,0}, {0,32}, 6, 1));
 
-        m_map.addEntity(&m_selector);
+        m_map.addEntity(m_selector);
         // populate the vertex array, with one quad per tile
         sf::Vector2i tile{0,0};
         for (tile.x = 0; tile.x < size.x; tile.x++)
@@ -41,7 +42,7 @@ namespace padi {
                 float z = (perlin.octave2D_01(tile.x * 0.2,tile.y * 0.2, 5));// * (0.9*radius / (1+distanceToCenter(tile, center)));//tiles[i + j * width];
                 //if (abs(tile.x - tile.y) < radius ) {
                 //    if(z > 0.5)
-                auto t = new Tile(tile);
+                auto t = std::make_shared<Tile>(tile);
                 t->m_color.r = z * 255;
                 t->m_color.g = z * 255;
                 t->m_color.b = z * 255;
@@ -67,7 +68,7 @@ namespace padi {
         auto pos = m_map.mapWorldPosToTile(getTransform().getInverse().transformPoint(mouse_pos));
 
 
-        Tile* tile = m_map.getTile(pos);
+        auto tile = m_map.getTile(pos);
         /*if((tile = m_map.getTile(pos)) == nullptr) {
             tile = new Tile(pos);
             m_map.addTile(tile);
@@ -76,15 +77,18 @@ namespace padi {
             tile->m_color.b = 255;
             //m_map.populate(m_vertices, 0, {32,32});
         }*/
-         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num0)) tile->m_detail = 0;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) tile->m_detail = 1;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) tile->m_detail = 2;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) tile->m_detail = 3;
-        m_map.moveEntity(&m_selector, pos, ~0u);
+        if(tile) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num0)) tile->m_detail = 0;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) tile->m_detail = 1;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) tile->m_detail = 2;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) tile->m_detail = 3;
+        }
+        m_map.moveEntity(m_selector, pos, ~0u);
 
         m_map.populate(m_vertices, 0, {32, 32});
 
         if (m_map.getCurrentCycleFrames() != mdb_lastFrame) {
+            // TODO - if the FPS drops, we end up with frame event skips. this is not robust
             auto iter = m_activeTriggers.begin();
             while (iter != m_activeTriggers.end()) {
                 if (!(*iter)(this)) {
