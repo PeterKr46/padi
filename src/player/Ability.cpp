@@ -34,16 +34,28 @@ namespace padi {
 
     bool content::AirStrike::cast(padi::Level *lvl, const sf::Vector2i &pos) {
         lvl->hideCursor();
-
-        auto ose = std::make_shared<padi::OneshotEntity>(pos);
-        ose->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
-        lvl->addCycleEndListener(ose);
-        lvl->getMap()->addEntity(ose);
+        strikePos = pos;
+        auto strike = std::make_shared<padi::OneshotEntity>(pos);
+        strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
+        lvl->addCycleEndListener(strike);
+        lvl->getMap()->addEntity(strike);
+        lvl->getMap()->getTile(pos)->m_walkable = false;
+        lvl->addFrameBeginListener(shared_from_this());
         return true;
     }
 
     void content::AirStrike::castIndicator(padi::Level *level) {
         level->showCursor();
+    }
+
+    bool content::AirStrike::onFrameBegin(Level * lvl, uint8_t frame) {
+        if(frame == 8) {
+            auto fire = std::make_shared<padi::StaticEntity>(strikePos);
+            fire->m_animation = lvl->getApollo()->lookupAnim("fire");
+            lvl->getMap()->addEntity(fire);
+            return false;
+        }
+        return true;
     }
 
     bool content::Walk::cast(padi::Level *lvl, const sf::Vector2i &pos) {

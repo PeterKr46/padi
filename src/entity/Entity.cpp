@@ -22,4 +22,8 @@ namespace padi {
         quad[3].position = anchor + sf::Vector2f(-size.x / 2,  verticalOffset);
         return 4;
     }
+
+    size_t Entity::numQuads() const {
+        return 1;
+    }
 }

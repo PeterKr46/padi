@@ -5,6 +5,7 @@
 #pragma once
 
 #include "UIObject.h"
+#include "SFML/Audio/Sound.hpp"
 
 namespace padi {
 
@@ -16,6 +17,7 @@ namespace padi {
         populate(const padi::UIContext *ctx, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) override;
 
     public:
+        sf::Sound m_soundSource;
         bool m_state{false};
     };
 

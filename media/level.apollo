@@ -20,9 +20,6 @@ anim peak               32 40   128 256
 audio chord_01          ../media/audio/jorgesbcomposer/chord_01.ogg
 audio guitar_01         ../media/audio/jorgesbcomposer/string_01.ogg
 
-audio high_clack        ../media/audio/the_sample_workshop/high_clack.ogg
-audio switch_on         ../media/audio/greatsoundstube/switch_on.ogg
-audio switch_off        ../media/audio/greatsoundstube/switch_off.ogg
 
 
 block cube

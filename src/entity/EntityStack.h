@@ -13,6 +13,8 @@ namespace padi {
     public:
         explicit EntityStack(const sf::Vector2i &pos);
         size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const override;
+        [[nodiscard]] size_t numQuads() const override;
+
 
         size_t m_stackSize{3};
     };

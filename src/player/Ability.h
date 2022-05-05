@@ -15,11 +15,14 @@ namespace padi {
     };
 
     namespace content {
-        class AirStrike : public Ability {
+        class AirStrike : public Ability, public CycleListener, public std::enable_shared_from_this<AirStrike> {
         public:
+            sf::Vector2i strikePos;
             bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
 
             void castIndicator(padi::Level *level) override;
+
+            bool onFrameBegin(Level *, uint8_t frame) override;
         };
 
         class Teleport : public Ability {

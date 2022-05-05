@@ -50,9 +50,9 @@ int main() {
     auto leSpawn = std::make_shared<padi::SpawnEvent>(livingEntity, apollo->lookupAnim("bubble"));
     leSpawn->dispatch(&level);
 
-    auto button = std::make_shared<padi::MapButton>(sf::Vector2i{4, 4}, apollo->lookupAnim("button"), apollo);
-    level.getMap()->addUIObject(button);
-    button->active = false;
+    //auto button = std::make_shared<padi::MapButton>(sf::Vector2i{4, 4}, apollo->lookupAnim("button"), apollo);
+    //level.getMap()->addUIObject(button);
+    //button->active = false;
 
     auto uiCtx = padi::UIContext();
     uiCtx.initTextures("../media/ui.apollo", "../media/ui_sheet.png");
@@ -64,6 +64,7 @@ int main() {
     walkAbility->user = livingEntity;
     auto tpAbility = std::make_shared<padi::content::Teleport>();
     tpAbility->user = livingEntity;
+    auto asAbility = std::make_shared<padi::content::AirStrike>();
 
     std::shared_ptr<padi::Ability> activeAbility{nullptr};
 
@@ -84,10 +85,11 @@ int main() {
             }
         }
 
-        button->update();
+        //button->update();
 
         level.update(&window);
 
+        t.setString(std::to_string(level.getMap()->numQuads()));
         if (padi::Controls::isKeyDown(sf::Keyboard::Home)) {
             level.moveCursor(livingEntity->getPosition());
         }
@@ -97,10 +99,9 @@ int main() {
                 livingEntity->intentCast(activeAbility, level.getCursorLocation());
                 activeAbility = nullptr;
             }
-        } else /*if (padi::Controls::isKeyDown(sf::Keyboard::S)) {
-            auto as = std::make_shared<padi::content::AirStrike>();
-            as->cast(&level, level.getCursorLocation());
-        } else */
+        } else if (padi::Controls::isKeyDown(sf::Keyboard::S)) {
+            activeAbility = asAbility;
+        } else
         if (padi::Controls::isKeyDown(sf::Keyboard::T)) {
             activeAbility = tpAbility;
         } else if (padi::Controls::isKeyDown(sf::Keyboard::W)) {

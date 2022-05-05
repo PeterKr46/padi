@@ -3,6 +3,7 @@
 //
 
 #include "UIContext.h"
+#include "../Controls.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -29,6 +30,9 @@ namespace padi {
         m_numVerts = 0;
         for(auto const& object : m_objects) {
             m_numVerts += object->populate(this, m_vbo, m_numVerts, 0);
+        }
+        if(m_focused && padi::Controls::isKeyDown(sf::Keyboard::Escape)) {
+            m_focused = nullptr;
         }
     }
 

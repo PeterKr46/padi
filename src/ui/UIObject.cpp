@@ -12,8 +12,7 @@ namespace padi {
 
     }
 
-    size_t
-    UIObject::populate(const padi::UIContext *ctx, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) {
+    size_t UIObject::populate(const padi::UIContext *ctx, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) {
         sf::Vertex *quad = &array[vertexOffset];
         sf::Vector2f texSize{padi::UIPadding_px * 2, padi::UIPadding_px * 2};
         sf::Vector2f texOffset{0, 0};

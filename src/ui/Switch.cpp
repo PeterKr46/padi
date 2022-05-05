@@ -18,6 +18,12 @@ namespace padi {
         if (ctx->isFocused(shared_from_this())) {
             if(padi::Controls::isKeyDown(sf::Keyboard::Space)) {
                 m_state = !m_state;
+                if(m_state) {
+                    m_soundSource.setBuffer(*ctx->getApollo()->lookupAudio("switch_on"));
+                } else {
+                    m_soundSource.setBuffer(*ctx->getApollo()->lookupAudio("switch_off"));
+                }
+                m_soundSource.play();
             }
             m_color = sf::Color::Yellow;
         } else {

@@ -38,4 +38,8 @@ namespace padi {
         }
         return m_stackSize * 4;
     }
+
+    size_t EntityStack::numQuads() const {
+        return m_stackSize;
+    }
 } // padi
