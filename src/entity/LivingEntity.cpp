@@ -6,6 +6,8 @@
 
 #include <utility>
 #include <iostream>
+#include "../player/Ability.h"
+#include "StaticEntity.h"
 
 padi::LivingEntity::LivingEntity(padi::AnimationSet const* moveset, const sf::Vector2i &pos) : Entity(pos), m_apolloCtx(moveset) {
     m_animation = m_apolloCtx->at("idle");
@@ -48,7 +50,7 @@ sf::Color padi::LivingEntity::getColor() const {
     return m_color;
 }
 
-size_t padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
+size_t padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) {
     sf::Vector2f size{getSize()};
     auto pVertex = &array[vertexOffset];
 
@@ -75,12 +77,17 @@ bool padi::LivingEntity::onCycleBegin(padi::Level * lvl) {
         std::cout << "Start" << std::endl;
         m_intent.move = false;
         m_inAction.move = true;
-        m_slaves.push_back(std::make_shared<padi::SlaveEntity>(getPosition() + m_intent.move_dir));
+        m_slaves.push_back(std::make_shared<padi::StaticEntity>(getPosition() + m_intent.move_dir));
         auto anims = determineAnims(m_apolloCtx, m_intent.move_dir);
         m_animation = anims.first;
         m_slaves.front()->m_animation = anims.second;
         m_slaves.front()->m_color = m_color;
         lvl->getMap()->addEntity(m_slaves.front());
+    }
+    else if(m_intent.cast) {
+        m_intent.cast = false;
+        m_inAction.cast = true;
+        m_intent.cast_ability->cast(lvl, m_intent.cast_pos);
     }
     else {
         m_animation = m_apolloCtx->at("idle");
@@ -96,6 +103,9 @@ bool padi::LivingEntity::onCycleEnd(padi::Level * lvl) {
         lvl->getMap()->moveEntity(shared_from_this(), m_slaves.front()->getPosition());
         m_animation = m_apolloCtx->at("idle");
         m_slaves.clear();
+    }
+    if(m_inAction.cast) {
+        m_inAction.cast = false; // hm
     }
     return true;
 }
@@ -115,32 +125,9 @@ void padi::LivingEntity::intentStay() {
     m_intent.move = false;
 }
 
-padi::SlaveEntity::SlaveEntity(const sf::Vector2i &pos) : Entity(pos) {
-
+void padi::LivingEntity::intentCast(std::shared_ptr<padi::Ability> const &ability, sf::Vector2i const &position) {
+    m_intent.cast = true;
+    m_intent.cast_ability = ability;
+    m_intent.cast_pos = position;
 }
 
-sf::Vector2i padi::SlaveEntity::getSize() const {
-    return m_animation->getResolution();
-}
-
-size_t padi::SlaveEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
-    sf::Vector2f size{getSize()};
-    auto pVertex = &array[vertexOffset];
-
-    sf::Vector2f anchor = map->mapTilePosToWorld(getPosition());
-    float verticalOffset = std::min(float(map->getTileSize().y), size.y) / 2;
-    pVertex[0].position = anchor + sf::Vector2f(-size.x / 2, verticalOffset - size.y);
-    pVertex[1].position = anchor + sf::Vector2f(size.x / 2,  verticalOffset - size.y);
-    pVertex[2].position = anchor + sf::Vector2f(size.x / 2,   verticalOffset);
-    pVertex[3].position = anchor + sf::Vector2f(-size.x / 2,  verticalOffset);
-
-    sf::Vector2f texCoordAnchor = (*m_animation)[frame];
-    pVertex[0].texCoords = texCoordAnchor;
-    pVertex[1].texCoords = texCoordAnchor + sf::Vector2f(size.x, 0);
-    pVertex[2].texCoords = texCoordAnchor + sf::Vector2f(size);
-    pVertex[3].texCoords = texCoordAnchor + sf::Vector2f(0, size.y);
-
-    for (int i = 0; i < 4; ++i) pVertex[i].color = m_color;
-
-    return 4;
-}

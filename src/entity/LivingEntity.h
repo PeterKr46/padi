@@ -7,23 +7,13 @@
 #include "Entity.h"
 #include "../animation/Apollo.h"
 #include "../level/Level.h"
+#include "StaticEntity.h"
 
 namespace padi {
 
     class Map;
 
-    class SlaveEntity
-            : public padi::Entity {
-    public:
-        explicit SlaveEntity(const sf::Vector2i &pos);
-
-        size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const override;
-
-        [[nodiscard]] sf::Vector2i getSize() const override;
-
-        sf::Color m_color{255, 255, 255};
-        std::shared_ptr<padi::Animation> m_animation;
-    };
+    class Ability;
 
     class LivingEntity
             : public padi::Entity
@@ -35,10 +25,11 @@ namespace padi {
 
         [[nodiscard]] sf::Vector2i getSize() const override;
 
-        size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const override;
+        size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) override;
 
         bool intentMove(sf::Vector2i const &dir);
         void intentStay();
+        void intentCast(std::shared_ptr<padi::Ability> const &ability, sf::Vector2i const &position);
 
         bool onCycleBegin(Level *) override;
         bool onCycleEnd(Level *) override;
@@ -49,15 +40,19 @@ namespace padi {
     private:
 
         padi::AnimationSet const*  m_apolloCtx;
-        std::vector<std::shared_ptr<padi::SlaveEntity>> m_slaves;
+        std::vector<std::shared_ptr<padi::StaticEntity>> m_slaves;
 
         struct {
             bool move{false};
+            bool cast{false};
         } m_inAction;
 
         struct {
             bool            move{false};
             sf::Vector2i    move_dir{0, 0};
+            bool            cast{false};
+            sf::Vector2i    cast_pos{0, 0};
+            std::shared_ptr<padi::Ability> cast_ability{nullptr};
         } m_intent;
 
         sf::Color m_color{168, 255, 168};

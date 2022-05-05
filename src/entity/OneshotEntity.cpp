@@ -6,7 +6,7 @@
 
 namespace padi {
 
-    OneshotEntity::OneshotEntity(const sf::Vector2i &pos) : SlaveEntity(pos) {
+    OneshotEntity::OneshotEntity(const sf::Vector2i &pos) : StaticEntity(pos) {
 
     }
 
@@ -21,4 +21,18 @@ namespace padi {
         return false;
     }
 
+    OneshotEntityStack::OneshotEntityStack(const sf::Vector2i &pos) : EntityStack(pos) {
+
+    }
+
+    bool OneshotEntityStack::onCycleBegin(Level *level) {
+
+        level->addCycleEndListener(shared_from_this());
+        level->getMap()->addEntity(shared_from_this());
+        return false;    }
+
+    bool OneshotEntityStack::onCycleEnd(Level *level) {
+
+        level->getMap()->removeEntity(shared_from_this());
+        return false;    }
 } // padi

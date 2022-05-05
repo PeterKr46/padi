@@ -45,6 +45,8 @@ namespace padi {
 
         const Apollo* getApollo() const;
 
+        size_t getVBOCapacity() const;
+
     private:
 
     protected:
@@ -52,6 +54,7 @@ namespace padi {
 
     private:
         sf::View m_view;
+        sf::View m_viewTarget;
         bool m_viewLocked{false};
 
         // Sprite master - anything drawn in the context of this level should be on here.

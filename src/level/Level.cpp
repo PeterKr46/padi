@@ -2,6 +2,7 @@
 // Created by Peter on 01/05/2022.
 //
 
+#include <iostream>
 #include "Level.h"
 #include "../Constants.h"
 #include "../Controls.h"
@@ -42,10 +43,20 @@ namespace padi {
         }
     }
 
+    Level::Level(const sf::Vector2i &area, const sf::Vector2i &tile_size) {
+        // resize the vertex array to fit the level size
+        m_vbo.setPrimitiveType(sf::PrimitiveType::Quads);
+        m_vbo.resize(area.x * area.y * 2);
+        m_viewTarget.setSize(0,0);
+    }
+
     void Level::update(sf::RenderWindow *window) {
         m_cycle.carried_uS += m_cycle.clock.restart().asMicroseconds();
         while (m_cycle.carried_uS > padi::FrameTime_uS) {
             handleFrameEnd(m_cycleListeners.frameEnd, this, m_cycle.frame);
+
+            m_view.setSize(m_viewTarget.getSize());//(m_viewTarget.getSize() * 0.3f + 0.7f * m_view.getSize()));
+            m_view.setCenter(m_viewTarget.getCenter());//(m_viewTarget.getCenter()  * 0.3f + 0.7f * m_view.getCenter()));
 
             m_cycle.carried_uS -= padi::FrameTime_uS;
 
@@ -58,15 +69,15 @@ namespace padi {
             }
             handleFrameBegin(m_cycleListeners.frameBegin, this, m_cycle.frame);
         }
-        if(m_view.getSize().x == 0) {
-            m_view.setSize(window->getSize().x, window->getSize().y);
+        if(m_viewTarget.getSize().x == 0) {
+            m_viewTarget.setSize(window->getSize().x, window->getSize().y);
         }
 
         // Zoom Hotkeys
         if (padi::Controls::isKeyDown(sf::Keyboard::Comma)) {
-            m_view.setSize(m_view.getSize().x / 2, m_view.getSize().y / 2);
+            m_viewTarget.setSize(m_viewTarget.getSize().x / 2, m_viewTarget.getSize().y / 2);
         } else if (padi::Controls::isKeyDown(sf::Keyboard::Period)) {
-            m_view.setSize(m_view.getSize().x * 2, m_view.getSize().y * 2);
+            m_viewTarget.setSize(m_viewTarget.getSize().x * 2, m_viewTarget.getSize().y * 2);
         }
 
         window->setView(m_view);
@@ -84,7 +95,7 @@ namespace padi {
 
     bool Level::centerView(const sf::Vector2i &position) {
         if (!m_viewLocked) {
-            m_view.setCenter(m_map.mapTilePosToWorld(position));
+            m_viewTarget.setCenter(m_map.mapTilePosToWorld(position));
         }
         return m_viewLocked;
     }
@@ -101,15 +112,10 @@ namespace padi {
         return &m_map;
     }
 
-    Level::Level(const sf::Vector2i &area, const sf::Vector2i &tile_size) {
-        // resize the vertex array to fit the level size
-        m_vbo.setPrimitiveType(sf::PrimitiveType::Quads);
-        m_vbo.resize(area.x * area.y * 4);
-        m_view.setSize(0,0);
-    }
-
     void Level::populateVBO() {
+        sf::Clock drawing;
         m_numVerts = m_map.populate(m_vbo, 0, m_cycle.frame);
+        std::cout << "DRAW " << 1.f / drawing.restart().asSeconds() << std::endl;
     }
 
     bool Level::addCycleBeginListener(const std::shared_ptr<CycleListener> &listener) {
@@ -150,6 +156,10 @@ namespace padi {
 
     const Apollo *Level::getApollo() const {
         return &m_apollo;
+    }
+
+    size_t Level::getVBOCapacity() const {
+        return m_vbo.getVertexCount();
     }
 
 } // padi

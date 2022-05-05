@@ -13,7 +13,7 @@ namespace padi {
             : UIObject(pos),
               m_sprites(std::move(sprite)) {}
 
-    size_t Button::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
+    size_t Button::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) {
         sf::Vector2f size{m_sprites->getResolution()};
         auto pVertex = &array[vertexOffset];
 

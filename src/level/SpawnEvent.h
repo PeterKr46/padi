@@ -12,7 +12,9 @@ namespace padi {
             : public padi::CycleListener
             , public std::enable_shared_from_this<SpawnEvent> {
     public:
-        explicit SpawnEvent(std::shared_ptr<LivingEntity> entity, std::shared_ptr<padi::Animation> particles);
+        SpawnEvent(std::shared_ptr<LivingEntity> entity, std::shared_ptr<padi::Animation> particles);
+        SpawnEvent(std::shared_ptr<LivingEntity> entity, std::shared_ptr<padi::Animation> particles, sf::Vector2i const& pos);
+
         ~SpawnEvent() = default;
 
         void dispatch(Level* level);
@@ -22,7 +24,7 @@ namespace padi {
         bool onFrameBegin(Level *, uint8_t frame) override;
 
     private:
-        std::shared_ptr<SlaveEntity>    m_particles;
+        std::shared_ptr<StaticEntity>    m_particles;
         std::shared_ptr<LivingEntity>         m_entity;
     };
 }

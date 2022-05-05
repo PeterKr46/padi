@@ -4,28 +4,32 @@
 
 #pragma once
 
-#include "../entity/OneshotEntity.h"
+#include "../level/SpawnEvent.h"
 
 namespace padi {
     class Ability {
+    public:
+        virtual bool cast(padi::Level *level, sf::Vector2i const &pos) = 0;
 
-        virtual bool cast(padi::Level* level, sf::Vector2i const& pos) = 0;
-        virtual void rangeIndicator(padi::Level* level, sf::Cursor* cursor) = 0;
+        virtual void rangeIndicator(padi::Level *level, sf::Cursor *cursor) = 0;
     };
 
     namespace content {
         class AirStrike : public Ability {
         public:
-            bool cast(padi::Level *lvl, const sf::Vector2i &pos) override {
-                auto ose = std::make_shared<padi::OneshotEntity>(pos);
-                ose->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
-                lvl->addCycleBeginListener(ose);
-                return true;
-            }
+            bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
 
-            void rangeIndicator(padi::Level *level, sf::Cursor *cursor) override {
+            void rangeIndicator(padi::Level *level, sf::Cursor *cursor) override;
+        };
 
-            }
+        class Teleport : public Ability {
+        public:
+            std::shared_ptr<LivingEntity> user;
+            sf::Vector2i target;
+
+            bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
+
+            void rangeIndicator(padi::Level *level, sf::Cursor *cursor) override;
         };
     };
 

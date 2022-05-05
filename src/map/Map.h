@@ -53,7 +53,7 @@ namespace padi {
 
         [[nodiscard]] size_t numQuads() const;
 
-        size_t populate(sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const;
+        size_t populate(sf::VertexArray & array, size_t vertexOffset, uint8_t frame);
 
         [[nodiscard]] sf::Vector2i getTileSize() const;
 

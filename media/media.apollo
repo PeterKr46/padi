@@ -5,11 +5,17 @@ anim cursor             32 32   160 0   0 32    6   1
 anim air_strike         32 32   288 0   0 32    12
 anim air_strike_large   32 48   384 0   0 48    12
 anim fire               32 40   352 0   0 40    12
+anim lightning          32 32   480 0   0 32    12
 anim q_mark             32 36   416 0   0 36    12
 anim debug              32 41   992 0   0 32    12
 anim button             18 24   96 0    0 24    4   2
 anim bubble             32 64   448 0   0 64    12
 anim marker             32 24   160 198 0 0     12
+anim mountain           32 40   128 163 0 0     12
+anim rocks              32 43   128 200 0 0     12
+
+audio chord_01          ../media/audio/jorgesbcomposer/chord_01.ogg
+audio guitar_01         ../media/audio/jorgesbcomposer/string_01.ogg
 
 block cube
 anim move_x_from    32 32   0 0     0 48    12

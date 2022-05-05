@@ -10,34 +10,34 @@
 
 namespace padi {
     std::shared_ptr<padi::Animation> Apollo::lookupAnim(const std::string &animName) const {
-        auto iter = m_generalSet.find(animName);
-        if (iter == m_generalSet.end()) return nullptr;
+        auto iter = m_generalAnimations.find(animName);
+        if (iter == m_generalAnimations.end()) return nullptr;
         return iter->second;
     }
 
-    const padi::AnimationSet *Apollo::lookupContext(const std::string &charName) const {
-        auto iter = m_contextMap.find(charName);
-        if (iter == m_contextMap.end()) return nullptr;
+    const padi::AnimationSet *Apollo::lookupAnimContext(const std::string &charName) const {
+        auto iter = m_animationContext.find(charName);
+        if (iter == m_animationContext.end()) return nullptr;
         return &iter->second;
     }
 
     void Apollo::addAnimation(std::string const &name, std::shared_ptr<padi::Animation> anim) {
-        m_generalSet[name] = std::move(anim);
+        m_generalAnimations[name] = std::move(anim);
     }
 
     bool Apollo::initializeContext(std::string const &name) {
-        if (m_contextMap.find(name) != m_contextMap.end()) {
+        if (m_animationContext.find(name) != m_animationContext.end()) {
             return false;
         } else {
-            m_contextMap[name] = {};
+            m_animationContext[name] = {};
             return true;
         }
     }
 
     bool Apollo::addAnimation(std::string const &name, std::string const &animName,
                               const std::shared_ptr<padi::Animation> &anim) {
-        auto ctx = m_contextMap.find(name);
-        if (ctx != m_contextMap.end()) {
+        auto ctx = m_animationContext.find(name);
+        if (ctx != m_animationContext.end()) {
             ctx->second[animName] = anim;
             return true;
         } else {
@@ -46,8 +46,8 @@ namespace padi {
     }
 
     std::shared_ptr<padi::Animation> Apollo::lookupAnim(const std::string &ctxName, const std::string &animName) const {
-        auto ctx = m_contextMap.find(ctxName);
-        if (ctx != m_contextMap.end()) {
+        auto ctx = m_animationContext.find(ctxName);
+        if (ctx != m_animationContext.end()) {
             auto anim = ctx->second.find(animName);
             if (anim != ctx->second.end()) {
                 return anim->second;
@@ -60,18 +60,18 @@ namespace padi {
         std::ifstream config(path);
         std::string line;
 
-        AnimationSet *block = &m_generalSet;
+        AnimationSet *block = &m_generalAnimations;
         std::string key{};
         if (config.is_open()) {
             while (getline(config, line)) {
                 if (line.empty() || line.at(0) == '#') continue;
 
                 if (line.substr(0, 5) == "block") {
-                    block = &m_contextMap[line.substr(6)];
+                    block = &m_animationContext[line.substr(6)];
                     printf("[Apollo] BLOCK '%s'\n", line.substr(6).c_str());
                 } else if (line.substr(0, 4) == "anim") {
                     auto secondspace = line.find(' ', 5);
-                    key = line.substr(5,secondspace - 5);
+                    key = line.substr(5, secondspace - 5);
                     printf("[Apollo] ANIM '%s'", key.c_str());
                     std::istringstream ints(line.substr(secondspace));
                     auto data = std::vector<int>(std::istream_iterator<int>(ints),
@@ -94,10 +94,27 @@ namespace padi {
                                                               {data[4], data[5]}, data[6], data[7]))
                                       });
                     }
+                } else if (line.substr(0, 5) == "audio") {
+                    auto secondspace = line.find(' ', 6);
+                    key = line.substr(6, secondspace - 6);
+                    auto soundPath = line.substr(line.find_last_of(' ')+1);
+                    printf("[Apollo] AUDIO '%s' - '%s'\n", key.c_str(), soundPath.c_str());
+                    auto buf = m_generalAudio[key] = std::make_shared<sf::SoundBuffer>();
+                    buf->loadFromFile(soundPath);
                 }
             }
             config.close();
         }
+    }
+
+    std::shared_ptr<sf::SoundBuffer> Apollo::lookupAudio(const std::string &audioName) const {
+        auto iter = m_generalAudio.find(audioName);
+        if (iter == m_generalAudio.end()) return nullptr;
+        return iter->second;
+    }
+
+    void Apollo::addSoundBuffer(const std::string &name, std::shared_ptr<sf::SoundBuffer> sound) {
+        m_generalAudio[name] = std::move(sound);
     }
 
 } // padi

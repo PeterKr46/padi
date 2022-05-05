@@ -1,5 +1,6 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <utility>
 #include "src/entity/LivingEntity.h"
 #include "src/animation/Apollo.h"
 #include "src/AStar.h"
@@ -10,6 +11,21 @@
 #include "src/level/Cursor.h"
 #include "src/ui/Button.h"
 #include "src/player/Ability.h"
+#include "SFML/Audio/Sound.hpp"
+#include "SFML/Audio/SoundBuffer.hpp"
+#include "src/entity/StaticEntity.h"
+#include "src/entity/EntityStack.h"
+
+
+class AudioPlayback : public padi::CycleListener {
+public:
+    explicit AudioPlayback(std::shared_ptr<sf::SoundBuffer>  s) : sound(std::move(s)) { }
+    std::shared_ptr<sf::SoundBuffer> sound;
+    bool onCycleBegin(padi::Level * ) override {
+        //if(sound) sound->play();
+        return true;
+    }
+};
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "PAdI");
@@ -17,7 +33,7 @@ int main() {
     auto levelGen = padi::LevelGenerator();
     auto level = levelGen
             .withSpritesheet("../media/complete_sheet.png")
-            .withApollo("../media/strips.apollo")
+            .withApollo("../media/media.apollo")
             .withSeed(3)
             .withArea({100, 100})
             .generate();
@@ -27,17 +43,20 @@ int main() {
     f.loadFromFile("../media/prstartk.ttf");
     sf::Text t("Hello, world.",f,7);
 
+    level.addCycleBeginListener(std::make_shared<AudioPlayback>(apollo->lookupAudio("chord_01")));
+
+
     {
         int offset = 2;
-        for (auto anim: {"air_strike", "air_strike_large", "fire", "q_mark", "debug", "cursor", "button"}) {
-            auto slave = std::make_shared<padi::SlaveEntity>(sf::Vector2i{++offset, 0});
+        for (auto anim: {"air_strike", "air_strike_large", "fire", "q_mark", "debug", "cursor", "button", "lightning", "bubble"}) {
+            auto slave = std::make_shared<padi::StaticEntity>(sf::Vector2i{++offset, 0});
             slave->m_animation = apollo->lookupAnim(anim);
             level.getMap()->addEntity(slave);
         }
     }
 
     std::shared_ptr<padi::LivingEntity> livingEntity;
-    livingEntity = std::make_shared<padi::LivingEntity>(apollo->lookupContext("cube"), sf::Vector2i{0, 0});
+    livingEntity = std::make_shared<padi::LivingEntity>(apollo->lookupAnimContext("cube"), sf::Vector2i{0, 0});
     livingEntity->setColor({255, 255, 255});
     auto leSpawn = std::make_shared<padi::SpawnEvent>(livingEntity, apollo->lookupAnim("bubble"));
     leSpawn->dispatch(&level);
@@ -77,13 +96,19 @@ int main() {
         cursor.update(&level);
 
         if(padi::Controls::isKeyPressed(sf::Keyboard::S)) {
-            padi::content::AirStrike().cast(&level, cursor.getPosition());
+            auto as =std::make_shared<padi::content::AirStrike>();
+            as->cast(&level, cursor.getPosition());
+        }
+        else if(padi::Controls::isKeyPressed(sf::Keyboard::T)) {
+            auto tp =std::make_shared<padi::content::Teleport>();
+            tp->user = livingEntity;
+            livingEntity->intentCast(tp, cursor.getPosition());
         }
 
-        level.centerView(livingEntity->getPosition());
+        level.centerView((livingEntity->getPosition() + cursor.getPosition())/2);
 
         t.setPosition(level.getMap()->mapTilePosToWorld(cursor.getPosition()) - sf::Vector2f(t.getLocalBounds().getSize().x / 2, -12));
-        t.setString(std::to_string(cursor.getPosition().x) + " " + std::to_string(cursor.getPosition().y));
+        //t.setString(std::to_string(cursor.getPosition().x) + " " + std::to_string(cursor.getPosition().y));
 
         if(padi::Controls::isKeyDown(sf::Keyboard::Q)) {
             path.clear();
@@ -113,7 +138,7 @@ int main() {
         ++frames;
     }
     printf("Slowest frame took %.3f s, i.e. %.3f FPS\n", longest, 1.f/longest);
-    printf("%i quads final\n", level.getMap()->numQuads());
+    printf("%i / %i quads final\n", level.getMap()->numQuads(), level.getVBOCapacity());
     printf("%i frames total in %.3f seconds\n", frames, clock.getElapsedTime().asSeconds());
     printf("%.3f fps avg", float(frames) / clock.getElapsedTime().asSeconds());
     return 0;

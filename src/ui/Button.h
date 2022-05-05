@@ -20,7 +20,7 @@ namespace padi {
         Button(const sf::Vector2i &pos, std::shared_ptr<padi::Animation> sprite);
 
         size_t
-        populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const override;
+        populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) override;
 
         void update();
 

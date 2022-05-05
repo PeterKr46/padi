@@ -21,7 +21,7 @@ namespace padi {
 
     private:
         bool m_locked{false};
-        std::shared_ptr<padi::SlaveEntity> m_entity;
+        std::shared_ptr<padi::StaticEntity> m_entity;
     };
 
 } // padi

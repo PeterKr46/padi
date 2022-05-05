@@ -8,10 +8,12 @@
 #include <string>
 #include <memory>
 #include "Animation.h"
+#include "SFML/Audio/SoundBuffer.hpp"
 
 namespace padi {
 
     typedef std::map<std::string, std::shared_ptr<padi::Animation>> AnimationSet;
+    typedef std::map<std::string, std::shared_ptr<sf::SoundBuffer>> AudioSet;
 
     class Apollo {
         /**
@@ -19,20 +21,31 @@ namespace padi {
          */
     public:
 
-        void loadFromFile(std::string const& path);
+        void loadFromFile(std::string const &path);
 
-        bool initializeContext(std::string const&);
+        bool initializeContext(std::string const &);
 
-        void addAnimation(std::string const& name, std::shared_ptr<padi::Animation> anim);
-        bool addAnimation(std::string const& context, std::string const& animName, const std::shared_ptr<padi::Animation>& anim);
+        void addAnimation(std::string const &name, std::shared_ptr<padi::Animation> anim);
 
-        [[nodiscard]] std::shared_ptr<padi::Animation> lookupAnim(std::string const& animName) const;
-        [[nodiscard]] std::shared_ptr<padi::Animation> lookupAnim(std::string const& ctxName, std::string const& animName) const;
+        bool addAnimation(std::string const &context, std::string const &animName,
+                          const std::shared_ptr<padi::Animation> &anim);
 
-        [[nodiscard]] const padi::AnimationSet* lookupContext(std::string const& charName) const;
+        [[nodiscard]] std::shared_ptr<padi::Animation> lookupAnim(std::string const &animName) const;
+
+        [[nodiscard]] std::shared_ptr<padi::Animation>
+        lookupAnim(std::string const &ctxName, std::string const &animName) const;
+
+
+        void addSoundBuffer(std::string const &name, std::shared_ptr<sf::SoundBuffer> sound);
+
+        [[nodiscard]] std::shared_ptr<sf::SoundBuffer> lookupAudio(std::string const &audioName) const;
+
+        [[nodiscard]] const padi::AnimationSet *lookupAnimContext(std::string const &charName) const;
+
     private:
-        AnimationSet m_generalSet;
-        std::map<std::string, AnimationSet> m_contextMap;
+        AudioSet m_generalAudio;
+        AnimationSet m_generalAnimations;
+        std::map<std::string, AnimationSet> m_animationContext;
     };
 
 

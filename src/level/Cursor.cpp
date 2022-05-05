@@ -37,7 +37,7 @@ namespace padi {
     }
 
     Cursor::Cursor(std::shared_ptr<padi::Animation> anim) {
-        m_entity = std::make_shared<padi::SlaveEntity>(sf::Vector2i{0, 0});
+        m_entity = std::make_shared<padi::StaticEntity>(sf::Vector2i{0, 0});
         m_entity->m_animation = std::move(anim);
     }
 

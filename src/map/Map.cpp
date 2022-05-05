@@ -5,6 +5,7 @@
 #include "Map.h"
 
 #include <cmath>
+#include <iostream>
 
 #include "../entity/Entity.h"
 
@@ -85,33 +86,50 @@ namespace padi {
         total =  m_ui.size();
         // TODO: This could be streamlined by keeping track of Entity removals/additions..?
         for(const auto& loc : m_tiles) {
-            total += 1 + loc.second.second.size();
+            if(loc.second.first) {
+                ++total;
+                for (const auto &entity: loc.second.second) {
+                    total += entity->numQuads();
+                }
+            }
         }
         return total;
     }
 
-    size_t Map::populate(sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
-
+    size_t Map::populate(sf::VertexArray &array, size_t vertexOffset, uint8_t frame) {
         size_t quads = numQuads();
+        //std::cout << "QUAD: " << 1.f / population.restart().asSeconds() << std::endl;
+
         if(array.getVertexCount() <= vertexOffset + quads * 4) {
+            std::cout << "VBO RESIZE: " << array.getVertexCount() << " > " << vertexOffset + quads * 6 << std::endl;
             array.resize(vertexOffset + quads * 6); // double to prevent minor increases causing trouble..?
         }
         auto tileIter = m_tiles.begin();
 
         size_t idx = 0;
-
+        sf::Clock population;
         while(tileIter != m_tiles.end()) {
             if(tileIter->second.first) {
                 idx += tileIter->second.first->populate(this, array, vertexOffset + idx, frame);
             }
+            ++tileIter;
+        }
+        //std::cout << "TILES " << 1.f / population.restart().asSeconds() << std::endl;
+        tileIter = m_tiles.begin();
+        while(tileIter != m_tiles.end()) {
             for (auto &entity: tileIter->second.second) {
                 idx += entity->populate(this, array, vertexOffset + idx, frame);
             }
-            tileIter = std::next(tileIter);
+            ++tileIter;
         }
+        //std::cout << "ENT " << 1.f / population.restart().asSeconds() << std::endl;
+
         for(auto const& [loc, obj] : m_ui) {
             idx += obj->populate(this, array, vertexOffset + idx, frame);
         }
+
+        //std::cout << "UI: " << 1.f / population.restart().asSeconds() << std::endl;
+
         return quads * 4;
     }
 
