@@ -4,8 +4,8 @@
 #pragma once
 
 #include "../map/Map.h"
-#include "SFML/Graphics/RenderWindow.hpp"
-#include "../animation/Apollo.h"
+#include <SFML/Graphics/RenderWindow.hpp>
+#include "../media/Apollo.h"
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/VertexArray.hpp>

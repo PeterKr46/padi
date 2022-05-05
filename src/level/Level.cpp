@@ -114,8 +114,7 @@ namespace padi {
 
     void Level::populateVBO() {
         sf::Clock drawing;
-        m_numVerts = m_map.populate(m_vbo, 0, m_cycle.frame);
-        std::cout << "DRAW " << 1.f / drawing.restart().asSeconds() << std::endl;
+        m_numVerts = m_map.populate(m_vbo, 0, m_cycle.frame, m_viewTarget);
     }
 
     bool Level::addCycleBeginListener(const std::shared_ptr<CycleListener> &listener) {

@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <utility>
 #include "src/entity/LivingEntity.h"
-#include "src/animation/Apollo.h"
+#include "src/media/Apollo.h"
 #include "src/AStar.h"
 #include "lib/PerlinNoise/PerlinNoise.hpp"
 #include "src/level/LevelGenerator.h"
@@ -14,18 +14,8 @@
 #include "SFML/Audio/Sound.hpp"
 #include "SFML/Audio/SoundBuffer.hpp"
 #include "src/entity/StaticEntity.h"
-#include "src/entity/EntityStack.h"
+#include "src/entity/OneshotEntity.h"
 
-
-class AudioPlayback : public padi::CycleListener {
-public:
-    explicit AudioPlayback(std::shared_ptr<sf::SoundBuffer>  s) : sound(std::move(s)) { }
-    std::shared_ptr<sf::SoundBuffer> sound;
-    bool onCycleBegin(padi::Level * ) override {
-        //if(sound) sound->play();
-        return true;
-    }
-};
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "PAdI");
@@ -43,7 +33,7 @@ int main() {
     f.loadFromFile("../media/prstartk.ttf");
     sf::Text t("Hello, world.",f,7);
 
-    level.addCycleBeginListener(std::make_shared<AudioPlayback>(apollo->lookupAudio("chord_01")));
+    //level.addCycleBeginListener(std::make_shared<padi::AudioPlayback>(apollo->lookupAudio("chord_01")));
 
 
     {
@@ -64,7 +54,7 @@ int main() {
     auto button = std::make_shared<padi::Button>(sf::Vector2i{4,4}, apollo->lookupAnim("button"));
     level.getMap()->addUIObject(button);
 
-    padi::Cursor cursor(apollo->lookupAnim("cursor"));
+    auto cursor = std::make_shared<padi::Cursor>(apollo->lookupAnim("cursor"));
 
     std::vector<sf::Vector2i> path;
 
@@ -90,31 +80,35 @@ int main() {
         }
 
         button->update();
-        button->active = cursor.getPosition() == button->getPosition();
+        button->active = cursor->getPosition() == button->getPosition();
 
         level.update(&window);
-        cursor.update(&level);
+        cursor->update(&level);
+
+        if (padi::Controls::isKeyPressed(sf::Keyboard::Home)) {
+            level.getMap()->moveEntity(cursor, livingEntity->getPosition());
+        }
 
         if(padi::Controls::isKeyPressed(sf::Keyboard::S)) {
             auto as =std::make_shared<padi::content::AirStrike>();
-            as->cast(&level, cursor.getPosition());
+            as->cast(&level, cursor->getPosition());
         }
         else if(padi::Controls::isKeyPressed(sf::Keyboard::T)) {
             auto tp =std::make_shared<padi::content::Teleport>();
             tp->user = livingEntity;
-            livingEntity->intentCast(tp, cursor.getPosition());
+            livingEntity->intentCast(tp, cursor->getPosition());
         }
 
-        level.centerView((livingEntity->getPosition() + cursor.getPosition())/2);
+        level.centerView((livingEntity->getPosition() + cursor->getPosition())/2);
 
-        t.setPosition(level.getMap()->mapTilePosToWorld(cursor.getPosition()) - sf::Vector2f(t.getLocalBounds().getSize().x / 2, -12));
+        t.setPosition(level.getMap()->mapTilePosToWorld(cursor->getPosition()) - sf::Vector2f(t.getLocalBounds().getSize().x / 2, -12));
         //t.setString(std::to_string(cursor.getPosition().x) + " " + std::to_string(cursor.getPosition().y));
 
         if(padi::Controls::isKeyDown(sf::Keyboard::Q)) {
             path.clear();
             livingEntity->intentStay();
         } else if(padi::Controls::isKeyDown(sf::Keyboard::W) && path.empty()) {
-            path = padi::FindPath(level.getMap(),livingEntity->getPosition(), cursor.getPosition());
+            path = padi::FindPath(level.getMap(),livingEntity->getPosition(), cursor->getPosition());
         }
         if(!path.empty()) {
             if(livingEntity->intentMove(path.front())) {

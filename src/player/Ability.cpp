@@ -15,9 +15,12 @@ namespace padi {
         lvl->addCycleEndListener(ose);
         lvl->getMap()->addEntity(ose);
 
+        auto ap = std::make_shared<padi::AudioPlayback>(lvl->getApollo()->lookupAudio("chord_01"));
+        ap->sound.setPitch((abs(pos.x) + abs(pos.y)) % 2 == 0 ? 1.2 : 1.0);
+        lvl->addCycleEndListener(ap);
+
         lvl->getMap()->removeEntity(user);
         auto spawnEvent = std::make_shared<padi::SpawnEvent>(user, lvl->getApollo()->lookupAnim("air_strike_large"), pos);
-        //spawnEvent->dispatch(lvl);
         spawnEvent->onCycleBegin(lvl);
         return true;
     }

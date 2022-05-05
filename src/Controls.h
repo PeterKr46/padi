@@ -4,8 +4,8 @@
 #pragma once
 
 #include <map>
-#include "SFML/Window/Keyboard.hpp"
-#include "SFML/Graphics/RenderWindow.hpp"
+#include <SFML/Window/Keyboard.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 
 namespace padi {
 

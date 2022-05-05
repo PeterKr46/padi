@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "../entity/Entity.h"
+#include "Tile.h"
 
 namespace padi {
 
@@ -87,7 +88,7 @@ namespace padi {
         // TODO: This could be streamlined by keeping track of Entity removals/additions..?
         for(const auto& loc : m_tiles) {
             if(loc.second.first) {
-                ++total;
+                total += loc.second.first->numQuads();
                 for (const auto &entity: loc.second.second) {
                     total += entity->numQuads();
                 }
@@ -96,39 +97,33 @@ namespace padi {
         return total;
     }
 
-    size_t Map::populate(sf::VertexArray &array, size_t vertexOffset, uint8_t frame) {
+    size_t Map::populate(sf::VertexArray &array, size_t vertexOffset, uint8_t frame, sf::View const& viewport) const {
         size_t quads = numQuads();
-        //std::cout << "QUAD: " << 1.f / population.restart().asSeconds() << std::endl;
 
         if(array.getVertexCount() <= vertexOffset + quads * 4) {
             std::cout << "VBO RESIZE: " << array.getVertexCount() << " > " << vertexOffset + quads * 6 << std::endl;
             array.resize(vertexOffset + quads * 6); // double to prevent minor increases causing trouble..?
         }
-        auto tileIter = m_tiles.begin();
 
         size_t idx = 0;
-        sf::Clock population;
+        auto tileIter = m_tiles.begin();
+        sf::Transform transform = viewport.getTransform();
         while(tileIter != m_tiles.end()) {
-            if(tileIter->second.first) {
-                idx += tileIter->second.first->populate(this, array, vertexOffset + idx, frame);
-            }
+            //auto tileCenter = transform.transformPoint(mapTilePosToWorld(tileIter->first)) / 2.f + sf::Vector2f(0.5,0.5);
+            //if(viewport.getViewport().contains(tileCenter)) {
+                if (tileIter->second.first) {
+                    idx += tileIter->second.first->populate(this, array, vertexOffset + idx, frame);
+                }
+                for (auto &entity: tileIter->second.second) {
+                    idx += entity->populate(this, array, vertexOffset + idx, frame);
+                }
+            //}
             ++tileIter;
         }
-        //std::cout << "TILES " << 1.f / population.restart().asSeconds() << std::endl;
-        tileIter = m_tiles.begin();
-        while(tileIter != m_tiles.end()) {
-            for (auto &entity: tileIter->second.second) {
-                idx += entity->populate(this, array, vertexOffset + idx, frame);
-            }
-            ++tileIter;
-        }
-        //std::cout << "ENT " << 1.f / population.restart().asSeconds() << std::endl;
 
         for(auto const& [loc, obj] : m_ui) {
             idx += obj->populate(this, array, vertexOffset + idx, frame);
         }
-
-        //std::cout << "UI: " << 1.f / population.restart().asSeconds() << std::endl;
 
         return idx + 1;
     }

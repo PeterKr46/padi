@@ -3,7 +3,7 @@
 //
 
 #include "Controls.h"
-#include "SFML/Graphics/RenderWindow.hpp"
+#include <SFML/Graphics/RenderWindow.hpp>
 namespace padi {
 
     void Controls::keyDown(sf::Keyboard::Key key) {

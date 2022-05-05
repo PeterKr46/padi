@@ -5,7 +5,8 @@
 
 #include <vector>
 #include <array>
-#include "SFML/System/Vector2.hpp"
+#include <SFML/System/Vector2.hpp>
+#include "map/Tile.h"
 
 namespace padi {
 

@@ -3,7 +3,7 @@
 //
 
 #include "StaticEntity.h"
-#include "../animation/Animation.h"
+#include "../media/Animation.h"
 
 namespace padi {
 

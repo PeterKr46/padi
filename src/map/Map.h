@@ -6,12 +6,12 @@
 #include <queue>
 #include <map>
 #include <functional>
-#include "SFML/Graphics/Transformable.hpp"
-#include "SFML/Graphics/VertexArray.hpp"
-#include "SFML/System/Clock.hpp"
+#include <SFML/Graphics/Transformable.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
+#include <SFML/System/Clock.hpp>
 #include "GridObject.h"
 #include "../ui/UIObject.h"
-#include "Tile.h"
+#include <SFML/Graphics/View.hpp>
 
 namespace padi {
 
@@ -28,7 +28,7 @@ namespace padi {
     template<typename T>
     using ManhattanMap = std::map<const sf::Vector2i, T, depth_order>;
 
-
+    class Tile;
     class Entity;
 
     class Map {
@@ -53,7 +53,7 @@ namespace padi {
 
         [[nodiscard]] size_t numQuads() const;
 
-        size_t populate(sf::VertexArray & array, size_t vertexOffset, uint8_t frame);
+        size_t populate(sf::VertexArray & array, size_t vertexOffset, uint8_t frame, sf::View const& viewport) const;
 
         [[nodiscard]] sf::Vector2i getTileSize() const;
 

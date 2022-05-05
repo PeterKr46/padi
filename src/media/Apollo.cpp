@@ -77,8 +77,12 @@ namespace padi {
                     auto data = std::vector<int>(std::istream_iterator<int>(ints),
                                                  std::istream_iterator<int>());
 
-                    if (data.size() < 7) {
-                        printf("INVALID (%i values, need at least 7).\n", data.size());
+                    if (data.size() == 4) {
+                        printf(" static frame.\n");
+                        block->insert({key,
+                                       std::make_shared<StaticAnimation>(sf::Vector2i(data[0], data[1]),
+                                                                         sf::Vector2f(data[2], data[3]))
+                                      });
                     } else if (data.size() == 7) {
                         printf(" %i frames.\n", data[6]);
                         block->insert({key,
@@ -86,18 +90,20 @@ namespace padi {
                                                StripAnimation(sf::Vector2i(data[0], data[1]), {data[2], data[3]},
                                                               {data[4], data[5]}, data[6]))
                                       });
-                    } else {
+                    } else if (data.size() > 7) {
                         printf(" %i frames.\n", data[6]);
                         block->insert({key,
                                        std::make_shared<SimpleAnimation>(
                                                StripAnimation(sf::Vector2i(data[0], data[1]), {data[2], data[3]},
                                                               {data[4], data[5]}, data[6], data[7]))
                                       });
+                    } else {
+                        printf("INVALID (%i values, need at least 7).\n", data.size());
                     }
                 } else if (line.substr(0, 5) == "audio") {
                     auto secondspace = line.find(' ', 6);
                     key = line.substr(6, secondspace - 6);
-                    auto soundPath = line.substr(line.find_last_of(' ')+1);
+                    auto soundPath = line.substr(line.find_last_of(' ') + 1);
                     printf("[Apollo] AUDIO '%s' - '%s'\n", key.c_str(), soundPath.c_str());
                     auto buf = m_generalAudio[key] = std::make_shared<sf::SoundBuffer>();
                     buf->loadFromFile(soundPath);

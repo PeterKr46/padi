@@ -5,8 +5,8 @@
 #pragma once
 
 #include <cstdint>
-#include "SFML/System/Vector2.hpp"
-#include "SFML/Graphics/VertexArray.hpp"
+#include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
 
 namespace padi {
 

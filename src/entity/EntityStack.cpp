@@ -3,7 +3,7 @@
 //
 
 #include "EntityStack.h"
-#include "../animation/Animation.h"
+#include "../media/Animation.h"
 
 namespace padi {
     EntityStack::EntityStack(const sf::Vector2i &pos) : StaticEntity(pos) {

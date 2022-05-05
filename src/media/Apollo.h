@@ -8,7 +8,7 @@
 #include <string>
 #include <memory>
 #include "Animation.h"
-#include "SFML/Audio/SoundBuffer.hpp"
+#include <SFML/Audio/SoundBuffer.hpp>
 
 namespace padi {
 
@@ -32,8 +32,7 @@ namespace padi {
 
         [[nodiscard]] std::shared_ptr<padi::Animation> lookupAnim(std::string const &animName) const;
 
-        [[nodiscard]] std::shared_ptr<padi::Animation>
-        lookupAnim(std::string const &ctxName, std::string const &animName) const;
+        [[nodiscard]] std::shared_ptr<padi::Animation> lookupAnim(std::string const &ctxName, std::string const &animName) const;
 
 
         void addSoundBuffer(std::string const &name, std::shared_ptr<sf::SoundBuffer> sound);

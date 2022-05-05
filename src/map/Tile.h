@@ -3,8 +3,10 @@
 //
 #pragma once
 
-#include "SFML/Graphics/Color.hpp"
+#include <memory>
+#include <SFML/Graphics/Color.hpp>
 #include "GridObject.h"
+#include "../entity/Entity.h"
 
 namespace padi {
 
@@ -25,6 +27,10 @@ namespace padi {
 
         [[nodiscard]] int32_t getVerticalOffset() const;
 
+        std::shared_ptr<padi::Entity> getDecoration() const;
+        void setDecoration(std::shared_ptr<padi::Entity> decor);
+
+        size_t numQuads() const override;
 
         bool m_walkable{true};
 
@@ -32,6 +38,7 @@ namespace padi {
         size_t m_detail{0};
         int32_t m_verticalOffset{0};
         sf::Color m_color;
+        std::shared_ptr<padi::Entity> m_decoration;
     };
 
 } // padi

@@ -5,6 +5,7 @@
 #include "SpawnEvent.h"
 
 #include <utility>
+#include "../map/Tile.h"
 
 namespace padi {
     SpawnEvent::SpawnEvent(std::shared_ptr<LivingEntity> entity, std::shared_ptr<padi::Animation> particles)

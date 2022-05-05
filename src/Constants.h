@@ -2,8 +2,7 @@
 // Created by Peter on 01/05/2022.
 //
 
-#ifndef PADI_CONSTANTS_H
-#define PADI_CONSTANTS_H
+#pragma once
 
 namespace padi {
     //const unsigned int FrameTime_uS{83333};
@@ -16,5 +15,3 @@ namespace padi {
     const sf::Vector2i Up{0, -1};
     const sf::Vector2i Down{0, 1};
 }
-
-#endif //PADI_CONSTANTS_H

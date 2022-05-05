@@ -7,6 +7,8 @@
 #include "StaticEntity.h"
 #include "EntityStack.h"
 #include "../level/Level.h"
+#include <SFML/Audio/Sound.hpp>
+#include "../Constants.h"
 
 namespace padi {
 
@@ -34,5 +36,22 @@ namespace padi {
         bool onCycleEnd(Level *) override;
     };
 
+    class AudioPlayback : public padi::CycleListener {
+    public:
+        explicit AudioPlayback(std::shared_ptr<sf::SoundBuffer>  s) : m_buffer(std::move(s)) {
+            sound.setBuffer(*m_buffer);
+            sound.play();
+            m_cycles = 1 + (m_buffer->getDuration().asMicroseconds() / (padi::CycleLength_F * padi::FrameTime_uS));
+        }
+        std::shared_ptr<sf::SoundBuffer> m_buffer;
+        sf::Sound sound;
+        size_t m_cycles;
+        bool onCycleEnd(padi::Level * ) override {
+            if(m_cycles-- == 0) {
+                return false;
+            }
+            return true;
+        }
+    };
 
 } // padi

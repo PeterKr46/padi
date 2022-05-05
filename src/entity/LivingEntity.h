@@ -3,9 +3,9 @@
 //
 #pragma once
 
-#include "../animation/Animation.h"
+#include "../media/Animation.h"
 #include "Entity.h"
-#include "../animation/Apollo.h"
+#include "../media/Apollo.h"
 #include "../level/Level.h"
 #include "StaticEntity.h"
 

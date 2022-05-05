@@ -18,34 +18,25 @@ namespace padi {
     void padi::Cursor::update(padi::Level *level) {
         if (!m_locked) {
             if (padi::Controls::isKeyDown(sf::Keyboard::Left)) {
-                level->getMap()->moveEntity(m_entity, m_entity->getPosition() + padi::Left + padi::Down);
+                level->getMap()->moveEntity(shared_from_this(), getPosition() + padi::Left + padi::Down);
             } else if (padi::Controls::isKeyDown(sf::Keyboard::Right)) {
-                level->getMap()->moveEntity(m_entity, m_entity->getPosition() + padi::Right + padi::Up);
+                level->getMap()->moveEntity(shared_from_this(), getPosition() + padi::Right + padi::Up);
             } else if (padi::Controls::isKeyDown(sf::Keyboard::Up)) {
-                auto up = (abs(m_entity->getPosition().x) + abs(m_entity->getPosition().y)) % 2 == 0 ? padi::Left : padi::Up;
-                level->getMap()->moveEntity(m_entity, m_entity->getPosition() + up);
+                auto up = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 0 ? padi::Left : padi::Up;
+                level->getMap()->moveEntity(shared_from_this(), getPosition() + up);
             } else if (padi::Controls::isKeyDown(sf::Keyboard::Down)) {
-                auto down = (abs(m_entity->getPosition().x) + abs(m_entity->getPosition().y)) % 2 == 1 ? padi::Right : padi::Down;
-                level->getMap()->moveEntity(m_entity, m_entity->getPosition() + down);
+                auto down = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 1 ? padi::Right : padi::Down;
+                level->getMap()->moveEntity(shared_from_this(), getPosition() + down);
             }
             if (padi::Controls::isAnyKeyPressed<sf::Keyboard::Key *>(&arrows[0], &arrows[4])) {
-                m_entity->m_color = sf::Color::Yellow;
+                m_color = sf::Color::Yellow;
             } else {
-                m_entity->m_color = sf::Color::White;
+                m_color = sf::Color::White;
             }
         }
     }
 
-    Cursor::Cursor(std::shared_ptr<padi::Animation> anim) {
-        m_entity = std::make_shared<padi::StaticEntity>(sf::Vector2i{0, 0});
-        m_entity->m_animation = std::move(anim);
-    }
-
-    void Cursor::moveTo(sf::Vector2i const &pos) {
-
-    }
-
-    sf::Vector2i Cursor::getPosition() const {
-        return m_entity->getPosition();
+    Cursor::Cursor(std::shared_ptr<padi::Animation> anim) : padi::StaticEntity({0,0}) {
+        m_animation = std::move(anim);
     }
 }
