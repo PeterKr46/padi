@@ -69,7 +69,7 @@ namespace padi {
         states.texture = &m_sprites;
 
         // draw the vertex array
-        target.draw(m_vbo, states);
+        target.draw(&m_vbo[0], m_numVerts, sf::PrimitiveType::Quads, states);
     }
 
     bool Level::centerView(const sf::Vector2i &position) {
@@ -102,7 +102,7 @@ namespace padi {
     }
 
     void Level::populateVBO() {
-        m_map.populate(m_vbo, 0, m_cycle.frame);
+        m_numVerts = m_map.populate(m_vbo, 0, m_cycle.frame);
     }
 
     bool Level::addCycleBeginListener(const std::shared_ptr<CycleListener> &listener) {

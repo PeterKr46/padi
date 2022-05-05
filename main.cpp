@@ -8,6 +8,7 @@
 #include "src/level/SpawnEvent.h"
 #include "src/Controls.h"
 #include "src/level/Cursor.h"
+#include "src/ui/Button.h"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "PAdI");
@@ -49,10 +50,11 @@ int main() {
     apollo.addAnimation("fire",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 40}, {352, 0}, {0, 40}, 12)));
     apollo.addAnimation("q_mark",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 36}, {416, 0}, {0, 36}, 12)));
     apollo.addAnimation("debug",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 41}, {992, 0}, {0, 32}, 12)));
+    apollo.addAnimation("button",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({18, 24}, {96, 0}, {0, 24}, 4, 2)));
 
     {
         int offset = 2;
-        for (auto anim: {"air_strike", "air_strike_large", "fire", "q_mark", "debug", "cursor"}) {
+        for (auto anim: {"air_strike", "air_strike_large", "fire", "q_mark", "debug", "cursor", "button"}) {
             auto slave = std::make_shared<padi::SlaveEntity>(sf::Vector2i{++offset, 0});
             slave->m_animation = apollo.lookupAnim(anim);
             level.getMap()->addEntity(slave);
@@ -66,6 +68,9 @@ int main() {
         auto leSpawn = std::make_shared<padi::SpawnEvent>(livingEntity, apollo.lookupAnim("air_strike_large"));
         leSpawn->dispatch(&level);
     }
+
+    auto button = std::make_shared<padi::Button>(sf::Vector2i{4,4}, apollo.lookupAnim("button"));
+    level.getMap()->addUIObject(button);
 
     padi::Cursor cursor(apollo.lookupAnim("cursor"));
 
@@ -93,8 +98,14 @@ int main() {
         }
         sf::Vector2f wPos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
         sf::Vector2i tPos = level.getMap()->mapWorldPosToTile(wPos);
+
+        button->update();
+        button->active = cursor.getPosition() == button->getPosition();
+
         level.update(&window);
         cursor.update(&level);
+
+
         level.centerView(livingEntity->getPosition());
 
         t.setPosition(level.getMap()->mapTilePosToWorld(tPos) - t.getLocalBounds().getSize());
@@ -113,31 +124,6 @@ int main() {
             }
         }
 
-        //if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) livingEntity->intentMove(&map, sf::Vector2i{-1, 0});
-        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) livingEntity->intentMove(&map, sf::Vector2i{1, 0});
-        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) livingEntity->intentMove(&map, sf::Vector2i{0, -1});
-        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) livingEntity->intentMove(&map, sf::Vector2i{0, 1});
-
-        //if(map.getMap()->getCurrentCycleFrames() == 0) {
-        //    sf::Vector2i dir;
-        //    switch (rand() & 0b11) {
-        //        case 0: dir={1,0}; break;
-        //        case 1: dir={-1,0}; break;
-        //        case 2: dir={0,1}; break;
-        //        case 3: dir={0,-1}; break;
-        //    }
-        //    if(randomEntity->intentMove(&map, dir)) {
-        //        auto tile = map.getMap()->getTile(randomEntity->getPosition());
-        //        if(tile) {
-        //            tile->m_color -= sf::Color(randomEntity->getColor().r / 16, randomEntity->getColor().g / 16,
-        //                                       randomEntity->getColor().b / 16);
-        //            tile->m_color.a = 255;
-        //            if(tile->m_color.r+tile->m_color.g+tile->m_color.b < 128) {
-        //                map.getMap()->removeTile(randomEntity->getPosition());
-        //            }
-        //        }
-        //    }
-        //}
         level.populateVBO();
 
         window.clear();
@@ -154,7 +140,7 @@ int main() {
         ++frames;
     }
     printf("Slowest frame took %.3f s, i.e. %.3f FPS\n", longest, 1.f/longest);
-    printf("%i entities final\n", level.getMap()->numQuads());
+    printf("%i quads final\n", level.getMap()->numQuads());
     printf("%i frames total in %.3f seconds\n", frames, clock.getElapsedTime().asSeconds());
     printf("%.3f fps avg", float(frames) / clock.getElapsedTime().asSeconds());
     return 0;

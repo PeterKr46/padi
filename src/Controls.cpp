@@ -38,4 +38,9 @@ namespace padi {
         const auto itr = s_state.find(key);
         return !(itr == s_state.cend()) && itr->second == 2;
     }
+
+    uint8_t Controls::pollKeyState(sf::Keyboard::Key key) {
+        const auto itr = s_state.find(key);
+        return (itr == s_state.cend()) ? 0 : itr->second + 1;
+    }
 }

@@ -63,6 +63,7 @@ namespace padi {
         } m_cycleListeners;
 
         padi::Map m_map;
+        size_t m_numVerts{0}; // TODO hm
     };
 
     class CycleListener {

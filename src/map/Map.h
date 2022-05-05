@@ -9,25 +9,10 @@
 #include "SFML/Graphics/Transformable.hpp"
 #include "SFML/Graphics/VertexArray.hpp"
 #include "SFML/System/Clock.hpp"
+#include "GridObject.h"
+#include "../ui/UIObject.h"
 
 namespace padi {
-
-    class GridPlaceable {
-    public:
-        explicit GridPlaceable(sf::Vector2i const& pos) : m_position(pos) { }
-
-        [[nodiscard]] sf::Vector2i getPosition() const { return m_position; }
-    private:
-        friend class Map;
-        sf::Vector2i m_position{0,0};
-    };
-
-    class GridObject : public GridPlaceable {
-    public:
-        explicit GridObject(sf::Vector2i const &pos) : GridPlaceable(pos) { }
-
-        virtual size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const = 0;
-    };
 
     struct depth_order {
         bool operator() (sf::Vector2i const& a, sf::Vector2i const& b) const {
@@ -85,8 +70,16 @@ namespace padi {
 
         void removeTile(sf::Vector2i const &vector2);
 
+        bool addUIObject(const std::shared_ptr<padi::UIObject>& obj);
+
+        bool removeUIObject(std::shared_ptr<padi::UIObject> obj);
+        bool removeUIObject(std::shared_ptr<padi::UIObject> obj, sf::Vector2i const& where);
+
+        bool moveUIObject(const std::shared_ptr<padi::UIObject> & obj, sf::Vector2i const& pos);
+
     private:
         ManhattanMap<std::pair<std::shared_ptr<Tile>, std::vector<std::shared_ptr<Entity>>>> m_tiles;
+        ManhattanMap<std::shared_ptr<padi::UIObject>> m_ui;
         sf::Vector2i m_tileSize{32,32};
     };
 

@@ -17,6 +17,13 @@ namespace padi {
         static bool isKeyUp(sf::Keyboard::Key key);
         static bool isKeyPressed(sf::Keyboard::Key key);
 
+        /**
+         * Gets a single byte representing the cached key state
+         * @param key SFML Keycode
+         * @return 0 if none, 1 if just down, 2 if held, 3 if just released
+         */
+        static uint8_t pollKeyState(sf::Keyboard::Key key);
+
         template<class iterator_type>
         static bool isAnyKeyPressed(iterator_type it, iterator_type end) {
             while(it != end) {

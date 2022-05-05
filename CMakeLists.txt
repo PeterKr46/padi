@@ -7,7 +7,7 @@ add_subdirectory(lib/SFML)
 
 set(PERLIN_NOISE lib/PerlinNoise/PerlinNoise.hpp )
 
-set(PADI src/map/Map.cpp src/map/Map.h src/entity/LivingEntity.cpp src/entity/LivingEntity.h src/animation/Animation.cpp src/animation/Animation.h src/entity/Entity.h src/entity/Entity.cpp src/animation/Apollo.cpp src/animation/Apollo.h src/AStar.h src/level/Level.cpp src/level/Level.h src/Ability.cpp src/Ability.h src/Constants.h src/level/LevelGenerator.cpp src/level/LevelGenerator.h src/level/SpawnEvent.cpp src/level/SpawnEvent.h src/turn/TurnManager.cpp src/turn/TurnManager.h src/level/Cursor.h src/level/Cursor.cpp src/Controls.cpp src/Controls.h src/entity/OneshotEntity.cpp src/entity/OneshotEntity.h)
+set(PADI src/map/Map.cpp src/map/Map.h src/entity/LivingEntity.cpp src/entity/LivingEntity.h src/animation/Animation.cpp src/animation/Animation.h src/entity/Entity.h src/entity/Entity.cpp src/animation/Apollo.cpp src/animation/Apollo.h src/AStar.h src/level/Level.cpp src/level/Level.h src/Ability.cpp src/Ability.h src/Constants.h src/level/LevelGenerator.cpp src/level/LevelGenerator.h src/level/SpawnEvent.cpp src/level/SpawnEvent.h src/turn/TurnManager.cpp src/turn/TurnManager.h src/level/Cursor.h src/level/Cursor.cpp src/Controls.cpp src/Controls.h src/entity/OneshotEntity.cpp src/entity/OneshotEntity.h src/player/Player.cpp src/player/Player.h src/ui/Button.cpp src/ui/Button.h src/ui/UIObject.cpp src/ui/UIObject.h src/map/GridObject.h)
 
 add_executable(padi main.cpp ${PERLIN_NOISE} ${PADI})
 target_compile_features(padi PRIVATE cxx_std_17)

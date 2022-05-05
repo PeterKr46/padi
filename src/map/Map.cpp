@@ -82,10 +82,10 @@ namespace padi {
 
     size_t Map::numQuads() const {
         size_t total;
-        total = m_tiles.size();
+        total =  m_ui.size();
         // TODO: This could be streamlined by keeping track of Entity removals/additions..?
         for(const auto& loc : m_tiles) {
-            total += loc.second.second.size();
+            total += 1 + loc.second.second.size();
         }
         return total;
     }
@@ -102,14 +102,15 @@ namespace padi {
 
         while(tileIter != m_tiles.end()) {
             if(tileIter->second.first) {
-                tileIter->second.first->populate(this, array, vertexOffset + idx * 4, frame);
-                idx++;
+                idx += tileIter->second.first->populate(this, array, vertexOffset + idx, frame);
             }
             for (auto &entity: tileIter->second.second) {
-                entity->populate(this, array, vertexOffset + idx * 4, frame);
-                idx++;
+                idx += entity->populate(this, array, vertexOffset + idx, frame);
             }
             tileIter = std::next(tileIter);
+        }
+        for(auto const& [loc, obj] : m_ui) {
+            idx += obj->populate(this, array, vertexOffset + idx, frame);
         }
         return quads * 4;
     }
@@ -141,6 +142,36 @@ namespace padi {
         if(iter != m_tiles.end()) {
             m_tiles.erase(iter);
         }
+    }
+
+    bool Map::addUIObject(const std::shared_ptr<padi::UIObject> &t) {
+        if (m_ui.find(t->getPosition()) == m_ui.end()) {
+            m_ui[t->getPosition()] = t;
+            return true;
+        }
+        return false;
+    }
+
+    bool Map::removeUIObject(std::shared_ptr<padi::UIObject> obj, const sf::Vector2i &pos) {
+        auto iter = m_ui.find(pos);
+        if (iter != m_ui.end()) { // Check entry at pos
+            if(iter->second == obj) {
+                m_ui.erase(iter);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool Map::removeUIObject(std::shared_ptr<padi::UIObject> obj) {
+        return removeUIObject(obj, obj->getPosition());
+    }
+
+    bool Map::moveUIObject(const std::shared_ptr<padi::UIObject> &obj, const sf::Vector2i &pos) {
+        removeUIObject(obj);
+        obj->m_position = pos;
+        addUIObject(obj);
+        return true; // TODO
     }
 
     Tile::Tile(const sf::Vector2i &pos) : GridObject(pos) {

@@ -18,10 +18,10 @@ namespace padi {
     void padi::Cursor::update(padi::Level *level) {
         if(!m_locked) {
             if(padi::Controls::isKeyDown(sf::Keyboard::Left)) {
-                level->getMap()->moveEntity(m_entity,m_entity->getPosition() + padi::Left);
+                level->getMap()->moveEntity(m_entity,m_entity->getPosition() + padi::Left + padi::Down);
             }
             else if(padi::Controls::isKeyDown(sf::Keyboard::Right)) {
-                level->getMap()->moveEntity(m_entity,m_entity->getPosition() + padi::Right);
+                level->getMap()->moveEntity(m_entity,m_entity->getPosition() + padi::Right + padi::Up);
             }
             else if(padi::Controls::isKeyDown(sf::Keyboard::Up)) {
                 level->getMap()->moveEntity(m_entity,m_entity->getPosition() + padi::Up);
@@ -45,5 +45,9 @@ namespace padi {
 
     void Cursor::moveTo(sf::Vector2i const& pos) {
 
+    }
+
+    sf::Vector2i Cursor::getPosition() const {
+        return m_entity->getPosition();
     }
 }

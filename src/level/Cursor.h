@@ -17,6 +17,7 @@ namespace padi {
         void update(padi::Level* level);
 
         void moveTo(sf::Vector2i const& pos);
+        [[nodiscard]] sf::Vector2i getPosition() const;
 
     private:
         bool m_locked{false};
