@@ -11,6 +11,7 @@ namespace padi {
 
     LevelGenerator &LevelGenerator::withSeed(uint64_t seed) {
         m_perlin = siv::PerlinNoise{static_cast<siv::PerlinNoise::seed_type>(seed)};
+        printf("[LVL] SEED %llu\n", seed);
         return *this;
     }
 
@@ -90,11 +91,11 @@ namespace padi {
                     t->setColor(hsv(r, 0.3f * cos(z), 0.8));
                     //t->setVerticalOffset(z*4);
                     level->getMap()->addTile(t);
-                    if (m > 0.14) {
+                    if (m > 0.12) {
                         auto e = std::make_shared<padi::StaticEntity>(pos);
-                        e->m_animation = level->m_apollo.lookupAnim(m > 0.3 ? "rocks" : (m > 0.2 ? "mountain" : "hill"));
+                        e->m_animation = level->m_apollo.lookupAnim(m > 0.35 ? "peak" : (m > 0.3 ? "mountain" : (m > 0.25 ? "rocks" : "hill")));
                         t->setVerticalOffset(3);
-                        t->m_walkable = m < 0.2;
+                        t->m_walkable = m < 0.25;
                         t->setDecoration(e);
                     }
                 }

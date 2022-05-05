@@ -9,14 +9,21 @@ anim lightning          32 32   480 0   0 32    12
 anim q_mark             32 36   416 0   0 36    12
 anim debug              32 41   992 0   0 32    12
 anim button             18 24   96 0    0 24    4   2
+anim scalable_button    32 32   96 112  0 32    4   2
 anim bubble             32 64   448 0   0 64    12
 anim marker             32 24   160 198
 anim hill               32 40   128 160
 anim rocks              32 40   128 192
 anim mountain           32 40   128 224
+anim peak               32 40   128 256
 
 audio chord_01          ../media/audio/jorgesbcomposer/chord_01.ogg
 audio guitar_01         ../media/audio/jorgesbcomposer/string_01.ogg
+
+audio high_clack        ../media/audio/the_sample_workshop/high_clack.ogg
+audio switch_on         ../media/audio/greatsoundstube/switch_on.ogg
+audio switch_off        ../media/audio/greatsoundstube/switch_off.ogg
+
 
 block cube
 anim move_x_from    32 32   0 0     0 48    12

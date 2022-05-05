@@ -61,16 +61,16 @@ namespace padi {
 
         void removeTile(sf::Vector2i const &vector2);
 
-        bool addUIObject(const std::shared_ptr<padi::UIObject>& obj);
+        bool addUIObject(const std::shared_ptr<padi::GridObject>& obj);
 
-        bool removeUIObject(std::shared_ptr<padi::UIObject> obj);
-        bool removeUIObject(std::shared_ptr<padi::UIObject> obj, sf::Vector2i const& where);
+        bool removeUIObject(std::shared_ptr<padi::GridObject> obj);
+        bool removeUIObject(std::shared_ptr<padi::GridObject> obj, sf::Vector2i const& where);
 
-        bool moveUIObject(const std::shared_ptr<padi::UIObject> & obj, sf::Vector2i const& pos);
+        bool moveUIObject(const std::shared_ptr<padi::GridObject> & obj, sf::Vector2i const& pos);
 
     private:
         ManhattanMap<std::pair<std::shared_ptr<Tile>, std::vector<std::shared_ptr<Entity>>>> m_tiles;
-        ManhattanMap<std::shared_ptr<padi::UIObject>> m_ui;
+        ManhattanMap<std::shared_ptr<padi::GridObject>> m_ui;
         sf::Vector2i m_tileSize{32,32};
     };
 

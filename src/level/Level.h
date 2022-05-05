@@ -61,6 +61,7 @@ namespace padi {
         sf::Texture m_sprites;
         padi::Apollo m_apollo;
         sf::VertexArray m_vbo;
+        size_t m_numVerts{0}; // TODO hm
 
         struct {
             sf::Clock clock;
@@ -76,7 +77,6 @@ namespace padi {
         } m_cycleListeners;
 
         padi::Map m_map;
-        size_t m_numVerts{0}; // TODO hm
     };
 
     class CycleListener {

@@ -14,4 +14,6 @@ namespace padi {
     const sf::Vector2i Right{1, 0};
     const sf::Vector2i Up{0, -1};
     const sf::Vector2i Down{0, 1};
+
+    const size_t UIPadding_px{8};
 }

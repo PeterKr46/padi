@@ -9,34 +9,34 @@
 
 namespace padi {
 
-    void handleFrameBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, Level* lvl, uint8_t frame) {
+    void handleFrameBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, Level *lvl, uint8_t frame) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
-            if(!(*i)->onFrameBegin(lvl, frame)) i = listeners.erase(i);
+            if (!(*i)->onFrameBegin(lvl, frame)) i = listeners.erase(i);
             else ++i;
         }
     }
 
-    void handleFrameEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, Level* lvl, uint8_t frame) {
+    void handleFrameEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, Level *lvl, uint8_t frame) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
-            if(!(*i)->onFrameEnd(lvl, frame)) i = listeners.erase(i);
+            if (!(*i)->onFrameEnd(lvl, frame)) i = listeners.erase(i);
             else ++i;
         }
     }
 
-    void handleCycleBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, Level* lvl) {
+    void handleCycleBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, Level *lvl) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
-            if(!(*i)->onCycleBegin(lvl)) i = listeners.erase(i);
+            if (!(*i)->onCycleBegin(lvl)) i = listeners.erase(i);
             else ++i;
         }
     }
 
-    void handleCycleEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, Level* lvl) {
+    void handleCycleEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, Level *lvl) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
-            if(!(*i)->onCycleEnd(lvl))
+            if (!(*i)->onCycleEnd(lvl))
                 i = listeners.erase(i);
             else
                 ++i;
@@ -47,7 +47,7 @@ namespace padi {
         // resize the vertex array to fit the level size
         m_vbo.setPrimitiveType(sf::PrimitiveType::Quads);
         m_vbo.resize(area.x * area.y * 2);
-        m_viewTarget.setSize(0,0);
+        m_viewTarget.setSize(0, 0);
     }
 
     void Level::update(sf::RenderWindow *window) {
@@ -56,11 +56,12 @@ namespace padi {
             handleFrameEnd(m_cycleListeners.frameEnd, this, m_cycle.frame);
 
             m_view.setSize(m_viewTarget.getSize());//(m_viewTarget.getSize() * 0.3f + 0.7f * m_view.getSize()));
-            m_view.setCenter(m_viewTarget.getCenter());//(m_viewTarget.getCenter()  * 0.3f + 0.7f * m_view.getCenter()));
+            m_view.setCenter(
+                    m_viewTarget.getCenter());//(m_viewTarget.getCenter()  * 0.3f + 0.7f * m_view.getCenter()));
 
             m_cycle.carried_uS -= padi::FrameTime_uS;
 
-            if(m_cycle.frame + 1 == padi::CycleLength_F) {
+            if (m_cycle.frame + 1 == padi::CycleLength_F) {
                 handleCycleEnd(m_cycleListeners.cycleEnd, this);
                 m_cycle.frame = 0;
                 handleCycleBegin(m_cycleListeners.cycleBegin, this);
@@ -69,7 +70,7 @@ namespace padi {
             }
             handleFrameBegin(m_cycleListeners.frameBegin, this, m_cycle.frame);
         }
-        if(m_viewTarget.getSize().x == 0) {
+        if (m_viewTarget.getSize().x == 0) {
             m_viewTarget.setSize(window->getSize().x, window->getSize().y);
         }
 
@@ -113,13 +114,12 @@ namespace padi {
     }
 
     void Level::populateVBO() {
-        sf::Clock drawing;
         m_numVerts = m_map.populate(m_vbo, 0, m_cycle.frame, m_viewTarget);
     }
 
     bool Level::addCycleBeginListener(const std::shared_ptr<CycleListener> &listener) {
         auto found = std::find(m_cycleListeners.cycleBegin.begin(), m_cycleListeners.cycleBegin.end(), listener);
-        if(found == m_cycleListeners.cycleBegin.end()) {
+        if (found == m_cycleListeners.cycleBegin.end()) {
             m_cycleListeners.cycleBegin.push_back(listener);
             return true;
         }
@@ -128,7 +128,7 @@ namespace padi {
 
     bool Level::addFrameBeginListener(const std::shared_ptr<CycleListener> &listener) {
         auto found = std::find(m_cycleListeners.frameBegin.begin(), m_cycleListeners.frameBegin.end(), listener);
-        if(found == m_cycleListeners.frameBegin.end()) {
+        if (found == m_cycleListeners.frameBegin.end()) {
             m_cycleListeners.frameBegin.push_back(listener);
             return true;
         }
@@ -137,7 +137,7 @@ namespace padi {
 
     bool Level::addFrameEndListener(const std::shared_ptr<CycleListener> &listener) {
         auto found = std::find(m_cycleListeners.frameEnd.begin(), m_cycleListeners.frameEnd.end(), listener);
-        if(found == m_cycleListeners.frameEnd.end()) {
+        if (found == m_cycleListeners.frameEnd.end()) {
             m_cycleListeners.frameEnd.push_back(listener);
             return true;
         }
@@ -146,7 +146,7 @@ namespace padi {
 
     bool Level::addCycleEndListener(const std::shared_ptr<CycleListener> &listener) {
         auto found = std::find(m_cycleListeners.cycleEnd.begin(), m_cycleListeners.cycleEnd.end(), listener);
-        if(found == m_cycleListeners.cycleEnd.end()) {
+        if (found == m_cycleListeners.cycleEnd.end()) {
             m_cycleListeners.cycleEnd.push_back(listener);
             return true;
         }

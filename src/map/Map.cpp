@@ -125,7 +125,7 @@ namespace padi {
             idx += obj->populate(this, array, vertexOffset + idx, frame);
         }
 
-        return idx + 1;
+        return idx;
     }
 
     sf::Vector2i Map::getTileSize() const {
@@ -157,7 +157,7 @@ namespace padi {
         }
     }
 
-    bool Map::addUIObject(const std::shared_ptr<padi::UIObject> &t) {
+    bool Map::addUIObject(const std::shared_ptr<padi::GridObject> &t) {
         if (m_ui.find(t->getPosition()) == m_ui.end()) {
             m_ui[t->getPosition()] = t;
             return true;
@@ -165,7 +165,7 @@ namespace padi {
         return false;
     }
 
-    bool Map::removeUIObject(std::shared_ptr<padi::UIObject> obj, const sf::Vector2i &pos) {
+    bool Map::removeUIObject(std::shared_ptr<padi::GridObject> obj, const sf::Vector2i &pos) {
         auto iter = m_ui.find(pos);
         if (iter != m_ui.end()) { // Check entry at pos
             if(iter->second == obj) {
@@ -176,11 +176,11 @@ namespace padi {
         return false;
     }
 
-    bool Map::removeUIObject(std::shared_ptr<padi::UIObject> obj) {
+    bool Map::removeUIObject(std::shared_ptr<padi::GridObject> obj) {
         return removeUIObject(obj, obj->getPosition());
     }
 
-    bool Map::moveUIObject(const std::shared_ptr<padi::UIObject> &obj, const sf::Vector2i &pos) {
+    bool Map::moveUIObject(const std::shared_ptr<padi::GridObject> &obj, const sf::Vector2i &pos) {
         removeUIObject(obj);
         obj->m_position = pos;
         addUIObject(obj);
