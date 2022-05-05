@@ -15,7 +15,7 @@ namespace padi {
     size_t Button::populate(const padi::UIContext *ctx, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) {
         frame = 0;
         if (ctx->isFocused(shared_from_this())) {
-            frame = 1 + padi::Controls::pollKeyState(sf::Keyboard::Space);
+            frame = padi::Controls::pollKeyState(sf::Keyboard::Space);
             m_color = sf::Color::Yellow;
         } else {
             m_color = sf::Color::White;

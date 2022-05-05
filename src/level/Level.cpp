@@ -51,14 +51,14 @@ namespace padi {
         m_viewTarget.setSize(0, 0);
     }
 
-    void Level::update(sf::RenderWindow *window) {
+    void Level::update(sf::RenderTarget *renderTarget) {
         m_cycle.carried_uS += m_cycle.clock.restart().asMicroseconds();
         while (m_cycle.carried_uS > padi::FrameTime_uS) {
             handleFrameEnd(m_cycleListeners.frameEnd, this, m_cycle.frame);
 
             m_view.setSize(m_viewTarget.getSize());//(m_viewTarget.getSize() * 0.3f + 0.7f * m_view.getSize()));
-            m_view.setCenter(
-                    m_viewTarget.getCenter());//(m_viewTarget.getCenter()  * 0.3f + 0.7f * m_view.getCenter()));
+            m_view.setCenter((m_viewTarget.getCenter()  * 0.5f + 0.5f * m_view.getCenter()));
+            //m_viewTarget.getCenter());
 
             m_cycle.carried_uS -= padi::FrameTime_uS;
 
@@ -72,22 +72,23 @@ namespace padi {
             handleFrameBegin(m_cycleListeners.frameBegin, this, m_cycle.frame);
         }
         if (m_viewTarget.getSize().x == 0) {
-            m_viewTarget.setSize(window->getSize().x, window->getSize().y);
+            m_viewTarget.setSize(renderTarget->getSize().x, renderTarget->getSize().y);
         }
 
         // Zoom Hotkeys
         if (padi::Controls::isKeyDown(sf::Keyboard::Comma)) {
-            m_viewTarget.setSize(m_viewTarget.getSize().x / 2, m_viewTarget.getSize().y / 2);
+            m_viewTarget.setSize(m_viewTarget.getSize().x / 1.5, m_viewTarget.getSize().y / 1.5);
         } else if (padi::Controls::isKeyDown(sf::Keyboard::Period)) {
             m_viewTarget.setSize(m_viewTarget.getSize().x * 2, m_viewTarget.getSize().y * 2);
         }
 
-        window->setView(m_view);
+        renderTarget->setView(m_view);
         m_cursor->update(this);
     }
 
     void Level::draw(sf::RenderTarget &target, sf::RenderStates states) const {
-        //states.transform *= getTransform();
+        //states.transform.translate(target.getView().getCenter());
+        // TODO
 
         // apply the tileset texture
         states.texture = &m_sprites;

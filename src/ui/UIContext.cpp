@@ -13,7 +13,7 @@ namespace padi {
 
         states.transform.translate(target.getView().getCenter() - target.getView().getSize() / 2.f);
         // TODO
-        states.transform.scale(sf::Vector2f(target.getView().getSize().y / 256,target.getView().getSize().y / 256));
+        states.transform.scale(sf::Vector2f(target.getView().getSize().y / 256, target.getView().getSize().y / 256));
 
         // draw the vertex array
         target.draw(&m_vbo[0], m_numVerts, sf::PrimitiveType::Quads, states);
@@ -23,38 +23,44 @@ namespace padi {
     void UIContext::populateVBO() {
         size_t quads = numQuads();
 
-        if(m_vbo.getVertexCount() <= quads * 4) {
+        if (m_vbo.getVertexCount() <= quads * 4) {
             m_vbo.resize(quads * 6); // double to prevent minor increases causing trouble..?
         }
 
         m_numVerts = 0;
-        for(auto const& object : m_objects) {
+        for (auto const &object: m_objects) {
             m_numVerts += object->populate(this, m_vbo, m_numVerts, 0);
         }
-        if(m_focused && padi::Controls::isKeyDown(sf::Keyboard::Escape)) {
-            m_focused = nullptr;
+        if (m_focused) {
+            if (padi::Controls::isKeyDown(sf::Keyboard::Escape)) {
+                m_focused = nullptr;
+            } else if (padi::Controls::isKeyDown(sf::Keyboard::Tab)) {
+                auto iter = std::find(m_objects.begin(), m_objects.end(), m_focused);
+                if (++iter == m_objects.end()) iter = m_objects.begin();
+                m_focused = *iter;
+            }
         }
     }
 
     size_t UIContext::numQuads() const {
         size_t numVerts = 0;
-        for(auto const& object : m_objects) {
+        for (auto const &object: m_objects) {
             numVerts += object->numQuads();
         }
         return numVerts;
     }
 
-    void UIContext::addObject(const std::shared_ptr<padi::UIObject>& obj) {
+    void UIContext::addObject(const std::shared_ptr<padi::UIObject> &obj) {
         m_objects.push_back(obj);
         m_focused = obj;
     }
 
     void UIContext::removeObject(const std::shared_ptr<padi::UIObject> &obj) {
         auto iter = std::find(m_objects.begin(), m_objects.end(), obj);
-        if(iter != m_objects.end()) {
+        if (iter != m_objects.end()) {
             m_objects.erase(iter);
         }
-        if(obj == m_focused) {
+        if (obj == m_focused) {
             m_focused = nullptr;
         }
     }
@@ -68,7 +74,7 @@ namespace padi {
         return &m_apollo;
     }
 
-    bool UIContext::isFocused(const std::shared_ptr<padi::UIObject>& obj) const {
+    bool UIContext::isFocused(const std::shared_ptr<padi::UIObject> &obj) const {
         return m_focused == obj;
     }
 } // padi

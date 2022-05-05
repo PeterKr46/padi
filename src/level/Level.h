@@ -23,7 +23,7 @@ namespace padi {
     public:
         explicit Level(sf::Vector2i const &area, sf::Vector2i const &tile_size = {32, 32});
 
-        void update(sf::RenderWindow *window);
+        void update(sf::RenderTarget *renderTarget);
 
         void populateVBO();
 

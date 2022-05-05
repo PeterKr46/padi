@@ -13,40 +13,5 @@ namespace padi {
 
         virtual void castIndicator(padi::Level *level) = 0;
     };
-
-    namespace content {
-        class AirStrike : public Ability, public CycleListener, public std::enable_shared_from_this<AirStrike> {
-        public:
-            sf::Vector2i strikePos;
-            bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
-
-            void castIndicator(padi::Level *level) override;
-
-            bool onFrameBegin(Level *, uint8_t frame) override;
-        };
-
-        class Teleport : public Ability {
-        public:
-            std::shared_ptr<LivingEntity> user;
-
-            bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
-
-            void castIndicator(padi::Level *level) override;
-        };
-
-        class Walk : public Ability, public CycleListener, public std::enable_shared_from_this<Walk> {
-        public:
-            std::shared_ptr<LivingEntity> user;
-            std::vector<sf::Vector2i> path;
-
-            bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
-
-            void castIndicator(padi::Level *level) override;
-
-            bool onCycleEnd(Level *) override;
-
-            bool onCycleBegin(Level *) override;
-        };
-    };
-
+    
 } // padi

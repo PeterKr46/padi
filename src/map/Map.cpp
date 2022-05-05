@@ -107,7 +107,6 @@ namespace padi {
 
         size_t idx = 0;
         auto tileIter = m_tiles.begin();
-        sf::Transform transform = viewport.getTransform();
         while(tileIter != m_tiles.end()) {
             //auto tileCenter = transform.transformPoint(mapTilePosToWorld(tileIter->first)) / 2.f + sf::Vector2f(0.5,0.5);
             //if(viewport.getViewport().contains(tileCenter)) {
