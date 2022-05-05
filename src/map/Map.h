@@ -57,11 +57,11 @@ namespace padi {
 
     class Map {
     public:
-        sf::Vector2i mapWorldPosToTile(sf::Vector2f const& world) const;
-        sf::Vector2f mapTilePosToWorld(sf::Vector2i const& tile, int z = 0) const;
+        [[nodiscard]] sf::Vector2i mapWorldPosToTile(sf::Vector2f const& world) const;
+        [[nodiscard]] sf::Vector2f mapTilePosToWorld(sf::Vector2i const& tile, int z = 0) const;
 
-        std::shared_ptr<padi::Tile> getTile(sf::Vector2i const& pos) const;
-        std::shared_ptr<padi::Tile> getTile(int x, int y) const;
+        [[nodiscard]] std::shared_ptr<padi::Tile> getTile(sf::Vector2i const& pos) const;
+        [[nodiscard]] std::shared_ptr<padi::Tile> getTile(int x, int y) const;
 
         bool addTile(std::shared_ptr<padi::Tile> tile);
 
@@ -75,11 +75,11 @@ namespace padi {
 
         bool moveEntity(const std::shared_ptr<Entity>& entity, sf::Vector2i const& pos2, size_t lower_by = 0);
 
-        size_t numQuads() const;
+        [[nodiscard]] size_t numQuads() const;
 
         size_t populate(sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const;
 
-        sf::Vector2i getTileSize() const;
+        [[nodiscard]] sf::Vector2i getTileSize() const;
 
         void for_each(const std::function<void(std::shared_ptr<padi::Tile>)>&);
 

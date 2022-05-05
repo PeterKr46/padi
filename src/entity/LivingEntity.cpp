@@ -82,6 +82,9 @@ bool padi::LivingEntity::onCycleBegin(padi::Level * lvl) {
         m_slaves.front()->m_color = m_color;
         lvl->getMap()->addEntity(m_slaves.front());
     }
+    else {
+        m_animation = m_apolloCtx->at("idle");
+    }
     return true;
 }
 
@@ -97,7 +100,7 @@ bool padi::LivingEntity::onCycleEnd(padi::Level * lvl) {
     return true;
 }
 
-bool padi::LivingEntity::moveIntent(const sf::Vector2i &dir) {
+bool padi::LivingEntity::intentMove(const sf::Vector2i &dir) {
     if(m_intent.move || abs(dir.x) + abs(dir.y) > 1) {
         return false;
     }
@@ -106,6 +109,10 @@ bool padi::LivingEntity::moveIntent(const sf::Vector2i &dir) {
         m_intent.move_dir = dir;
         return true;
     }
+}
+
+void padi::LivingEntity::intentStay() {
+    m_intent.move = false;
 }
 
 padi::SlaveEntity::SlaveEntity(const sf::Vector2i &pos) : Entity(pos) {

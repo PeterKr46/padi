@@ -11,8 +11,8 @@ namespace padi {
 
     const sf::Vector2i Left{-1,0};
     const sf::Vector2i Right{1,0};
-    const sf::Vector2i Up{0,1};
-    const sf::Vector2i Down{0,-1};
+    const sf::Vector2i Up{0,-1};
+    const sf::Vector2i Down{0,1};
 }
 
 #endif //PADI_CONSTANTS_H

@@ -34,8 +34,10 @@ namespace padi {
     void handleCycleEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, Level* lvl) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
-            if(!(*i)->onCycleEnd(lvl)) i = listeners.erase(i);
-            else ++i;
+            if(!(*i)->onCycleEnd(lvl))
+                i = listeners.erase(i);
+            else
+                ++i;
         }
     }
 
@@ -56,7 +58,7 @@ namespace padi {
             handleFrameBegin(m_cycleListeners.frameBegin, this, m_cycle.frame);
         }
         // TODO
-        m_view.setSize(window->getSize().x / 4, window->getSize().y / 4);
+        m_view.setSize(window->getSize().x / 3, window->getSize().y / 3);
         window->setView(m_view);
     }
 

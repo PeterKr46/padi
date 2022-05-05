@@ -37,7 +37,8 @@ namespace padi {
 
         size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const override;
 
-        bool moveIntent(sf::Vector2i const &dir);
+        bool intentMove(sf::Vector2i const &dir);
+        void intentStay();
 
         bool onCycleBegin(Level *) override;
         bool onCycleEnd(Level *) override;
