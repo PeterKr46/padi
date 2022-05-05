@@ -13,6 +13,7 @@
 #include "SFML/Graphics/Texture.hpp"
 #include "SFML/Graphics/RenderTarget.hpp"
 #include "SFML/System/Time.hpp"
+#include "Map.h"
 
 namespace padi {
     class Stage
@@ -23,14 +24,14 @@ namespace padi {
 
         void update(sf::Vector2f & mouse_pos, sf::Time time);
 
+        Map map;
+
     protected:
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
         sf::VertexArray m_vertices;
         sf::Texture m_tileset;
-        sf::Vector2u m_size;
-        sf::Vector2i m_selected{0,0};
     };
 
 } // padi
