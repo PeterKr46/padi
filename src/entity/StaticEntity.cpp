@@ -15,7 +15,7 @@ namespace padi {
         return m_animation->getResolution();
     }
 
-    size_t padi::StaticEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) {
+    size_t padi::StaticEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
         sf::Vector2f size{getSize()};
         auto pVertex = &array[vertexOffset];
 

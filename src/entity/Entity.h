@@ -11,7 +11,7 @@ namespace padi {
     public:
         explicit Entity(sf::Vector2i const &pos);
 
-        size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) override;
+        size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const override;
 
         [[nodiscard]] virtual sf::Vector2i getSize() const = 0;
 

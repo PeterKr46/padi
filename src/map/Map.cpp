@@ -130,7 +130,7 @@ namespace padi {
 
         //std::cout << "UI: " << 1.f / population.restart().asSeconds() << std::endl;
 
-        return quads * 4;
+        return idx + 1;
     }
 
     sf::Vector2i Map::getTileSize() const {

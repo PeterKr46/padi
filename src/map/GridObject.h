@@ -28,8 +28,7 @@ namespace padi {
 
         virtual size_t numQuads() const { return 1; };
 
-        virtual size_t
-        populate(padi::Map const *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) = 0;
+        virtual size_t populate(padi::Map const *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const = 0;
     };
 }
 

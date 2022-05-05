@@ -11,7 +11,7 @@ namespace padi {
     }
 
     size_t
-    Entity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) {
+    Entity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
         auto quad = &array[vertexOffset];
         sf::Vector2f size{getSize()};
         sf::Vector2f anchor = map->mapTilePosToWorld(getPosition());
