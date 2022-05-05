@@ -41,11 +41,12 @@ namespace padi {
         bool move(padi::Stage *map, sf::Vector2i const &dir);
 
         void setColor(sf::Color const &color);
+        sf::Color getColor() const;
 
     private:
         padi::FrameListener m_frameListener;
         padi::AnimationSet const*  m_moveset;
-        sf::Color m_color{255, 255, 255};
+        sf::Color m_color{168, 255, 168};
         std::shared_ptr<padi::Animation> m_animation;
         std::shared_ptr<padi::Animation> m_slaveAnimation;
         std::vector<std::shared_ptr<padi::SlaveEntity>> m_slaves;

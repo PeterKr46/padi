@@ -22,7 +22,7 @@ namespace padi {
     std::shared_ptr<padi::Tile> Map::getTile(const sf::Vector2i &pos) const {
         auto iter = m_tiles.find(pos);
         if (iter != m_tiles.end()) {
-            return iter->second.first;
+            return {iter->second.first};
         }
         return {nullptr};
     }

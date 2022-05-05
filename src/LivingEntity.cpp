@@ -39,13 +39,17 @@ std::pair<std::shared_ptr<padi::Animation>,std::shared_ptr<padi::Animation>> det
         result.second   = std::make_shared<padi::ReverseAnimation>(context->at("move_x_from"));
         result.first    = std::make_shared<padi::ReverseAnimation>(context->at("move_x_to"));
     }
-    if(dir.y > 0) {
+    else if(dir.y > 0) {
         result.first    = context->at("move_y_from");
         result.second   = context->at("move_y_to");
     }
     else if(dir.y < 0) {
         result.second   = std::make_shared<padi::ReverseAnimation>(context->at("move_y_from"));
         result.first    = std::make_shared<padi::ReverseAnimation>(context->at("move_y_to"));
+    }
+    else {
+        result.first = context->at("idle");
+        result.second = context->at("idle");
     }
     return result;
 }
@@ -58,7 +62,7 @@ bool padi::LivingEntity::move(Stage *stage, const sf::Vector2i &dir) {
     m_slaves.front()->m_animation = anims.second;
     m_slaves.front()->m_color = m_color;
     stage->getMap()->addEntity(m_slaves.front());
-    m_frameListener = [this, dir](padi::Stage *stage) {
+    m_frameListener = [this](padi::Stage *stage) {
         if(stage->getMap()->getCurrentCycleFrames() == 11) {
             stage->getMap()->removeEntity(m_slaves.front());
             stage->getMap()->moveEntity(shared_from_this(), m_slaves.front()->getPosition());
@@ -80,6 +84,10 @@ void padi::LivingEntity::setColor(sf::Color const &c) {
     m_color = c;
 }
 
+sf::Color padi::LivingEntity::getColor() const {
+    return m_color;
+}
+
 padi::SlaveEntity::SlaveEntity(const sf::Vector2i &pos) : Entity(pos) {
 
 }
@@ -88,10 +96,11 @@ void padi::SlaveEntity::populate(const Map *map, sf::Vertex *pVertex) const {
     sf::Vector2f size{getSize()};
 
     sf::Vector2f anchor = map->mapTilePosToWorld(getPosition());
-    pVertex[0].position = anchor + sf::Vector2f(-size.x / 2, -size.y / 2);
-    pVertex[1].position = anchor + sf::Vector2f(size.x / 2, -size.y / 2);
-    pVertex[2].position = anchor + sf::Vector2f(size.x / 2, size.y / 2);
-    pVertex[3].position = anchor + sf::Vector2f(-size.x / 2, size.y / 2);
+    float verticalOffset = std::min(float(map->getTileSize().y), size.y) / 2;
+    pVertex[0].position = anchor + sf::Vector2f(-size.x / 2, -verticalOffset);
+    pVertex[1].position = anchor + sf::Vector2f(size.x / 2,  -verticalOffset);
+    pVertex[2].position = anchor + sf::Vector2f(size.x / 2,   size.y - verticalOffset);
+    pVertex[3].position = anchor + sf::Vector2f(-size.x / 2,  size.y - verticalOffset);
 
     sf::Vector2f texCoordAnchor = m_animation->operator[](map->getCurrentCycleFrames());
     pVertex[0].texCoords = texCoordAnchor;

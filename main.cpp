@@ -3,6 +3,7 @@
 #include "src/Stage.h"
 #include "src/LivingEntity.h"
 #include "src/Apollo.h"
+#include "src/AStar.h"
 
 int main()
 {
@@ -27,10 +28,31 @@ int main()
 
         apollo.addAnimation("cube", "idle", std::make_shared<padi::StaticAnimation>(sf::Vector2i {32,32}, sf::Vector2f {0,0}));
     }
+    if(apollo.initializeContext("tetrahedron")) {
+        apollo.addAnimation("tetrahedron", "move_x_from", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {192, 0}, {0, 48}, 12)));
+        apollo.addAnimation("tetrahedron", "move_x_to", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {208, 8}, {0, 48}, 12)));
+
+        apollo.addAnimation("tetrahedron", "move_y_from", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {256, 0}, {0, 48}, 12)));
+        apollo.addAnimation("tetrahedron", "move_y_to", std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {240, 8}, {0, 48}, 12)));
+
+        apollo.addAnimation("tetrahedron", "idle", std::make_shared<padi::StaticAnimation>(sf::Vector2i {32,32}, sf::Vector2f {192,0}));
+    }
+
+    apollo.addAnimation("air_strike",std::make_shared<padi::SimpleAnimation>(padi::StripAnimation({32, 32}, {288, 0}, {0, 32}, 12)));
+
+    auto airStrike = std::make_shared<padi::SlaveEntity>(sf::Vector2i {8,8});
+    airStrike->m_animation = apollo.lookupAnim("air_strike");
+    map.getMap()->addEntity(airStrike);
 
     auto livingEntity = std::make_shared<padi::LivingEntity>(apollo.lookupChar("cube"), sf::Vector2i{1, 1});
     livingEntity->setColor({255, 255, 255});
     map.getMap()->addEntity(livingEntity);
+
+    auto randomEntity = std::make_shared<padi::LivingEntity>(apollo.lookupChar("tetrahedron"), sf::Vector2i{10, 10});
+    livingEntity->setColor({255, 255, 255});
+    map.getMap()->addEntity(randomEntity);
+
+    auto path = padi::FindPath(&map, {0,0}, {2,2});
 
     sf::Vector2f clickPos{0,0};
     bool clicked{false};
@@ -62,10 +84,39 @@ int main()
             if(!sf::Mouse::isButtonPressed(sf::Mouse::Right))
                 clicked = false;
         }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) livingEntity->move(&map, sf::Vector2i{-1, 0});
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) livingEntity->move(&map, sf::Vector2i{1, 0});
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) livingEntity->move(&map, sf::Vector2i{0, -1});
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) livingEntity->move(&map, sf::Vector2i{0, 1});
+
+        auto tPos = map.getMap()->mapWorldPosToTile(map.getTransform().getInverse().transformPoint(wPos));
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Left) && (path.empty() || (!path.empty() && path.back() != tPos))) {
+            path = padi::FindPath(&map,livingEntity->getPosition(), tPos);
+        }
+        if(!path.empty()) {
+            if(livingEntity->move(&map, path.front() - livingEntity->getPosition())) {
+                path.erase(path.begin());
+            }
+        }
+
+        //if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) livingEntity->move(&map, sf::Vector2i{-1, 0});
+        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) livingEntity->move(&map, sf::Vector2i{1, 0});
+        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) livingEntity->move(&map, sf::Vector2i{0, -1});
+        //else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) livingEntity->move(&map, sf::Vector2i{0, 1});
+
+        if(map.getMap()->getCurrentCycleFrames() == 0) {
+            sf::Vector2i dir;
+            switch (rand() & 0b11) {
+                case 0: dir={1,0}; break;
+                case 1: dir={-1,0}; break;
+                case 2: dir={0,1}; break;
+                case 3: dir={0,-1}; break;
+            }
+            if(randomEntity->move(&map, dir)) {
+                auto tile = map.getMap()->getTile(randomEntity->getPosition());
+                if(tile) {
+                    tile->m_color -= sf::Color(randomEntity->getColor().r / 16, randomEntity->getColor().g / 16,
+                                               randomEntity->getColor().b / 16);
+                    tile->m_color.a = 255;
+                }
+            }
+        }
 
         window.clear();
         window.draw(map);

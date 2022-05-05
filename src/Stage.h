@@ -28,7 +28,7 @@ namespace padi {
         void update(sf::Vector2f & mouse_pos, sf::Time time);
 
 
-        Map* getMap();
+        Map * getMap();
 
         void addFrameListener(FrameListener* func);
         void removeFrameListener(FrameListener* func);

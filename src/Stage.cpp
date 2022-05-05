@@ -82,6 +82,12 @@ namespace padi {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) tile->m_detail = 1;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) tile->m_detail = 2;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) tile->m_detail = 3;
+            m_selector->m_color = sf::Color::White - tile->m_color;
+            auto delta = abs(m_selector->m_color.r - tile->m_color.r)+abs(m_selector->m_color.g - tile->m_color.g)+abs(m_selector->m_color.b - tile->m_color.b);
+            if(delta < 64) {
+                m_selector->m_color = sf::Color::White;
+            }
+            m_selector->m_color.a = 255;
         }
         m_map.moveEntity(m_selector, pos, ~0u);
 
@@ -102,7 +108,7 @@ namespace padi {
         }
     }
 
-    Map *Stage::getMap() {
+    Map * Stage::getMap() {
         return &m_map;
     }
 
