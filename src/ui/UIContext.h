@@ -4,31 +4,32 @@
 
 #pragma once
 
-#include "SFML/Graphics/Drawable.hpp"
-#include "UIObject.h"
-#include "SFML/Graphics/Texture.hpp"
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Texture.hpp>
 #include "../media/Apollo.h"
+#include "SFML/Graphics/VertexArray.hpp"
 
 namespace padi {
 
     class UIContext
             : public sf::Drawable {
+    private: friend class Immediate;
 
     public:
-        void addObject(const std::shared_ptr<padi::UIObject>& obj);
-        void removeObject(const std::shared_ptr<padi::UIObject>& obj);
 
-        void populateVBO();
+        UIContext();
 
-        void initTextures(std::string const& apollo, std::string const& sprite);
+        void init(std::string const& apollo, std::string const& sprite);
 
         const padi::Apollo* getApollo() const;
 
-        bool isFocused(const std::shared_ptr<padi::UIObject>& obj) const;
+        bool isFocused(size_t elemID) const;
+        void setFocus(size_t elemID);
 
         size_t numQuads() const;
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
+        void clear();
 
     private:
 
@@ -38,8 +39,7 @@ namespace padi {
         size_t m_numVerts{0};
 
     protected:
-        std::vector<std::shared_ptr<padi::UIObject>> m_objects;
-        std::shared_ptr<padi::UIObject> m_focused;
+        size_t m_focused{};
     };
 
 } // padi

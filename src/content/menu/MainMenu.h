@@ -11,7 +11,7 @@ namespace padi::content {
 
     class MainMenu : public padi::UIContext {
     public:
-        explicit MainMenu(sf::RenderTarget* renderTarget);
+        MainMenu(sf::RenderTarget* renderTarget, std::string const& apollo, std::string const& spritesheet);
 
         void draw();
 

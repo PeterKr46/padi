@@ -12,17 +12,20 @@ namespace padi::content {
 
     class Disolver : public padi::CycleListener, public std::enable_shared_from_this<Disolver> {
     public:
-        bool onFrameBegin(Level * level, uint8_t frame) override {
+        bool onFrameBegin(Level *level, uint8_t frame) override {
             std::vector<sf::Vector2i> remove;
             auto rm = &remove;
-            level->getMap()->for_each([level, rm](auto && PH1) { return Disolver::disolve(level, rm, std::forward<decltype(PH1)>(PH1)); });
-            for(auto p : remove) {
+            level->getMap()->for_each([level, rm](auto &&PH1) {
+                return Disolver::dissolve(level, rm,
+                                          std::forward<decltype(PH1)>(PH1));
+            });
+            for (auto p: remove) {
                 level->getMap()->removeTile(p);
             }
             return true;
         }
 
-        static void disolve(Level* lvl, std::vector<sf::Vector2i> *remove, std::shared_ptr<Tile> const& tile) {
+        static void dissolve(Level *lvl, std::vector<sf::Vector2i> *remove, std::shared_ptr<Tile> const &tile) {
             static const sf::Vector2i directions[4]{
                     sf::Vector2i(0, 1),
                     sf::Vector2i(0, -1),
@@ -30,10 +33,11 @@ namespace padi::content {
                     sf::Vector2i(-1, 0)
             };
             auto pos = tile->getPosition();
-            auto num = std::count_if(&directions[0], &directions[3], [lvl, pos](auto &d){return lvl->getMap()->getTile(pos+d);});
-            if(num < 3) {
-                tile->setColor(tile->getColor() - sf::Color(8,8,8,0));
-                if(tile->getColor() == sf::Color::Black) {
+            auto num = std::count_if(&directions[0], &directions[3],
+                                     [lvl, pos](auto &d) { return lvl->getMap()->getTile(pos + d); });
+            if (num < 3) {
+                tile->setColor(tile->getColor() - sf::Color(8, 8, 8, 0));
+                if (tile->getColor() == sf::Color::Black) {
                     //lvl->getMap()->removeTile(pos);
                     remove->push_back(tile->getPosition());
                 }

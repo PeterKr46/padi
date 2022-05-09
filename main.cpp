@@ -1,19 +1,14 @@
-#include <iostream>
 #include <SFML/Graphics.hpp>
 #include <utility>
 #include "src/entity/LivingEntity.h"
-#include "src/media/Apollo.h"
 #include "lib/PerlinNoise/PerlinNoise.hpp"
 #include "src/level/LevelGenerator.h"
 #include "src/level/SpawnEvent.h"
 #include "src/Controls.h"
 #include "src/level/Cursor.h"
 #include "src/player/Ability.h"
-#include "SFML/Audio/SoundBuffer.hpp"
 #include "src/entity/StaticEntity.h"
 #include "src/ui/UIContext.h"
-#include "src/ui/Button.h"
-#include "src/ui/Switch.h"
 #include "SFML/Audio/Music.hpp"
 #include "src/content/abilities/Abilities.h"
 #include "src/content/menu/MainMenu.h"
@@ -24,7 +19,7 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "PAdI");
     sf::RenderTexture rawImage;
     sf::Shader crtShader;
-    crtShader.loadFromFile("../src/shaders/crt.vert","../src/shaders/crt.frag");
+    crtShader.loadFromFile("../src/shaders/crt.vert", "../src/shaders/crt.frag");
 
     if (!rawImage.create(1920, 1080)) {
         return -1;
@@ -51,19 +46,14 @@ int main() {
     ambient.setLoop(true);
     ambient.setLoopPoints(sf::Music::TimeSpan(sf::Time(), ambient.getDuration() - sf::seconds(0.8)));
     //ambient.setPlayingOffset(sf::seconds(30));
-    ambient.setPitch(120.f/125.8f);
+    ambient.setPitch(120.f / 125.8f);
+    ambient.setVolume(20);
     ambient.play();
     std::shared_ptr<padi::LivingEntity> livingEntity;
     livingEntity = std::make_shared<padi::LivingEntity>(apollo->lookupAnimContext("cube"), sf::Vector2i{0, 0});
     livingEntity->setColor({255, 255, 255});
     auto leSpawn = std::make_shared<padi::SpawnEvent>(livingEntity, apollo->lookupAnim("bubble"));
     leSpawn->dispatch(level);
-
-    auto ui = padi::UIContext();
-    ui.initTextures("../media/ui.apollo", "../media/ui_sheet.png");
-    ui.addObject(std::make_shared<padi::Button>(&ui));
-    auto uiSwitch = std::make_shared<padi::Switch>(&ui);
-    ui.addObject(uiSwitch);
 
     auto walkAbility = std::make_shared<padi::content::Walk>();
     walkAbility->user = livingEntity;
@@ -74,7 +64,7 @@ int main() {
 
     std::shared_ptr<padi::Ability> activeAbility{nullptr};
 
-    auto dbg = std::make_shared<padi::StaticEntity>(sf::Vector2i(3,-3));
+    auto dbg = std::make_shared<padi::StaticEntity>(sf::Vector2i(3, -3));
     dbg->m_animation = level->getApollo()->lookupAnim("debug");
     level->getMap()->addEntity(dbg);
 
@@ -87,7 +77,7 @@ int main() {
         quad[0].texCoords = {0, imgSize.y};
 
         quad[1].position = {-halfSize.x, halfSize.y};
-        quad[1].texCoords = {0,0};
+        quad[1].texCoords = {0, 0};
 
         quad[2].position = halfSize;
         quad[2].texCoords = {imgSize.x, 0};
@@ -96,14 +86,11 @@ int main() {
         quad[3].texCoords = imgSize;
     }
     auto view = window.getView();
-    view.setSize(sf::Vector2f (rawImage.getSize()));
-    view.setCenter(0,0);//sf::Vector2f (rawImage.getSize()) / 2.f);
+    view.setSize(sf::Vector2f(rawImage.getSize()));
+    view.setCenter(0, 0);//sf::Vector2f (rawImage.getSize()) / 2.f);
     window.setView(view);
 
-    padi::content::MainMenu menu(&window);
-    menu.initTextures("../media/ui.apollo", "../media/ui_sheet.png");
-    menu.addObject(std::make_shared<padi::Button>(&menu));
-    menu.addObject(std::make_shared<padi::Switch>(&menu));
+    padi::content::MainMenu menu(&window, "../media/ui.apollo", "../media/ui_sheet.png");
 
     sf::Clock clock;
     sf::Clock frameClock;
@@ -120,6 +107,7 @@ int main() {
                 padi::Controls::keyReleased(event.key.code);
             }
         }
+        menu.clear();
         menu.draw();
 /*
         level->update(&rawImage);
@@ -169,11 +157,11 @@ int main() {
 
         ++frames;
         size_t ms = frameClock.restart().asMicroseconds();
-        if(ms < 1024) std::this_thread::sleep_for(std::chrono::microseconds (1024 - ms));
+        if (ms < 1024) std::this_thread::sleep_for(std::chrono::microseconds(1024 - ms));
     }
     //printf("Slowest frame took %.3f s, i.e. %.3f FPS\n", longest, 1.f / longest);
-    printf("%i / %i quads final\n", level->getMap()->numQuads(), level->getVBOCapacity());
-    printf("%i frames total in %.3f seconds\n", frames, clock.getElapsedTime().asSeconds());
+    printf("%zu / %zu quads final\n", level->getMap()->numQuads(), level->getVBOCapacity());
+    printf("%zu frames total in %.3f seconds\n", frames, clock.getElapsedTime().asSeconds());
     printf("%.3f fps avg", float(frames) / clock.getElapsedTime().asSeconds());
     return 0;
 }

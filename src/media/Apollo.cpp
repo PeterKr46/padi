@@ -98,7 +98,7 @@ namespace padi {
                                                               {data[4], data[5]}, data[6], data[7]))
                                       });
                     } else {
-                        printf("INVALID (%i values, need at least 7).\n", data.size());
+                        printf("INVALID (%llu values, need at least 7).\n", data.size());
                     }
                 } else if (line.substr(0, 5) == "audio") {
                     auto secondspace = line.find(' ', 6);

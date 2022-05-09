@@ -20,52 +20,11 @@ namespace padi {
 
     }
 
-    void UIContext::populateVBO() {
-        size_t quads = numQuads();
-
-        if (m_vbo.getVertexCount() <= quads * 4) {
-            m_vbo.resize(quads * 6); // double to prevent minor increases causing trouble..?
-        }
-
-        m_numVerts = 0;
-        for (auto const &object: m_objects) {
-            m_numVerts += object->populate(this, m_vbo, m_numVerts, 0);
-        }
-        if (m_focused) {
-            if (padi::Controls::isKeyDown(sf::Keyboard::Escape)) {
-                m_focused = nullptr;
-            } else if (padi::Controls::isKeyDown(sf::Keyboard::Tab)) {
-                auto iter = std::find(m_objects.begin(), m_objects.end(), m_focused);
-                if (++iter == m_objects.end()) iter = m_objects.begin();
-                m_focused = *iter;
-            }
-        }
-    }
-
     size_t UIContext::numQuads() const {
-        size_t numVerts = 0;
-        for (auto const &object: m_objects) {
-            numVerts += object->numQuads();
-        }
-        return numVerts;
+        return m_numVerts / 4;
     }
 
-    void UIContext::addObject(const std::shared_ptr<padi::UIObject> &obj) {
-        m_objects.push_back(obj);
-        m_focused = obj;
-    }
-
-    void UIContext::removeObject(const std::shared_ptr<padi::UIObject> &obj) {
-        auto iter = std::find(m_objects.begin(), m_objects.end(), obj);
-        if (iter != m_objects.end()) {
-            m_objects.erase(iter);
-        }
-        if (obj == m_focused) {
-            m_focused = nullptr;
-        }
-    }
-
-    void UIContext::initTextures(const std::string &apollo, const std::string &sprite) {
+    void UIContext::init(const std::string &apollo, const std::string &sprite) {
         m_apollo.loadFromFile(apollo);
         m_sprites.loadFromFile(sprite);
     }
@@ -74,7 +33,18 @@ namespace padi {
         return &m_apollo;
     }
 
-    bool UIContext::isFocused(const std::shared_ptr<padi::UIObject> &obj) const {
-        return m_focused == obj;
+    void UIContext::setFocus(size_t elemId) {
+        m_focused = elemId;
+    }
+
+    bool UIContext::isFocused(size_t elemID) const {
+        return m_focused == elemID;
+    }
+
+    void UIContext::clear() {
+        m_numVerts = 0;
+    }
+
+    UIContext::UIContext() : m_vbo(sf::VertexArray(sf::PrimitiveType::Quads, 16)) {
     }
 } // padi

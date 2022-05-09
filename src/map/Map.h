@@ -9,9 +9,8 @@
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/System/Clock.hpp>
-#include "GridObject.h"
-#include "../ui/UIObject.h"
 #include <SFML/Graphics/View.hpp>
+#include "GridObject.h"
 
 namespace padi {
 
