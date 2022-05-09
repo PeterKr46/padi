@@ -17,11 +17,13 @@ namespace padi {
 
         ~SpawnEvent() = default;
 
-        void dispatch(Level* level);
+        void dispatch(std::shared_ptr<Level> const&  level);
 
         bool onCycleBegin(Level *) override;
         bool onCycleEnd(Level *) override;
         bool onFrameBegin(Level *, uint8_t frame) override;
+
+        bool pullFocus{false};
 
     private:
         std::shared_ptr<StaticEntity>    m_particles;

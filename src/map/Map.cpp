@@ -89,9 +89,9 @@ namespace padi {
         for(const auto& loc : m_tiles) {
             if(loc.second.first) {
                 total += loc.second.first->numQuads();
-                for (const auto &entity: loc.second.second) {
-                    total += entity->numQuads();
-                }
+            }
+            for (const auto &entity: loc.second.second) {
+                total += entity->numQuads();
             }
         }
         return total;

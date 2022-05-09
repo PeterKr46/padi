@@ -9,29 +9,28 @@
 #include "../player/Ability.h"
 #include "StaticEntity.h"
 
-padi::LivingEntity::LivingEntity(padi::AnimationSet const* moveset, const sf::Vector2i &pos) : Entity(pos), m_apolloCtx(moveset) {
+padi::LivingEntity::LivingEntity(padi::AnimationSet const *moveset, const sf::Vector2i &pos) : Entity(pos),
+                                                                                               m_apolloCtx(moveset) {
     m_animation = m_apolloCtx->at("idle");
+    m_slaves.push_back(std::make_shared<padi::StaticEntity>(getPosition()));
 }
 
-std::pair<std::shared_ptr<padi::Animation>,std::shared_ptr<padi::Animation>> determineAnims(padi::AnimationSet const* context, sf::Vector2i const& dir) {
-    std::pair<std::shared_ptr<padi::Animation>,std::shared_ptr<padi::Animation>> result{nullptr,nullptr};
-    if(dir.x > 0) {
-        result.first    = context->at("move_x_from");
-        result.second   = context->at("move_x_to");
-    }
-    else if(dir.x < 0) {
-        result.second   = std::make_shared<padi::ReverseAnimation>(context->at("move_x_from"));
-        result.first    = std::make_shared<padi::ReverseAnimation>(context->at("move_x_to"));
-    }
-    else if(dir.y > 0) {
-        result.first    = context->at("move_y_from");
-        result.second   = context->at("move_y_to");
-    }
-    else if(dir.y < 0) {
-        result.second   = std::make_shared<padi::ReverseAnimation>(context->at("move_y_from"));
-        result.first    = std::make_shared<padi::ReverseAnimation>(context->at("move_y_to"));
-    }
-    else {
+std::pair<std::shared_ptr<padi::Animation>, std::shared_ptr<padi::Animation>>
+determineAnims(padi::AnimationSet const *context, sf::Vector2i const &dir) {
+    std::pair<std::shared_ptr<padi::Animation>, std::shared_ptr<padi::Animation>> result{nullptr, nullptr};
+    if (dir.x > 0) {
+        result.first = context->at("move_x_from");
+        result.second = context->at("move_x_to");
+    } else if (dir.x < 0) {
+        result.second = std::make_shared<padi::ReverseAnimation>(context->at("move_x_from"));
+        result.first = std::make_shared<padi::ReverseAnimation>(context->at("move_x_to"));
+    } else if (dir.y > 0) {
+        result.first = context->at("move_y_from");
+        result.second = context->at("move_y_to");
+    } else if (dir.y < 0) {
+        result.second = std::make_shared<padi::ReverseAnimation>(context->at("move_y_from"));
+        result.first = std::make_shared<padi::ReverseAnimation>(context->at("move_y_to"));
+    } else {
         result.first = context->at("idle");
         result.second = context->at("idle");
     }
@@ -50,16 +49,17 @@ sf::Color padi::LivingEntity::getColor() const {
     return m_color;
 }
 
-size_t padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
+size_t
+padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
     sf::Vector2f size{getSize()};
     auto pVertex = &array[vertexOffset];
 
     sf::Vector2f anchor = map->mapTilePosToWorld(getPosition());
     float verticalOffset = std::min(float(map->getTileSize().y), size.y) / 2;
     pVertex[0].position = anchor + sf::Vector2f(-size.x / 2, verticalOffset - size.y);
-    pVertex[1].position = anchor + sf::Vector2f(size.x / 2,  verticalOffset - size.y);
-    pVertex[2].position = anchor + sf::Vector2f(size.x / 2,   verticalOffset);
-    pVertex[3].position = anchor + sf::Vector2f(-size.x / 2,  verticalOffset);
+    pVertex[1].position = anchor + sf::Vector2f(size.x / 2, verticalOffset - size.y);
+    pVertex[2].position = anchor + sf::Vector2f(size.x / 2, verticalOffset);
+    pVertex[3].position = anchor + sf::Vector2f(-size.x / 2, verticalOffset);
 
     sf::Vector2f texCoordAnchor = (*m_animation)[frame];
     pVertex[0].texCoords = texCoordAnchor;
@@ -72,49 +72,44 @@ size_t padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array
     return 4;
 }
 
-bool padi::LivingEntity::onCycleBegin(padi::Level * lvl) {
-    if(m_intent.move) {
+bool padi::LivingEntity::onCycleBegin(padi::Level *lvl) {
+    if (m_intent.move) {
         std::cout << "Start" << std::endl;
         m_intent.move = false;
         m_inAction.move = true;
-        m_slaves.push_back(std::make_shared<padi::StaticEntity>(getPosition() + m_intent.move_dir));
         auto anims = determineAnims(m_apolloCtx, m_intent.move_dir);
         m_animation = anims.first;
         m_slaves.front()->m_animation = anims.second;
         m_slaves.front()->m_color = m_color;
-        lvl->getMap()->addEntity(m_slaves.front());
-    }
-    else if(m_intent.cast) {
+        lvl->getMap()->addEntity(m_slaves.front(), getPosition() + m_intent.move_dir);
+    } else if (m_intent.cast) {
         m_intent.cast = false;
         m_inAction.cast = true;
         m_intent.cast_ability->cast(lvl, m_intent.cast_pos);
-    }
-    else {
+    } else {
         m_animation = m_apolloCtx->at("idle");
     }
     return true;
 }
 
-bool padi::LivingEntity::onCycleEnd(padi::Level * lvl) {
-    if(m_inAction.move) {
+bool padi::LivingEntity::onCycleEnd(padi::Level *lvl) {
+    if (m_inAction.move) {
         std::cout << "Stop (intent: " << (m_intent.move ? "Go" : "Stay") << ")" << std::endl;
         m_inAction.move = false;
         lvl->getMap()->removeEntity(m_slaves.front());
         lvl->getMap()->moveEntity(shared_from_this(), m_slaves.front()->getPosition());
         m_animation = m_apolloCtx->at("idle");
-        m_slaves.clear();
     }
-    if(m_inAction.cast) {
+    if (m_inAction.cast) {
         m_inAction.cast = false; // hm
     }
     return true;
 }
 
 bool padi::LivingEntity::intentMove(const sf::Vector2i &dir) {
-    if(m_intent.move || abs(dir.x) + abs(dir.y) > 1) {
+    if (m_intent.move || abs(dir.x) + abs(dir.y) > 1) {
         return false;
-    }
-    else {
+    } else {
         m_intent.move = true;
         m_intent.move_dir = dir;
         return true;
@@ -129,5 +124,26 @@ void padi::LivingEntity::intentCast(std::shared_ptr<padi::Ability> const &abilit
     m_intent.cast = true;
     m_intent.cast_ability = ability;
     m_intent.cast_pos = position;
+}
+
+bool padi::LivingEntity::isCasting() const {
+    return m_inAction.cast;
+}
+
+bool padi::LivingEntity::isMoving() const {
+    return m_inAction.move;
+}
+
+bool padi::LivingEntity::hasMoveIntent() const {
+    return m_intent.move;
+}
+
+bool padi::LivingEntity::hasCastIntent() const {
+    return m_intent.cast;
+}
+
+sf::Vector2i padi::LivingEntity::currentMoveDirection() const {
+    if(!m_inAction.move) return {0,0};
+    return m_slaves.front()->getPosition() - getPosition();
 }
 

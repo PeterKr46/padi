@@ -16,7 +16,9 @@
 #include "src/ui/Switch.h"
 #include "SFML/Audio/Music.hpp"
 #include "src/content/abilities/Abilities.h"
-
+#include "src/content/menu/MainMenu.h"
+#include <chrono>
+#include <thread>
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "PAdI");
@@ -37,8 +39,8 @@ int main() {
             .withSeed(seed)
             .withArea({100, 100})
             .generate();
-    level.initCursor("cursor");
-    auto apollo = level.getApollo();
+    level->initCursor("cursor");
+    auto apollo = level->getApollo();
     sf::Font f{};
     f.setSmooth(false);
     f.loadFromFile("../media/prstartk.ttf");
@@ -55,7 +57,7 @@ int main() {
     livingEntity = std::make_shared<padi::LivingEntity>(apollo->lookupAnimContext("cube"), sf::Vector2i{0, 0});
     livingEntity->setColor({255, 255, 255});
     auto leSpawn = std::make_shared<padi::SpawnEvent>(livingEntity, apollo->lookupAnim("bubble"));
-    leSpawn->dispatch(&level);
+    leSpawn->dispatch(level);
 
     auto ui = padi::UIContext();
     ui.initTextures("../media/ui.apollo", "../media/ui_sheet.png");
@@ -73,8 +75,8 @@ int main() {
     std::shared_ptr<padi::Ability> activeAbility{nullptr};
 
     auto dbg = std::make_shared<padi::StaticEntity>(sf::Vector2i(3,-3));
-    dbg->m_animation = level.getApollo()->lookupAnim("debug");
-level.getMap()->addEntity(dbg);
+    dbg->m_animation = level->getApollo()->lookupAnim("debug");
+    level->getMap()->addEntity(dbg);
 
     sf::VertexArray quad(sf::Quads, 4);
     {
@@ -98,10 +100,14 @@ level.getMap()->addEntity(dbg);
     view.setCenter(0,0);//sf::Vector2f (rawImage.getSize()) / 2.f);
     window.setView(view);
 
+    padi::content::MainMenu menu(&window);
+    menu.initTextures("../media/ui.apollo", "../media/ui_sheet.png");
+    menu.addObject(std::make_shared<padi::Button>(&menu));
+    menu.addObject(std::make_shared<padi::Switch>(&menu));
+
     sf::Clock clock;
+    sf::Clock frameClock;
     size_t frames = 0;
-    sf::Clock frame_clock;
-    float longest = 0;
     while (window.isOpen()) {
         sf::Event event{};
         padi::Controls::resetKeyStates(); // Handles key events
@@ -114,23 +120,22 @@ level.getMap()->addEntity(dbg);
                 padi::Controls::keyReleased(event.key.code);
             }
         }
+        menu.draw();
+/*
+        level->update(&rawImage);
 
-        //button->update();
-
-        level.update(&rawImage);
-
-        t.setString(std::to_string(level.getMap()->numQuads()));
+        t.setString(std::to_string(level->getMap()->numQuads()));
         if (padi::Controls::isKeyDown(sf::Keyboard::Home)) {
-            level.moveCursor(livingEntity->getPosition());
+            level->moveCursor(livingEntity->getPosition());
         }
         if (activeAbility) {
-            activeAbility->castIndicator(&level);
+            activeAbility->castIndicator(&(*level));
             if (padi::Controls::isKeyDown(sf::Keyboard::Space)) {
-                livingEntity->intentCast(activeAbility, level.getCursorLocation());
+                livingEntity->intentCast(activeAbility, level->getCursorLocation());
                 activeAbility = nullptr;
             } else if (padi::Controls::isKeyDown(sf::Keyboard::Escape)) {
                 activeAbility = nullptr;
-                level.hideCursor();
+                level->hideCursor();
             }
         } else if (padi::Controls::isKeyDown(sf::Keyboard::Q)) {
             activeAbility = asAbility;
@@ -138,21 +143,19 @@ level.getMap()->addEntity(dbg);
             activeAbility = tpAbility;
         } else if (padi::Controls::isKeyDown(sf::Keyboard::W)) {
             activeAbility = walkAbility;
-        }/* else if (padi::Controls::isKeyDown(sf::Keyboard::R)) {
-            activeAbility = darkAbility;
-        }*/
+        }
 
-        level.centerView(livingEntity->getPosition());
+        level->centerView(livingEntity->getPosition());
 
-        t.setPosition(level.getMap()->mapTilePosToWorld(level.getCursorLocation()));// - sf::Vector2f(t.getLocalBounds().getSize().x / 2, -12));
+        t.setPosition(level->getMap()->mapTilePosToWorld(level->getCursorLocation()));// - sf::Vector2f(t.getLocalBounds().getSize().x / 2, -12));
 
-        level.populateVBO();
+        level->populateVBO();
         ui.populateVBO();
 
         rawImage.clear();
         auto states = sf::RenderStates::Default;
         states.transform.scale(sf::Vector2f( 256.f /rawImage.getView().getSize().y, 256.f / rawImage.getView().getSize().y));
-        rawImage.draw(level, states);
+        rawImage.draw(*level, states);
         rawImage.draw(t, states);
         rawImage.draw(ui);
 
@@ -161,16 +164,15 @@ level.getMap()->addEntity(dbg);
         rState.shader = &crtShader;
         rState.texture = &rawImage.getTexture();
         window.draw(quad,rState);
+        */
         window.display();
 
-        float t = frame_clock.restart().asSeconds();
-        if (frames > 20 && t > 0.013) {
-            std::cout << "Drop detected: " << 1.f / t << " FPS (" << t << ")" << std::endl;
-        }
         ++frames;
+        size_t ms = frameClock.restart().asMicroseconds();
+        if(ms < 1024) std::this_thread::sleep_for(std::chrono::microseconds (1024 - ms));
     }
-    printf("Slowest frame took %.3f s, i.e. %.3f FPS\n", longest, 1.f / longest);
-    printf("%i / %i quads final\n", level.getMap()->numQuads(), level.getVBOCapacity());
+    //printf("Slowest frame took %.3f s, i.e. %.3f FPS\n", longest, 1.f / longest);
+    printf("%i / %i quads final\n", level->getMap()->numQuads(), level->getVBOCapacity());
     printf("%i frames total in %.3f seconds\n", frames, clock.getElapsedTime().asSeconds());
     printf("%.3f fps avg", float(frames) / clock.getElapsedTime().asSeconds());
     return 0;

@@ -35,12 +35,12 @@ namespace padi {
         return false;
     }
 
-    void SpawnEvent::dispatch(Level *level) {
+    void SpawnEvent::dispatch(std::shared_ptr<Level> const& level) {
         level->addCycleBeginListener(shared_from_this());
     }
 
     bool SpawnEvent::onFrameBegin(Level *level, uint8_t frame) {
-        level->centerView(m_particles->getPosition());
+        if(pullFocus) level->centerView(m_particles->getPosition());
         static const int radius = 8;
         auto pos = m_particles->getPosition();
         for (int x = -radius; x < radius; ++x)

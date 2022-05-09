@@ -62,6 +62,6 @@ namespace padi {
     }
 
     size_t Tile::numQuads() const {
-        return 1 + m_decoration.operator bool();
+        return m_decoration ? 2 : 1;
     }
 } // padi

@@ -18,7 +18,7 @@ namespace padi {
         LevelGenerator& withApollo(std::string const& path);
         LevelGenerator& withSeed(uint64_t seed);
         LevelGenerator& withArea(sf::Vector2i const& size);
-        Level generate();
+        std::shared_ptr<Level> generate();
     private:
         static void log(std::string const& output);
 

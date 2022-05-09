@@ -63,7 +63,7 @@ namespace padi {
         }
     }
 
-    Level LevelGenerator::generate() {
+    std::shared_ptr<Level> LevelGenerator::generate() {
         static const float zScale = 0.2f;
         static const float cScale = 0.05f;
         static const float mScale = 0.05f;
@@ -93,7 +93,8 @@ namespace padi {
                     level->getMap()->addTile(t);
                     if (m > 0.12) {
                         auto e = std::make_shared<padi::StaticEntity>(pos);
-                        e->m_animation = level->m_apollo.lookupAnim(m > 0.35 ? "peak" : (m > 0.3 ? "mountain" : (m > 0.25 ? "rocks" : "hill")));
+                        e->m_animation = level->m_apollo.lookupAnim(
+                                m > 0.35 ? "peak" : (m > 0.3 ? "mountain" : (m > 0.25 ? "rocks" : "hill")));
                         t->setVerticalOffset(3);
                         t->m_walkable = m < 0.25;
                         t->setDecoration(e);
@@ -102,7 +103,7 @@ namespace padi {
             }
         }
         level->centerView(m_targetArea / 2);
-        return *level;
+        return level;
     }
 
     LevelGenerator &LevelGenerator::withApollo(const std::string &path) {

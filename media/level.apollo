@@ -27,7 +27,7 @@ anim move_x_from    32 32   0 0     0 48    12
 anim move_x_to      32 32   16 8    0 48    12
 anim move_y_from    32 32   64 0    0 48    12
 anim move_y_to      32 32   48 8    0 48    12
-anim idle           32 32   0 560   0 32    12
+anim idle           32 32   0 568   0 32    12
 
 block tetrahedron
 anim move_x_from    32 32   192 0   0 48    12

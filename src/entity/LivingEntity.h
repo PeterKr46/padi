@@ -31,6 +31,15 @@ namespace padi {
         void intentStay();
         void intentCast(std::shared_ptr<padi::Ability> const &ability, sf::Vector2i const &position);
 
+        bool isMoving() const;
+        sf::Vector2i currentMoveDirection() const;
+        bool hasMoveIntent() const;
+
+        bool hasCastIntent() const;
+
+
+        bool isCasting() const;
+
         bool onCycleBegin(Level *) override;
         bool onCycleEnd(Level *) override;
 
@@ -55,7 +64,7 @@ namespace padi {
             std::shared_ptr<padi::Ability> cast_ability{nullptr};
         } m_intent;
 
-        sf::Color m_color{168, 255, 168};
+        sf::Color m_color{255, 255, 255};
         std::shared_ptr<padi::Animation> m_animation;
     };
 }

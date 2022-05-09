@@ -72,18 +72,18 @@ namespace padi {
             handleFrameBegin(m_cycleListeners.frameBegin, this, m_cycle.frame);
         }
         if (m_viewTarget.getSize().x == 0) {
-            m_viewTarget.setSize(renderTarget->getSize().x, renderTarget->getSize().y);
+            m_viewTarget.setSize(455, 256);
         }
 
         // Zoom Hotkeys
-        if (padi::Controls::isKeyDown(sf::Keyboard::Comma)) {
-            m_viewTarget.setSize(m_viewTarget.getSize().x / 1.5, m_viewTarget.getSize().y / 1.5);
-        } else if (padi::Controls::isKeyDown(sf::Keyboard::Period)) {
-            m_viewTarget.setSize(m_viewTarget.getSize().x * 2, m_viewTarget.getSize().y * 2);
-        }
+        //if (padi::Controls::isKeyDown(sf::Keyboard::Comma)) {
+        //    m_viewTarget.setSize(m_viewTarget.getSize().x / 1.5, m_viewTarget.getSize().y / 1.5);
+        //} else if (padi::Controls::isKeyDown(sf::Keyboard::Period)) {
+        //    m_viewTarget.setSize(m_viewTarget.getSize().x * 2, m_viewTarget.getSize().y * 2);
+        //}
 
         renderTarget->setView(m_view);
-        m_cursor->update(this);
+        if(m_cursor) m_cursor->update(this);
     }
 
     void Level::draw(sf::RenderTarget &target, sf::RenderStates states) const {

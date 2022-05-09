@@ -26,7 +26,6 @@ namespace padi {
 
         bool isFocused(const std::shared_ptr<padi::UIObject>& obj) const;
 
-    private:
         size_t numQuads() const;
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
@@ -38,6 +37,7 @@ namespace padi {
         sf::VertexArray m_vbo;
         size_t m_numVerts{0};
 
+    protected:
         std::vector<std::shared_ptr<padi::UIObject>> m_objects;
         std::shared_ptr<padi::UIObject> m_focused;
     };
