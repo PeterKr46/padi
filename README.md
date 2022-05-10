@@ -20,15 +20,15 @@ The above concept will be realized the following features, optional/extra featur
  - [ ] Up to three (four?) player characters
  - [ ] Cooperative gameplay
    - [ ] Couch Co-op / Hot Seat
-   - [ ] (Local Co-op)
-   - [ ] (Network Multiplayer)
-     - [ ] (Text-based chat)
+   - [ ] BONUS: (Local Co-op with Keyboard + Controller)
+   - [ ] BONUS: (Network Multiplayer)
+     - [ ] BONUS: (Text-based chat)
  - [x] Randomly generated levels
    - [ ] of increasing difficulty
  - [ ] The option to save and load in between levels
  - [ ] Limited character customization:
    - [ ] Swappable abilites per character via an Inventory-like system
-   - [ ] (Color selection per character)
+   - [ ] BONUS: (Color selection per character)
  - [x] Sprite-based animation
  - [ ] Custom shaders
    - [ ] On the map itself
