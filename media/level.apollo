@@ -11,6 +11,7 @@ anim debug              32 41   992 0   0 32    12
 anim button             18 24   96 0    0 24    4   2
 anim scalable_button    32 32   96 112  0 32    4   2
 anim bubble             32 64   448 0   0 64    12
+anim laser_hold         32 48   512 0   0 48    4   2
 anim marker             32 24   160 198
 anim hill               32 40   128 160
 anim rocks              32 40   128 192

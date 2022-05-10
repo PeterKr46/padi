@@ -68,6 +68,12 @@ int main() {
     dbg->m_animation = level->getApollo()->lookupAnim("debug");
     level->getMap()->addEntity(dbg);
 
+    for(int i = 0; i < 10; ++i) {
+        auto laser = std::make_shared<padi::StaticEntity>(sf::Vector2i(3, i));
+        laser->m_animation = level->getApollo()->lookupAnim("laser_hold");
+        level->getMap()->addEntity(laser);
+    }
+
     sf::VertexArray quad(sf::Quads, 4);
     {
         sf::Vector2f halfSize{window.getSize()};
@@ -107,9 +113,9 @@ int main() {
                 padi::Controls::keyReleased(event.key.code);
             }
         }
-        menu.clear();
-        menu.draw();
-/*
+        //menu.clear();
+        //menu.draw();
+
         level->update(&rawImage);
 
         t.setString(std::to_string(level->getMap()->numQuads()));
@@ -138,21 +144,19 @@ int main() {
         t.setPosition(level->getMap()->mapTilePosToWorld(level->getCursorLocation()));// - sf::Vector2f(t.getLocalBounds().getSize().x / 2, -12));
 
         level->populateVBO();
-        ui.populateVBO();
 
         rawImage.clear();
         auto states = sf::RenderStates::Default;
         states.transform.scale(sf::Vector2f( 256.f /rawImage.getView().getSize().y, 256.f / rawImage.getView().getSize().y));
         rawImage.draw(*level, states);
         rawImage.draw(t, states);
-        rawImage.draw(ui);
+        //rawImage.draw(ui);
 
         window.clear();
         auto rState = sf::RenderStates::Default;
         rState.shader = &crtShader;
         rState.texture = &rawImage.getTexture();
         window.draw(quad,rState);
-        */
         window.display();
 
         ++frames;
