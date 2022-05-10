@@ -1,5 +1,4 @@
 #include <SFML/Graphics.hpp>
-#include <utility>
 #include "src/entity/LivingEntity.h"
 #include "lib/PerlinNoise/PerlinNoise.hpp"
 #include "src/level/LevelGenerator.h"
@@ -14,9 +13,14 @@
 #include "src/content/menu/MainMenu.h"
 #include <chrono>
 #include <thread>
+#include <memory>
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(1920, 1080), "PAdI");
+    std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
+    sf::RenderWindow window(modes[0],
+            //sf::VideoMode(1920, 1080),
+            "PAdI",
+            sf::Style::Fullscreen);
     sf::RenderTexture rawImage;
     sf::Shader crtShader;
     crtShader.loadFromFile("../src/shaders/crt.vert", "../src/shaders/crt.frag");

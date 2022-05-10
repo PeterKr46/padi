@@ -5,6 +5,7 @@
 #include "Apollo.h"
 
 #include <utility>
+#include <iterator>
 #include <fstream>
 #include <sstream>
 

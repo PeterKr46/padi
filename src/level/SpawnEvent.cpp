@@ -5,6 +5,7 @@
 #include "SpawnEvent.h"
 
 #include <utility>
+#include <cmath>
 #include "../map/Tile.h"
 
 namespace padi {

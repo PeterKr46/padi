@@ -21,13 +21,11 @@ vec2 curveRemapUV(vec2 uv)
 
 void main()
 {
-    // lookup the pixel in the texture
-    vec2 uv = gl_TexCoord[0].xy;//curveRemapUV(gl_TexCoord[0].xy);
-    vec4 pixel = vec4(0);
-    if (uv.x > 0 && uv.x < 1 && uv.y > 0 && uv.y < 1) {
-        pixel = texture2D(texture, uv);
-        //pixel *= scanLineIntensity(uv.x, 512, 0.5);
-        //pixel *= scanLineIntensity(uv.y, 288, 0.5);// multiply it by the color
-    }
+    vec2 uv = gl_TexCoord[0].xy; //curveRemapUV(gl_TexCoord[0].xy);
+    vec4 pixel = vec4(1);
+    //pixel *= scanLineIntensity(uv.x, 512.0, 0.5) * scanLineIntensity(uv.y, 288.0, 0.5);
+    pixel *= texture2D(texture, uv)
+                    * step(uv.x,1.0) * (1.0 - step(uv.x,0.0))
+                    * step(uv.y,1.0) * (1.0 - step(uv.y,0.0));
     gl_FragColor = gl_Color * pixel;
 }

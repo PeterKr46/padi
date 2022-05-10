@@ -2,8 +2,9 @@
 // Created by Peter on 01/05/2022.
 //
 
-#include <iostream>
 #include "LevelGenerator.h"
+#include <iostream>
+#include <cmath>
 #include "../entity/LivingEntity.h"
 #include "../map/Tile.h"
 
@@ -78,11 +79,11 @@ namespace padi {
         size_t safeRadius = std::min(m_targetArea.x, m_targetArea.y) / 2;
         for (pos.x = -halfSize.x; pos.x < halfSize.x; pos.x++) {
             for (pos.y = -halfSize.y; pos.y < halfSize.y; pos.y++) {
-                double dsqr = sqrt(pow(pos.x, 2) + pow(pos.y, 2));
+                double dsqr = std::sqrt(pos.x*pos.x + pos.y*pos.y);
                 if (dsqr < safeRadius) {
                     auto z = float(m_perlin.octave2D_01(pos.x * zScale, pos.y * zScale, 5)) * (1 - dsqr / safeRadius);
                     auto t = std::make_shared<padi::Tile>(pos);
-                    int r = floor(16 * (m_perlin.normalizedOctave2D_01(234 + pos.x * cScale, pos.y * cScale, 2))) * 90;
+                    int r = int(16 * (m_perlin.normalizedOctave2D_01(234 + pos.x * cScale, pos.y * cScale, 2))) * 90;
                     float m = (z * m_perlin.normalizedOctave2D_01(pos.x * mScale, pos.y * mScale, 7));
                     //t->m_detail = std::max(0.,m_perlin.octave2D_01((pos.x - 320) * zScale, pos.y * zScale, 3) * 3.9 - 0.3);
 

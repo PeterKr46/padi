@@ -57,7 +57,7 @@ namespace padi {
             handleFrameEnd(m_cycleListeners.frameEnd, this, m_cycle.frame);
 
             m_view.setSize(m_viewTarget.getSize());//(m_viewTarget.getSize() * 0.3f + 0.7f * m_view.getSize()));
-            m_view.setCenter((m_viewTarget.getCenter()  * 0.5f + 0.5f * m_view.getCenter()));
+            m_view.setCenter((m_viewTarget.getCenter()  * 0.9f + 0.1f * m_view.getCenter()));
             //m_viewTarget.getCenter());
 
             m_cycle.carried_uS -= padi::FrameTime_uS;

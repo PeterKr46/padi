@@ -6,6 +6,7 @@
 #include <queue>
 #include <map>
 #include <functional>
+#include <memory>
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/System/Clock.hpp>

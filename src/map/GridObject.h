@@ -5,10 +5,13 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 
 namespace padi {
+
+    class Map;
 
     class GridPlaceable {
     public:
