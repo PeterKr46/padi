@@ -17,7 +17,9 @@
 
 int main() {
     std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
-    sf::RenderWindow window(modes[0],
+
+    sf::RenderWindow window(
+            modes[0],
             //sf::VideoMode(1920, 1080),
             "PAdI",
             sf::Style::Fullscreen);
@@ -25,7 +27,7 @@ int main() {
     sf::Shader crtShader;
     crtShader.loadFromFile("../src/shaders/crt.vert", "../src/shaders/crt.frag");
 
-    if (!rawImage.create(1920, 1080)) {
+    if (!rawImage.create(modes[0].width, modes[0].height)) {
         return -1;
     }
 
