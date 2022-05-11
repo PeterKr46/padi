@@ -34,7 +34,7 @@ namespace padi {
         level->showCursor();
     }
 
-    bool content::AirStrike::cast(padi::Level *lvl, const sf::Vector2i &pos) {
+    bool content::Lighten::cast(padi::Level *lvl, const sf::Vector2i &pos) {
         lvl->hideCursor();
         strikePos = pos;
         auto strike = std::make_shared<padi::OneshotEntity>(pos);
@@ -46,15 +46,48 @@ namespace padi {
         return true;
     }
 
-    void content::AirStrike::castIndicator(padi::Level *level) {
+    void content::Lighten::castIndicator(padi::Level *level) {
         level->showCursor();
     }
 
-    bool content::AirStrike::onFrameBegin(Level * lvl, uint8_t frame) {
+    bool content::Lighten::onFrameBegin(Level * lvl, uint8_t frame) {
         if(frame == 8) {
             auto fire = std::make_shared<padi::StaticEntity>(strikePos);
             fire->m_animation = lvl->getApollo()->lookupAnim("fire");
             lvl->getMap()->addEntity(fire);
+            return false;
+        }
+        return true;
+    }
+
+    bool content::Darken::cast(padi::Level *lvl, const sf::Vector2i &pos) {lvl->hideCursor();
+        strikePos = pos;
+        auto strike = std::make_shared<padi::OneshotEntity>(pos);
+        strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
+        strike->m_color = sf::Color::Black;
+        lvl->addCycleEndListener(strike);
+        lvl->getMap()->addEntity(strike);
+        lvl->getMap()->getTile(pos)->m_walkable = false;
+        lvl->addFrameBeginListener(shared_from_this());
+        return true;
+    }
+
+    void content::Darken::castIndicator(padi::Level *level) {
+        level->showCursor();
+    }
+
+    bool content::Darken::onFrameBegin(Level * lvl, uint8_t frame) {
+        auto tile = lvl->getMap()->getTile(strikePos);
+        auto color = tile->getColor();
+        color -= sf::Color(4,4,4, 0);
+        tile->setColor(color);
+
+        if(frame == 8) {
+            auto fire = std::make_shared<padi::StaticEntity>(strikePos);
+            fire->m_animation = lvl->getApollo()->lookupAnim("fire");
+            fire->m_color = sf::Color::Black;
+            lvl->getMap()->addEntity(fire);
+            tile->setColor(sf::Color::Black);
             return false;
         }
         return true;
@@ -94,7 +127,8 @@ namespace padi {
 
     void content::Walk::castIndicator(padi::Level *level) {
         level->showCursor();
-        if(!level->getMap()->getTile(level->getCursorLocation())->m_walkable) {
+        auto tile = level->getMap()->getTile(level->getCursorLocation());
+        if(!tile || !tile->m_walkable) {
             level->getCursor()->m_color = sf::Color::Red;
         }
     }
