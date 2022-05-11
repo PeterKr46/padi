@@ -8,6 +8,7 @@
 #include <iostream>
 #include "../player/Ability.h"
 #include "StaticEntity.h"
+#include "../Constants.h"
 
 padi::LivingEntity::LivingEntity(padi::AnimationSet const *moveset, const sf::Vector2i &pos) : Entity(pos),
                                                                                                m_apolloCtx(moveset) {
@@ -55,7 +56,7 @@ padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_
     auto pVertex = &array[vertexOffset];
 
     sf::Vector2f anchor = map->mapTilePosToWorld(getPosition());
-    float verticalOffset = std::min(float(map->getTileSize().y), size.y) / 2;
+    float verticalOffset = std::min(float(padi::TileSize.y), size.y) / 2;
     pVertex[0].position = anchor + sf::Vector2f(-size.x / 2, verticalOffset - size.y);
     pVertex[1].position = anchor + sf::Vector2f(size.x / 2, verticalOffset - size.y);
     pVertex[2].position = anchor + sf::Vector2f(size.x / 2, verticalOffset);
@@ -145,5 +146,13 @@ bool padi::LivingEntity::hasCastIntent() const {
 sf::Vector2i padi::LivingEntity::currentMoveDirection() const {
     if(!m_inAction.move) return {0,0};
     return m_slaves.front()->getPosition() - getPosition();
+}
+
+void padi::LivingEntity::trySetAnimation(std::string const& anim) {
+    m_animation = m_apolloCtx->at(anim);
+}
+
+padi::AnimationSet const *padi::LivingEntity::getAnimationSet() const {
+    return m_apolloCtx;
 }
 

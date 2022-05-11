@@ -17,6 +17,7 @@ namespace padi {
 
 
         size_t m_stackSize{3};
+        float m_verticalOffset{0};
     };
 
 } // padi

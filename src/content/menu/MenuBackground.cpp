@@ -38,7 +38,7 @@ namespace padi::content {
             if (num < 3) {
                 tile->setColor(tile->getColor() - sf::Color(8, 8, 8, 0));
                 if (tile->getColor() == sf::Color::Black) {
-                    if(!lvl->getMap()->hasEntities(pos)) {
+                    if (!lvl->getMap()->hasEntities(pos)) {
                         //lvl->getMap()->removeTile(pos);
                         remove->push_back(tile->getPosition());
                     }
@@ -110,7 +110,7 @@ namespace padi::content {
         cubes[1]->setColor(sf::Color::Green);
         cubes[2]->setColor(sf::Color::Blue);
         for (auto const &cube: cubes) {
-            auto leSpawn = std::make_shared<padi::SpawnEvent>(cube, m_level->getApollo()->lookupAnim("bubble"));
+            auto leSpawn = std::make_shared<padi::SpawnEvent>(cube);
             leSpawn->dispatch(m_level);
         }
         m_level->addCycleEndListener(std::make_shared<RandomizedMovement>(cubes));

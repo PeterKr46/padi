@@ -4,6 +4,7 @@
 
 #include "EntityStack.h"
 #include "../media/Animation.h"
+#include "../Constants.h"
 
 namespace padi {
     EntityStack::EntityStack(const sf::Vector2i &pos) : StaticEntity(pos) {
@@ -15,7 +16,7 @@ namespace padi {
         sf::Vector2f size{getSize()};
 
         sf::Vector2f anchor = map->mapTilePosToWorld(getPosition());
-        float verticalOffset = std::min(float(map->getTileSize().y), size.y) / 2;
+        float verticalOffset = m_verticalOffset + std::min(float(padi::TileSize.y), size.y) / 2;
         sf::Vertex* quad;
         sf::Vector2f texCoordAnchor;
 

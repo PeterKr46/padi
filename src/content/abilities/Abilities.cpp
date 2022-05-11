@@ -24,8 +24,7 @@ namespace padi {
         lvl->addCycleEndListener(ap);
 
         lvl->getMap()->removeEntity(user);
-        auto spawnEvent = std::make_shared<padi::SpawnEvent>(user, lvl->getApollo()->lookupAnim("air_strike_large"),
-                                                             pos);
+        auto spawnEvent = std::make_shared<padi::SpawnEvent>(user, pos);
         spawnEvent->onCycleBegin(lvl);
         return true;
     }
@@ -79,7 +78,7 @@ namespace padi {
     bool content::Darken::onFrameBegin(Level * lvl, uint8_t frame) {
         auto tile = lvl->getMap()->getTile(strikePos);
         auto color = tile->getColor();
-        color -= sf::Color(4,4,4, 0);
+        color = sf::Color(std::max(32,color.r - 32),std::max(32,color.g - 32),std::max(32,color.b - 32), 255);
         tile->setColor(color);
 
         if(frame == 8) {
@@ -87,7 +86,6 @@ namespace padi {
             fire->m_animation = lvl->getApollo()->lookupAnim("fire");
             fire->m_color = sf::Color::Black;
             lvl->getMap()->addEntity(fire);
-            tile->setColor(sf::Color::Black);
             return false;
         }
         return true;

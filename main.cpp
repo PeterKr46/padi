@@ -15,13 +15,13 @@
 #include <thread>
 #include <memory>
 
-#define SHOW_MENU
+//#define SHOW_MENU
 
 int main() {
     std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
     auto mode = modes[0];
-    mode.width = 960;
-    mode.height = 1060;
+    // mode.width = 960;
+    // mode.height = 1060;
     sf::RenderWindow window(
             mode
             // sf::VideoMode(960, 1080)
@@ -66,7 +66,7 @@ int main() {
     std::shared_ptr<padi::LivingEntity> livingEntity;
     livingEntity = std::make_shared<padi::LivingEntity>(apollo->lookupAnimContext("cube"), sf::Vector2i{0, 0});
     livingEntity->setColor({255, 255, 255});
-    auto leSpawn = std::make_shared<padi::SpawnEvent>(livingEntity, apollo->lookupAnim("bubble"));
+    auto leSpawn = std::make_shared<padi::SpawnEvent>(livingEntity);
     leSpawn->dispatch(level);
 
     auto walkAbility = std::make_shared<padi::content::Walk>();

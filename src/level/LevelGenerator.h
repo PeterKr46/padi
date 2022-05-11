@@ -28,7 +28,6 @@ namespace padi {
         std::string m_apolloPath;
 
         sf::Vector2i m_targetArea{8,8};
-        sf::Vector2i m_tileSize{32,32};
     };
 
 } // padi

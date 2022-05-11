@@ -9,16 +9,17 @@
 
 #include "../entity/Entity.h"
 #include "Tile.h"
+#include "../Constants.h"
 
 namespace padi {
 
     sf::Vector2i Map::mapWorldPosToTile(const sf::Vector2f &world) const {
-        sf::Vector2f local = world + sf::Vector2f (m_tileSize.x / 2.f, m_tileSize.y / 4.f);
-        return {int(2 * local.y + (local.x - m_tileSize.x / 2)) / m_tileSize.x, int(2 * local.y - (local.x - m_tileSize.x / 2)) / m_tileSize.x};
+        sf::Vector2f local = world + sf::Vector2f (padi::TileSize.x / 2.f, padi::TileSize.y / 4.f);
+        return {int(2 * local.y + (local.x - padi::TileSize.x / 2)) / padi::TileSize.x, int(2 * local.y - (local.x - padi::TileSize.x / 2)) / padi::TileSize.x};
     }
 
     sf::Vector2f Map::mapTilePosToWorld(const sf::Vector2i &tile, int z) const {
-        return {float(tile.x - tile.y) * 0.5f * m_tileSize.x, float(tile.x + tile.y - z) * 0.25f * m_tileSize.y};
+        return {float(tile.x - tile.y) * 0.5f * padi::TileSize.x, float(tile.x + tile.y - z) * 0.25f * padi::TileSize.y};
     }
 
     std::shared_ptr<padi::Tile> Map::getTile(const sf::Vector2i &pos) const {
@@ -125,10 +126,6 @@ namespace padi {
         }
 
         return idx;
-    }
-
-    sf::Vector2i Map::getTileSize() const {
-        return m_tileSize;
     }
 
     void Map::for_each(const std::function<void(std::shared_ptr<padi::Tile>)>& func) {

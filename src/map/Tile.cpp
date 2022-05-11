@@ -6,6 +6,7 @@
 
 #include <utility>
 #include "Map.h"
+#include "../Constants.h"
 
 namespace padi {
     Tile::Tile(const sf::Vector2i &pos) : GridObject(pos) {
@@ -15,7 +16,7 @@ namespace padi {
     size_t Tile::populate(const padi::Map *context, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
         sf::Vertex* quad = &array[vertexOffset];
         sf::Vector2f anchor = context->mapTilePosToWorld(getPosition());
-        sf::Vector2f tileSize(context->getTileSize());
+        sf::Vector2f tileSize(padi::TileSize);
         quad[0].position = anchor + sf::Vector2f(-tileSize.x / 2, -tileSize.y / 2);
         quad[1].position = anchor + sf::Vector2f(tileSize.x / 2, -tileSize.y / 2);
         quad[2].position = anchor + sf::Vector2f(tileSize.x / 2, tileSize.y / 2);

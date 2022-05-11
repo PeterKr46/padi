@@ -7,6 +7,7 @@
 #include <cmath>
 #include "../entity/LivingEntity.h"
 #include "../map/Tile.h"
+#include "../Constants.h"
 
 namespace padi {
 
@@ -69,7 +70,7 @@ namespace padi {
         static const float cScale = 0.05f;
         static const float mScale = 0.05f;
 
-        auto level = std::make_shared<Level>(m_targetArea, m_tileSize);
+        auto level = std::make_shared<Level>(m_targetArea, padi::TileSize);
 
         level->m_sprites.loadFromFile(m_spritesheetPath);
         level->m_apollo.loadFromFile(m_apolloPath);

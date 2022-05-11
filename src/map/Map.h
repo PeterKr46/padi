@@ -57,8 +57,6 @@ namespace padi {
 
         size_t populate(sf::VertexArray & array, size_t vertexOffset, uint8_t frame, sf::View const& viewport) const;
 
-        [[nodiscard]] sf::Vector2i getTileSize() const;
-
         void for_each(const std::function<void(std::shared_ptr<padi::Tile>)>&);
 
         void removeTile(sf::Vector2i const &vector2);
@@ -73,7 +71,6 @@ namespace padi {
     private:
         ManhattanMap<std::pair<std::shared_ptr<Tile>, std::vector<std::shared_ptr<Entity>>>> m_tiles;
         ManhattanMap<std::shared_ptr<padi::GridObject>> m_ui;
-        sf::Vector2i m_tileSize{32,32};
     };
 
 

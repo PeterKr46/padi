@@ -34,11 +34,11 @@ namespace padi {
         bool isMoving() const;
         sf::Vector2i currentMoveDirection() const;
         bool hasMoveIntent() const;
-
         bool hasCastIntent() const;
-
-
         bool isCasting() const;
+
+        padi::AnimationSet const* getAnimationSet() const;
+        void trySetAnimation(std::string const& anim);
 
         bool onCycleBegin(Level *) override;
         bool onCycleEnd(Level *) override;
