@@ -17,14 +17,14 @@ namespace padi {
 
     void padi::Cursor::update(padi::Level *level) {
         if (!m_locked) {
-            if (padi::Controls::isKeyDown(sf::Keyboard::Left)) {
+            if (padi::Controls::wasKeyPressed(sf::Keyboard::Left)) {
                 level->getMap()->moveEntity(shared_from_this(), getPosition() + padi::Left + padi::Down);
-            } else if (padi::Controls::isKeyDown(sf::Keyboard::Right)) {
+            } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Right)) {
                 level->getMap()->moveEntity(shared_from_this(), getPosition() + padi::Right + padi::Up);
-            } else if (padi::Controls::isKeyDown(sf::Keyboard::Up)) {
+            } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Up)) {
                 auto up = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 0 ? padi::Left : padi::Up;
                 level->getMap()->moveEntity(shared_from_this(), getPosition() + up);
-            } else if (padi::Controls::isKeyDown(sf::Keyboard::Down)) {
+            } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Down)) {
                 auto down = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 1 ? padi::Right : padi::Down;
                 level->getMap()->moveEntity(shared_from_this(), getPosition() + down);
             }

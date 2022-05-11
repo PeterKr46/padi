@@ -13,9 +13,9 @@ namespace padi {
     class Controls {
     public:
 
+        static bool wasKeyPressed(sf::Keyboard::Key key);
+        static bool wasKeyReleased(sf::Keyboard::Key key);
         static bool isKeyDown(sf::Keyboard::Key key);
-        static bool isKeyUp(sf::Keyboard::Key key);
-        static bool isKeyPressed(sf::Keyboard::Key key);
 
         /**
          * Gets a single byte representing the cached key state

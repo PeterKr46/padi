@@ -33,7 +33,7 @@ The above concept will be realized the following features, optional/extra featur
  - [ ] Custom shaders
    - [ ] On the map itself
    - [ ] For screenspace effects
- - [ ] Cross-OS gameplay
+ - [x] Cross-OS gameplay
  - [x] Audio
    - [ ] Soundtrack/Music
    - [ ] Audio Effects for Abilites

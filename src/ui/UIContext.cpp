@@ -42,7 +42,8 @@ namespace padi {
     }
 
     void UIContext::clear() {
-        m_numVerts = 0;
+        m_numVerts  = 0;
+        m_navUsed   = false;
     }
 
     UIContext::UIContext() : m_vbo(sf::VertexArray(sf::PrimitiveType::Quads, 16)) {

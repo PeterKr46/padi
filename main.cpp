@@ -119,9 +119,9 @@ int main() {
                 padi::Controls::keyReleased(event.key.code);
             }
         }
-        //menu.clear();
-        //menu.draw();
-
+        menu.clear();
+        menu.draw();
+/*
         level->update(&rawImage);
 
         t.setString(std::to_string(level->getMap()->numQuads()));
@@ -141,7 +141,7 @@ int main() {
             activeAbility = asAbility;
         } else if (padi::Controls::isKeyDown(sf::Keyboard::E)) {
             activeAbility = tpAbility;
-        } else if (padi::Controls::isKeyDown(sf::Keyboard::W)) {
+        } else if (padi::Controls::wasKeyPressed(sf::Keyboard::W)) {
             activeAbility = walkAbility;
         }
 
@@ -156,13 +156,12 @@ int main() {
         states.transform.scale(sf::Vector2f( 256.f /rawImage.getView().getSize().y, 256.f / rawImage.getView().getSize().y));
         rawImage.draw(*level, states);
         rawImage.draw(t, states);
-        //rawImage.draw(ui);
 
         window.clear();
         auto rState = sf::RenderStates::Default;
         rState.shader = &crtShader;
         rState.texture = &rawImage.getTexture();
-        window.draw(quad,rState);
+        window.draw(quad,rState);*/
         window.display();
 
         ++frames;

@@ -28,7 +28,7 @@ namespace padi {
 
         size_t numQuads() const;
 
-        void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
+        virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
         void clear();
 
     private:
@@ -39,6 +39,8 @@ namespace padi {
         size_t m_numVerts{0};
 
     protected:
+        size_t m_pred{};
+        bool m_navUsed{false};
         size_t m_focused{};
     };
 

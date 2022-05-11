@@ -38,8 +38,10 @@ namespace padi::content {
             if (num < 3) {
                 tile->setColor(tile->getColor() - sf::Color(8, 8, 8, 0));
                 if (tile->getColor() == sf::Color::Black) {
-                    //lvl->getMap()->removeTile(pos);
-                    remove->push_back(tile->getPosition());
+                    if(!lvl->getMap()->hasEntities(pos)) {
+                        //lvl->getMap()->removeTile(pos);
+                        remove->push_back(tile->getPosition());
+                    }
                 }
             }
         }
@@ -80,10 +82,19 @@ namespace padi::content {
 
     MenuBackground::MenuBackground() {
         auto levelGen = padi::LevelGenerator();
+        // Seed with a real random value, if available
+        std::random_device r;
+
+        // Choose a random mean between 1 and 6
+        std::default_random_engine e1(r());
+        // 1076582
+        // 9675480
+        // 6774586
+        std::uniform_int_distribution<int> uniform_dist(0, 9999999);
         m_level = levelGen
                 .withSpritesheet("../media/level_sheet.png")
                 .withApollo("../media/level.apollo")
-                .withSeed(80081352)
+                .withSeed(6774586)
                 .withArea({20, 20})
                 .generate();
         std::vector<std::shared_ptr<LivingEntity>> cubes = {
@@ -92,7 +103,7 @@ namespace padi::content {
                 std::make_shared<padi::LivingEntity>(m_level->getApollo()->lookupAnimContext("cube"),
                                                      sf::Vector2i{-5, -2}),
                 std::make_shared<padi::LivingEntity>(m_level->getApollo()->lookupAnimContext("cube"),
-                                                     sf::Vector2i{3, 2})
+                                                     sf::Vector2i{3, 4})
         };
         m_level->addFrameBeginListener(std::make_shared<Disolver>());
         cubes[0]->setColor(sf::Color::Red);

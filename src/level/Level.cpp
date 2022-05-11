@@ -76,9 +76,9 @@ namespace padi {
         }
 
         // Zoom Hotkeys
-        //if (padi::Controls::isKeyDown(sf::Keyboard::Comma)) {
+        //if (padi::Controls::wasKeyPressed(sf::Keyboard::Comma)) {
         //    m_viewTarget.setSize(m_viewTarget.getSize().x / 1.5, m_viewTarget.getSize().y / 1.5);
-        //} else if (padi::Controls::isKeyDown(sf::Keyboard::Period)) {
+        //} else if (padi::Controls::wasKeyPressed(sf::Keyboard::Period)) {
         //    m_viewTarget.setSize(m_viewTarget.getSize().x * 2, m_viewTarget.getSize().y * 2);
         //}
 

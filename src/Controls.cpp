@@ -24,17 +24,17 @@ namespace padi {
         }
     }
 
-    bool Controls::isKeyDown(sf::Keyboard::Key key) {
+    bool Controls::wasKeyPressed(sf::Keyboard::Key key) {
         const auto itr = s_state.find(key);
         return !(itr == s_state.cend()) && itr->second == 0;
     }
 
-    bool Controls::isKeyPressed(sf::Keyboard::Key key) {
+    bool Controls::isKeyDown(sf::Keyboard::Key key) {
         const auto itr = s_state.find(key);
         return !(itr == s_state.cend()) && itr->second < 2;
     }
 
-    bool Controls::isKeyUp(sf::Keyboard::Key key) {
+    bool Controls::wasKeyReleased(sf::Keyboard::Key key) {
         const auto itr = s_state.find(key);
         return !(itr == s_state.cend()) && itr->second == 2;
     }

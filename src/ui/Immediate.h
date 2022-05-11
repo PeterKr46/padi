@@ -21,13 +21,29 @@ namespace padi {
 
         static bool Switch(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size, bool *ptr = nullptr);
 
-
+        static bool checkFocusSwitch(padi::UIContext * ctx, size_t id);
 
     protected:
         static size_t drawScalable(padi::UIContext *ctx, const std::shared_ptr<Animation>& anim, const sf::FloatRect &bound, uint8_t frame, sf::Color);
 
         static size_t draw(UIContext *ctx, const std::shared_ptr<Animation> &anim, const sf::FloatRect &bound, uint8_t frame, sf::Color color);
     };
+
+    bool Immediate::checkFocusSwitch(padi::UIContext *ctx, size_t id) {
+        if(!ctx->m_navUsed) {
+            if (padi::Controls::wasKeyReleased(sf::Keyboard::Down)) {
+                ctx->m_focused = 0;
+                ctx->m_navUsed = true;
+                return true;
+            }
+            if (padi::Controls::wasKeyReleased(sf::Keyboard::Up)) {
+                ctx->m_focused = ctx->m_pred;
+                ctx->m_navUsed = true;
+                return true;
+            }
+        }
+        return false;
+    }
 
     bool Immediate::Button(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size) {
         static auto hash = std::hash<std::string>();
@@ -38,8 +54,7 @@ namespace padi {
         size_t frame = 0;
         if(ctx->isFocused(id)) {
             // Tab to cycle... for now
-            if(padi::Controls::isKeyUp(sf::Keyboard::Tab))
-                ctx->m_focused = 0;
+            checkFocusSwitch(ctx, id);
 
             color = sf::Color::Yellow;
             frame = padi::Controls::pollKeyState(sf::Keyboard::Space);
@@ -49,6 +64,7 @@ namespace padi {
                 ctx->m_focused = id;
         }
         ctx->m_numVerts += drawScalable(ctx, ctx->getApollo()->lookupAnim("scalable_button"), size, frame, color);
+        ctx->m_pred = id;
 
         return frame == 3;
     }
@@ -64,10 +80,9 @@ namespace padi {
 
         if (ctx->isFocused(id)) {
             // Tab to cycle... for now
-            if(padi::Controls::isKeyUp(sf::Keyboard::Tab))
-                ctx->m_focused = 0;
+            checkFocusSwitch(ctx, id);
 
-            if(padi::Controls::isKeyDown(sf::Keyboard::Space)) {
+            if(padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
                 changed = true;
                 if(ptr) {
                     *ptr = ! *ptr;
@@ -87,6 +102,8 @@ namespace padi {
                 ctx->m_focused = id;
         }
         ctx->m_numVerts += draw(ctx, ctx->getApollo()->lookupAnim("switch"), size, frame, color);
+        ctx->m_pred = id;
+
         return changed;
     }
 

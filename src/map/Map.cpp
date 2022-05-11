@@ -186,6 +186,13 @@ namespace padi {
         return true; // TODO
     }
 
+    bool Map::hasEntities(const sf::Vector2i &pos) const {
+        auto iter = m_tiles.find(pos);
+        if(iter != m_tiles.end()) {
+            return !iter->second.second.empty();
+        }
+        return false;
+    }
 
 
 } // padi
