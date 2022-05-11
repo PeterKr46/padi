@@ -17,17 +17,20 @@
 
 int main() {
     std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
-
+    auto mode = modes[0];
+    mode.width = 960;
+    mode.height = 1060;
     sf::RenderWindow window(
-            modes[0],
-            //sf::VideoMode(1920, 1080),
-            "PAdI",
-            sf::Style::Fullscreen);
+            mode
+            // sf::VideoMode(960, 1080)
+            ,"PAdI"
+            //,sf::Style::Fullscreen
+            );
     sf::RenderTexture rawImage;
     sf::Shader crtShader;
     crtShader.loadFromFile("../src/shaders/crt.vert", "../src/shaders/crt.frag");
 
-    if (!rawImage.create(modes[0].width, modes[0].height)) {
+    if (!rawImage.create(mode.width, mode.height)) {
         return -1;
     }
 
@@ -119,9 +122,9 @@ int main() {
                 padi::Controls::keyReleased(event.key.code);
             }
         }
-        menu.clear();
-        menu.draw();
-/*
+        //menu.clear();
+        //menu.draw();
+
         level->update(&rawImage);
 
         t.setString(std::to_string(level->getMap()->numQuads()));
@@ -161,7 +164,7 @@ int main() {
         auto rState = sf::RenderStates::Default;
         rState.shader = &crtShader;
         rState.texture = &rawImage.getTexture();
-        window.draw(quad,rState);*/
+        window.draw(quad,rState);
         window.display();
 
         ++frames;

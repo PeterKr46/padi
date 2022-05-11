@@ -72,7 +72,7 @@ namespace padi {
             handleFrameBegin(m_cycleListeners.frameBegin, this, m_cycle.frame);
         }
         if (m_viewTarget.getSize().x == 0) {
-            m_viewTarget.setSize(455, 256);
+            m_viewTarget.setSize( float(renderTarget->getSize().x) / renderTarget->getSize().y * 256 , 256);
         }
 
         // Zoom Hotkeys
