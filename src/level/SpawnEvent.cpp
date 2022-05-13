@@ -63,7 +63,7 @@ namespace padi {
         if (pullFocus)
             level->centerView(pos);
 
-        static const int radius = 8;
+        static const int radius = 4;
         for (int x = -radius; x < radius; ++x)
             for (int y = -radius; y < radius; ++y) {
                 auto tile = level->getMap()->getTile(pos.x + x, pos.y + y);

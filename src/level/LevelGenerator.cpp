@@ -90,7 +90,7 @@ namespace padi {
 
                     /*uint8_t g = 255.f * z * m_perlin.normalizedOctave2D_01(pos.x * cScale, 2345+ pos.y * cScale, 2);
                     uint8_t b = 255.f * z * m_perlin.normalizedOctave2D_01( 768 +pos.x * cScale, 789 +pos.y * cScale, 2);*/
-                    t->setColor(hsv(r, 0.3f * cos(z), 0.8));
+                    t->setColor(hsv(r, 0.2f,  z));
                     //t->setVerticalOffset(z*4);
                     level->getMap()->addTile(t);
                     if (m > 0.12) {

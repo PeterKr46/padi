@@ -3,7 +3,6 @@
 //
 
 #include "Abilities.h"
-#include "../../entity/OneshotEntity.h"
 #include "../../map/Tile.h"
 #include "../../level/Cursor.h"
 #include "../../AStar.h"
@@ -78,7 +77,7 @@ namespace padi {
     bool content::Darken::onFrameBegin(Level * lvl, uint8_t frame) {
         auto tile = lvl->getMap()->getTile(strikePos);
         auto color = tile->getColor();
-        color = sf::Color(std::max(32,color.r - 32),std::max(32,color.g - 32),std::max(32,color.b - 32), 255);
+        color = sf::Color(std::max(48,color.r - 32),std::max(48,color.g - 32),std::max(48,color.b - 32), 255);
         tile->setColor(color);
 
         if(frame == 8) {

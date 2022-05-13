@@ -57,8 +57,7 @@ namespace padi {
             handleFrameEnd(m_cycleListeners.frameEnd, this, m_cycle.frame);
 
             m_view.setSize(m_viewTarget.getSize());//(m_viewTarget.getSize() * 0.3f + 0.7f * m_view.getSize()));
-            m_view.setCenter((m_viewTarget.getCenter()  * 0.9f + 0.1f * m_view.getCenter()));
-            //m_viewTarget.getCenter());
+            m_view.setCenter((m_viewTarget.getCenter() * 0.9f + 0.1f * m_view.getCenter()));
 
             m_cycle.carried_uS -= padi::FrameTime_uS;
 
@@ -72,18 +71,11 @@ namespace padi {
             handleFrameBegin(m_cycleListeners.frameBegin, this, m_cycle.frame);
         }
         if (m_viewTarget.getSize().x == 0) {
-            m_viewTarget.setSize( float(renderTarget->getSize().x) / renderTarget->getSize().y * 256 , 256);
+            m_viewTarget.setSize(float(renderTarget->getSize().x) / renderTarget->getSize().y * 256, 256);
         }
 
-        // Zoom Hotkeys
-        //if (padi::Controls::wasKeyPressed(sf::Keyboard::Comma)) {
-        //    m_viewTarget.setSize(m_viewTarget.getSize().x / 1.5, m_viewTarget.getSize().y / 1.5);
-        //} else if (padi::Controls::wasKeyPressed(sf::Keyboard::Period)) {
-        //    m_viewTarget.setSize(m_viewTarget.getSize().x * 2, m_viewTarget.getSize().y * 2);
-        //}
-
         renderTarget->setView(m_view);
-        if(m_cursor) m_cursor->update(this);
+        if (m_cursor) m_cursor->update(this);
     }
 
     void Level::draw(sf::RenderTarget &target, sf::RenderStates states) const {
@@ -168,7 +160,7 @@ namespace padi {
         return m_cycle.frame;
     }
 
-    void Level::moveCursor(sf::Vector2i const & pos) {
+    void Level::moveCursor(sf::Vector2i const &pos) {
         m_map.moveEntity(m_cursor, pos);
     }
 
@@ -187,12 +179,12 @@ namespace padi {
         m_cursor->unlock();
     }
 
-    void Level::initCursor(std::string const& key) {
+    void Level::initCursor(std::string const &key) {
         m_cursor = std::make_shared<padi::Cursor>(m_apollo.lookupAnim(key));
         m_cursor->lock();
     }
 
-    std::shared_ptr<padi::Cursor> Level::getCursor() const{
+    std::shared_ptr<padi::Cursor> Level::getCursor() const {
         return m_cursor;
     }
 

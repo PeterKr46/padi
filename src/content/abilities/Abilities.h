@@ -7,6 +7,7 @@
 #include "../../player/Ability.h"
 
 namespace padi::content {
+    
     class Lighten : public padi::Ability, public padi::CycleListener, public std::enable_shared_from_this<Lighten> {
     public:
         sf::Vector2i strikePos;
