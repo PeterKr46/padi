@@ -49,15 +49,6 @@ int main() {
 
     std::shared_ptr<padi::LivingEntity> livingEntity;
 
-    auto walkAbility = std::make_shared<padi::content::Walk>();
-    walkAbility->user = livingEntity;
-    auto tpAbility = std::make_shared<padi::content::Teleport>();
-    tpAbility->user = livingEntity;
-    auto lightenAbility = std::make_shared<padi::content::Lighten>();
-
-    auto darkenAbility = std::make_shared<padi::content::Darken>();
-
-    std::shared_ptr<padi::Ability> activeAbility{nullptr};
 
     auto view = window.getView();
     view.setSize(sf::Vector2f(window.getSize()));
@@ -91,7 +82,11 @@ int main() {
 
 #ifdef SHOW_MENU
         activity->draw();
-        activity = activity->handoff();
+        auto nextActivity = activity->handoff();
+        if(nextActivity != activity) {
+            nextActivity->handleResize(window.getSize().x, window.getSize().y);
+            activity = nextActivity;
+        }
 #else
         level->update(&rawImage);
 

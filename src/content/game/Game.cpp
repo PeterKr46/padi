@@ -7,28 +7,14 @@
 #include "../../Controls.h"
 #include "SFML/Window/Keyboard.hpp"
 #include "../../level/SpawnEvent.h"
+#include "../abilities/Abilities.h"
 
 namespace padi::content {
+
 
     Game::Game(sf::RenderTarget *target)
             : m_renderTarget(target) {
         if (m_vfxBuffer.create(target->getSize().x, target->getSize().y)) {
-            {
-                sf::Vector2f halfSize{target->getSize()};
-                halfSize /= 2.f;
-                sf::Vector2f imgSize{m_vfxBuffer.getSize()};
-                m_screenQuad[0].position = -halfSize;
-                m_screenQuad[0].texCoords = {0, imgSize.y};
-
-                m_screenQuad[1].position = {-halfSize.x, halfSize.y};
-                m_screenQuad[1].texCoords = {0, 0};
-
-                m_screenQuad[2].position = halfSize;
-                m_screenQuad[2].texCoords = {imgSize.x, 0};
-
-                m_screenQuad[3].position = {halfSize.x, -halfSize.y};
-                m_screenQuad[3].texCoords = imgSize;
-            }
             auto levelGen = padi::LevelGenerator();
             time_t seed;
             time(&seed);
@@ -45,6 +31,20 @@ namespace padi::content {
             m_player->setColor({255, 255, 255});
             auto leSpawn = std::make_shared<padi::SpawnEvent>(m_player);
             leSpawn->dispatch(m_level);
+
+            auto walk = std::make_shared<padi::content::Walk>();
+            walk->user = m_player;
+            m_playerAbilities.push_back(walk);
+            auto tp = std::make_shared<padi::content::Teleport>();
+            tp->user = m_player;
+            m_playerAbilities.push_back(tp);
+            m_playerAbilities.push_back(std::make_shared<padi::content::Lighten>());
+
+            m_playerAbilities.push_back(std::make_shared<padi::content::Darken>());
+
+
+
+            printf("[padi::content::Game] VfxBuffer at size %u, %u!\n", m_vfxBuffer.getSize().x, m_vfxBuffer.getSize().y);
         } else {
             printf("[padi::content::Game] Could not create vfxBuffer Texture!\n");
         }
@@ -55,29 +55,26 @@ namespace padi::content {
         if (padi::Controls::isKeyDown(sf::Keyboard::Home)) {
             m_level->moveCursor(m_player->getPosition());
         }
-        /*if (activeAbility) {
-            activeAbility->castIndicator(&(*m_level));
+        if (active != -1) {
+            m_playerAbilities[active]->castIndicator(&(*m_level));
             if (padi::Controls::isKeyDown(sf::Keyboard::Space)) {
-                m_player->intentCast(activeAbility, m_level->getCursorLocation());
-                activeAbility = nullptr;
+                m_player->intentCast(m_playerAbilities[active], m_level->getCursorLocation());
+                active = -1;
             } else if (padi::Controls::isKeyDown(sf::Keyboard::Escape)) {
-                activeAbility = nullptr;
+                active = -1;
                 m_level->hideCursor();
             }
         } else if (padi::Controls::isKeyDown(sf::Keyboard::Q)) {
-            activeAbility = lightenAbility;
+            active = 0;
         } else if (padi::Controls::isKeyDown(sf::Keyboard::E)) {
-            activeAbility = tpAbility;
+            active = 1;
         } else if (padi::Controls::wasKeyPressed(sf::Keyboard::W)) {
-            activeAbility = walkAbility;
+            active = 2;
         } else if (padi::Controls::wasKeyPressed(sf::Keyboard::R)) {
-            activeAbility = darkenAbility;
-        }*/
+            active = 3;
+        }
 
         m_level->centerView(m_player->getPosition());
-
-        //quadCounter.setString(std::to_string(m_level->getMap()->numQuads()));
-        //quadCounter.setPosition(m_level->getMap()->mapTilePosToWorld(m_level->getCursorLocation()));
 
         m_level->populateVBO();
         m_vfxBuffer.clear();
@@ -90,7 +87,9 @@ namespace padi::content {
         auto rState = sf::RenderStates::Default;
         //rState.shader = &crtShader;
         rState.texture = &m_vfxBuffer.getTexture();
+        m_renderTarget->setView(m_renderTarget->getDefaultView());
         m_renderTarget->draw(m_screenQuad, rState);
+
     }
 
     void Game::handleResize(int width, int height) {
@@ -98,16 +97,16 @@ namespace padi::content {
             sf::Vector2f halfSize{float(width), float(height)};
             halfSize /= 2.f;
             sf::Vector2f imgSize{m_vfxBuffer.getSize()};
-            m_screenQuad[0].position = -halfSize;
+            m_screenQuad[0].position = {0,0};//-halfSize;
             m_screenQuad[0].texCoords = {0, imgSize.y};
 
-            m_screenQuad[1].position = {-halfSize.x, halfSize.y};
+            m_screenQuad[1].position = {0, imgSize.y};//{-halfSize.x, halfSize.y};
             m_screenQuad[1].texCoords = {0, 0};
 
-            m_screenQuad[2].position = halfSize;
+            m_screenQuad[2].position = imgSize;
             m_screenQuad[2].texCoords = {imgSize.x, 0};
 
-            m_screenQuad[3].position = {halfSize.x, -halfSize.y};
+            m_screenQuad[3].position = {imgSize.x, 0}; //{halfSize.x, -halfSize.y};
             m_screenQuad[3].texCoords = imgSize;
         }
     }

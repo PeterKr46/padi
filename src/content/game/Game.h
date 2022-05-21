@@ -24,9 +24,12 @@ namespace padi::content {
     private:
         sf::RenderTarget* m_renderTarget;
         std::shared_ptr<Level> m_level;
-        std::shared_ptr<padi::LivingEntity> m_player;
         sf::RenderTexture m_vfxBuffer;
         sf::VertexArray m_screenQuad{sf::Quads, 4};
+
+        std::shared_ptr<padi::LivingEntity> m_player;
+        std::vector<std::shared_ptr<padi::Ability>> m_playerAbilities;
+        int active = -1;
 
     };
 

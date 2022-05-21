@@ -32,10 +32,10 @@ namespace padi::content {
         static bool state = false;
         if(Immediate::Button(&m_uiContext, "menu.play", {16, 32, 96, 32})) {
             m_next = std::make_shared<padi::content::Game>(m_renderTarget);
-            if(m_background.getLevel()->isPaused()) m_background.getLevel()->play();
+            if (m_background.getLevel()->isPaused()) m_background.getLevel()->play();
             else m_background.getLevel()->pause();
         }
-        if(Immediate::Switch(&m_uiContext,  "menu.toggle", {16, 64, 32,32}, &state)) {
+        if (Immediate::Switch(&m_uiContext,  "menu.toggle", {16, 64, 32,32}, &state)) {
             printf("Toggle One");
         }
         if(Immediate::Switch(&m_uiContext,  "menu.toggle2", {48, 64, 32,32}, &state)) {
