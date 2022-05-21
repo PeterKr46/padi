@@ -207,4 +207,9 @@ namespace padi {
         m_paused = true;
     }
 
+    bool Level::togglePause() {
+        m_paused = !m_paused;
+        return m_paused;
+    }
+
 } // padi

@@ -57,6 +57,7 @@ namespace padi {
 
         void pause();
         void play();
+        bool togglePause();
         bool isPaused() const;
 
         std::shared_ptr<padi::Cursor> getCursor() const;

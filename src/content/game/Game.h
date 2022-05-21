@@ -6,6 +6,7 @@
 #include "../Activity.h"
 #include "SFML/Graphics/RenderTexture.hpp"
 #include "../../entity/LivingEntity.h"
+#include "SFML/Graphics/Shader.hpp"
 
 namespace padi::content {
     class Game : public padi::Activity {
@@ -30,6 +31,8 @@ namespace padi::content {
         std::shared_ptr<padi::LivingEntity> m_player;
         std::vector<std::shared_ptr<padi::Ability>> m_playerAbilities;
         int active = -1;
+
+        sf::Shader m_pauseShader;
 
     };
 
