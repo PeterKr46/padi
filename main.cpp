@@ -15,7 +15,7 @@
 #include <thread>
 #include <memory>
 
-//#define SHOW_MENU
+#define SHOW_MENU
 
 int main() {
     std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
@@ -25,29 +25,13 @@ int main() {
     sf::RenderWindow window(
             mode
             // sf::VideoMode(960, 1080)
-            ,"PAdI"
-            //,sf::Style::Fullscreen
-            );
-    sf::RenderTexture rawImage;
+            , "PAdI", sf::Style::Fullscreen
+    );
 
     sf::Shader crtShader;
     crtShader.loadFromFile("../src/shaders/crt.vert", "../src/shaders/crt.frag");
 
-    if (!rawImage.create(mode.width, mode.height)) {
-        return -1;
-    }
 
-    auto levelGen = padi::LevelGenerator();
-    time_t seed;
-    time(&seed);
-    auto level = levelGen
-            .withSpritesheet("../media/level_sheet.png")
-            .withApollo("../media/level.apollo")
-            .withSeed(seed)
-            .withArea({100, 100})
-            .generate();
-    level->initCursor("cursor");
-    auto apollo = level->getApollo();
 
     sf::Font font{};
     font.setSmooth(false);
@@ -64,10 +48,6 @@ int main() {
     ambient.play();
 
     std::shared_ptr<padi::LivingEntity> livingEntity;
-    livingEntity = std::make_shared<padi::LivingEntity>(apollo->lookupAnimContext("cube"), sf::Vector2i{0, 0});
-    livingEntity->setColor({255, 255, 255});
-    auto leSpawn = std::make_shared<padi::SpawnEvent>(livingEntity);
-    leSpawn->dispatch(level);
 
     auto walkAbility = std::make_shared<padi::content::Walk>();
     walkAbility->user = livingEntity;
@@ -79,40 +59,16 @@ int main() {
 
     std::shared_ptr<padi::Ability> activeAbility{nullptr};
 
-    // Cycle indicator
-    auto cycleIndicator = std::make_shared<padi::StaticEntity>(sf::Vector2i(3, -3));
-    cycleIndicator->m_animation = level->getApollo()->lookupAnim("debug");
-    level->getMap()->addEntity(cycleIndicator);
-
-    for(int i = 0; i < 10; ++i) {
-        auto laser = std::make_shared<padi::StaticEntity>(sf::Vector2i(3, i));
-        laser->m_animation = level->getApollo()->lookupAnim("laser_hold");
-        level->getMap()->addEntity(laser);
-    }
-
-    sf::VertexArray screenQuad(sf::Quads, 4);
-    {
-        sf::Vector2f halfSize{window.getSize()};
-        halfSize /= 2.f;
-        sf::Vector2f imgSize{rawImage.getSize()};
-        screenQuad[0].position = -halfSize;
-        screenQuad[0].texCoords = {0, imgSize.y};
-
-        screenQuad[1].position = {-halfSize.x, halfSize.y};
-        screenQuad[1].texCoords = {0, 0};
-
-        screenQuad[2].position = halfSize;
-        screenQuad[2].texCoords = {imgSize.x, 0};
-
-        screenQuad[3].position = {halfSize.x, -halfSize.y};
-        screenQuad[3].texCoords = imgSize;
-    }
     auto view = window.getView();
-    view.setSize(sf::Vector2f(rawImage.getSize()));
+    view.setSize(sf::Vector2f(window.getSize()));
     view.setCenter(0, 0);//sf::Vector2f (rawImage.getSize()) / 2.font);
     window.setView(view);
 
-    padi::content::MainMenu menu(&window, "../media/ui.apollo", "../media/ui_sheet.png");
+    std::shared_ptr<padi::Activity> activity = std::make_shared<padi::content::MainMenu>
+            (&window,
+             "../media/ui.apollo",
+             "../media/ui_sheet.png"
+            );
 
     sf::Clock clock;
     sf::Clock frameClock;
@@ -127,13 +83,15 @@ int main() {
                 padi::Controls::keyDown(event.key.code);
             } else if (event.type == sf::Event::KeyReleased) {
                 padi::Controls::keyReleased(event.key.code);
+            } else if (event.type == sf::Event::Resized) {
+                activity->handleResize(event.size.width, event.size.height);
             }
         }
         window.clear();
 
 #ifdef SHOW_MENU
-        menu.clear();
-        menu.draw();
+        activity->draw();
+        activity = activity->handoff();
 #else
         level->update(&rawImage);
 
@@ -183,7 +141,7 @@ int main() {
         size_t ms = frameClock.restart().asMicroseconds();
         if (ms < 1024) std::this_thread::sleep_for(std::chrono::microseconds(1024 - ms));
     }
-    printf("%zu / %zu quads final\n", level->getMap()->numQuads(), level->getVBOCapacity());
+    // printf("%zu / %zu quads final\n", level->getMap()->numQuads(), level->getVBOCapacity());
     printf("%zu frames total in %.3f seconds\n", frames, clock.getElapsedTime().asSeconds());
     printf("%.3f fps avg", float(frames) / clock.getElapsedTime().asSeconds());
     return 0;

@@ -52,7 +52,12 @@ namespace padi {
     }
 
     void Level::update(sf::RenderTarget *renderTarget) {
-        m_cycle.carried_uS += m_cycle.clock.restart().asMicroseconds();
+        if (!m_paused) {
+            m_cycle.carried_uS += m_cycle.clock.restart().asMicroseconds();
+        } else {
+            m_cycle.clock.restart();
+        }
+
         while (m_cycle.carried_uS > padi::FrameTime_uS) {
             handleFrameEnd(m_cycleListeners.frameEnd, this, m_cycle.frame);
 
@@ -71,7 +76,9 @@ namespace padi {
             handleFrameBegin(m_cycleListeners.frameBegin, this, m_cycle.frame);
         }
         if (m_viewTarget.getSize().x == 0) {
-            m_viewTarget.setSize(float(renderTarget->getSize().x) / renderTarget->getSize().y * 256, 256);
+            sf::Vector2f size{float(renderTarget->getSize().x) / renderTarget->getSize().y * 256, 256};
+            m_viewTarget.setSize(size);
+            printf("[padi::Level] view Target size initialized to %.f,%.f\n", size.x, size.y);
         }
 
         renderTarget->setView(m_view);
@@ -186,6 +193,18 @@ namespace padi {
 
     std::shared_ptr<padi::Cursor> Level::getCursor() const {
         return m_cursor;
+    }
+
+    bool Level::isPaused() const {
+        return m_paused;
+    }
+
+    void Level::play() {
+        m_paused = false;
+    }
+
+    void Level::pause() {
+        m_paused = true;
     }
 
 } // padi

@@ -3,12 +3,12 @@
 //
 #pragma once
 
-#include "../map/Map.h"
 #include <SFML/Graphics/RenderWindow.hpp>
-#include "../media/Apollo.h"
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
+#include "../map/Map.h"
+#include "../media/Apollo.h"
 
 namespace padi {
 
@@ -55,6 +55,10 @@ namespace padi {
         void hideCursor();
         void showCursor();
 
+        void pause();
+        void play();
+        bool isPaused() const;
+
         std::shared_ptr<padi::Cursor> getCursor() const;
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
@@ -75,6 +79,7 @@ namespace padi {
             uint64_t carried_uS{0};
             uint8_t frame{0};
         } m_cycle;
+        bool m_paused{false};
 
         struct {
             std::vector<std::shared_ptr<CycleListener>> cycleBegin;

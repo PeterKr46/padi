@@ -30,6 +30,7 @@ namespace padi {
         auto apolloCtx = m_entity->getAnimationSet();
         if (apolloCtx->find("spawn_ray") != apolloCtx->end()) {
             m_ray = std::make_shared<OneshotEntityStack>(pos);
+            m_ray->m_color = m_entity->getColor();
             m_ray->m_animation = apolloCtx->at("spawn_ray");
             m_ray->m_stackSize = 16;
             m_ray->m_verticalOffset = -padi::TileSize.y;
