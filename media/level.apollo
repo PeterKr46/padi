@@ -40,6 +40,4 @@ anim move_y_to      32 32   240 8   0 48    12
 anim idle           32 32   192 0
 
 shader fpa ../src/shaders/crt.vert
-shader fpa ../src/shaders/fpa.frag
-shader fpa_pause ../src/shaders/crt.vert
-shader fpa_pause ../src/shaders/fpa_pause.frag
+shader fpa ../src/shaders/fpa_pausable.frag

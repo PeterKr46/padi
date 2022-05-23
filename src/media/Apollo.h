@@ -40,7 +40,7 @@ namespace padi {
         bool loadShader(std::string const& name, std::string const& vert, std::string const& frag);
         bool loadVertexShader(std::string const& name, std::string const& vert);
         bool loadFragmentShader(std::string const& name, std::string const& vert);
-        [[nodiscard]] const sf::Shader* lookupShader(std::string const& name) const;
+        [[nodiscard]] std::shared_ptr<sf::Shader> lookupShader(std::string const& name) const;
 
         void addSoundBuffer(std::string const &name, std::shared_ptr<sf::SoundBuffer> sound);
 
@@ -50,7 +50,7 @@ namespace padi {
         AudioSet m_generalAudio;
         AnimationSet m_generalAnimations;
         std::map<std::string, AnimationSet> m_animationContext;
-        std::map<std::string, sf::Shader> m_shaders;
+        std::map<std::string, std::shared_ptr<sf::Shader>> m_shaders;
     };
 
 

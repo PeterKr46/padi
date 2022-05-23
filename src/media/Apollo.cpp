@@ -137,19 +137,35 @@ namespace padi {
     }
 
     bool Apollo::loadShader(const std::string &name, const std::string &vert, const std::string &frag) {
-        return m_shaders[name].loadFromFile(vert, frag);
+        auto & shader = m_shaders[name];
+        if(!shader) {
+            shader = std::make_shared<sf::Shader>();
+        }
+        return shader->loadFromFile(vert, frag);
     }
 
-    const sf::Shader *Apollo::lookupShader(const std::string &name) const {
-        return &m_shaders.at(name);
+    std::shared_ptr<sf::Shader> Apollo::lookupShader(const std::string &name) const {
+        auto shader = m_shaders.find(name);
+        if(shader == m_shaders.end()) {
+            return nullptr;
+        }
+        return shader->second;
     }
 
     bool Apollo::loadVertexShader(const std::string &name, const std::string &vert) {
-        return m_shaders[name].loadFromFile(vert, sf::Shader::Type::Vertex);
+        auto & shader = m_shaders[name];
+        if(!shader) {
+            shader = std::make_shared<sf::Shader>();
+        }
+        return shader->loadFromFile(vert, sf::Shader::Type::Vertex);
     }
 
     bool Apollo::loadFragmentShader(const std::string &name, const std::string &vert) {
-        return m_shaders[name].loadFromFile(vert, sf::Shader::Type::Fragment);
+        auto & shader = m_shaders[name];
+        if(!shader) {
+            shader = std::make_shared<sf::Shader>();
+        }
+        return shader->loadFromFile(vert, sf::Shader::Type::Fragment);
     }
 
 } // padi

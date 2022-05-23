@@ -32,8 +32,7 @@ namespace padi::content {
         std::vector<std::shared_ptr<padi::Ability>> m_playerAbilities;
         int active = -1;
 
-        sf::Shader m_pauseShader;
-
+        sf::Clock m_graphicsClock;
     };
 
 } // content

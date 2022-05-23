@@ -1,4 +1,25 @@
-uniform sampler2D texture;
+uniform sampler2D   texture;
+uniform float       time;
+uniform bool        paused;
+// BEGIN NOISE
+
+// Noise via https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
+
+float rand(float n){return fract(sin(n) * 43758.5453123);}
+
+float noise(float p){
+    float fl = floor(p);
+    float fc = fract(p);
+    return mix(rand(fl), rand(fl + 1.0), fc);
+}
+
+float noise(vec2 n) {
+    const vec2 d = vec2(0.0, 1.0);
+    vec2 b = floor(n), f = smoothstep(vec2(0.0), vec2(1.0), fract(n));
+    return mix(mix(rand(b), rand(b + d.yx), f.x), mix(rand(b + d.xy), rand(b + d.yy), f.x), f.y);
+}
+
+// END NOISE
 
 //
 // PUBLIC DOMAIN CRT STYLED SCAN-LINE SHADER
@@ -126,12 +147,14 @@ vec2 curveRemapUV(vec2 uv)
 // Entry.
 void main(){
     //out vec4 fragColor, in vec2 fragCoord
-    vec2 fragCoord = curveRemapUV(gl_TexCoord[0].xy);
+    vec2 fragCoord = gl_TexCoord[0].xy;
+    if(paused) fragCoord.x += noise(floor(fragCoord.y * 128) + floor(time * 14) * 32) * (1.f / 455);
+    fragCoord = curveRemapUV(fragCoord);
     vec4 fragColor = texture2D(texture, fragCoord);
     // Unmodified.
     vec2 pos=fragCoord;
     fragColor.rgb=Tri(pos);
-    fragColor.r = fragColor.g = fragColor.b;
+    if(paused) fragColor.r = fragColor.g = fragColor.b = (fragColor.r + fragColor.b + fragColor.g) / 3;
     fragColor.a=1.0;
 
     gl_FragColor = fragColor;

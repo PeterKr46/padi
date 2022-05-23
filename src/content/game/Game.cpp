@@ -13,7 +13,8 @@ namespace padi::content {
 
 
     Game::Game(sf::RenderTarget *target)
-            : m_renderTarget(target) {
+            : m_renderTarget(target)
+            , m_graphicsClock() {
         if (m_vfxBuffer.create(float(target->getSize().x) / target->getSize().y * 256, 256 )) {
             auto levelGen = padi::LevelGenerator();
             time_t seed;
@@ -85,7 +86,10 @@ namespace padi::content {
         m_vfxBuffer.draw(*m_level, states);
 
         auto rState = sf::RenderStates::Default;
-        rState.shader = m_level->isPaused() ? m_level->getApollo()->lookupShader("fpa_pause") : m_level->getApollo()->lookupShader("fpa");
+        auto shader =  m_level->getApollo()->lookupShader("fpa");
+        shader->setUniform("time", m_graphicsClock.getElapsedTime().asSeconds());
+        shader->setUniform("paused", m_level->isPaused());
+        rState.shader = shader.get();
         rState.texture = &m_vfxBuffer.getTexture();
         m_renderTarget->setView(m_renderTarget->getDefaultView());
         m_renderTarget->draw(m_screenQuad, rState);
