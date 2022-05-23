@@ -85,7 +85,7 @@ namespace padi::content {
         m_vfxBuffer.draw(*m_level, states);
 
         auto rState = sf::RenderStates::Default;
-        //rState.shader = m_level->isPaused() ?
+        rState.shader = m_level->isPaused() ? m_level->getApollo()->lookupShader("fpa_pause") : m_level->getApollo()->lookupShader("fpa");
         rState.texture = &m_vfxBuffer.getTexture();
         m_renderTarget->setView(m_renderTarget->getDefaultView());
         m_renderTarget->draw(m_screenQuad, rState);

@@ -23,7 +23,7 @@ void main()
 {
     vec2 uv = gl_TexCoord[0].xy; //curveRemapUV(gl_TexCoord[0].xy);
     vec4 pixel = vec4(1);
-    //pixel *= scanLineIntensity(uv.x, 512.0, 0.5) * scanLineIntensity(uv.y, 288.0, 0.5);
+    pixel *= scanLineIntensity(uv.x, 512.0, 0.5) * scanLineIntensity(uv.y, 288.0, 0.5);
     pixel *= texture2D(texture, uv)
                     * step(uv.x,1.0) * (1.0 - step(uv.x,0.0))
                     * step(uv.y,1.0) * (1.0 - step(uv.y,0.0));

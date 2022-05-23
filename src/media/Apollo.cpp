@@ -108,10 +108,22 @@ namespace padi {
                     printf("[Apollo] AUDIO '%s' - '%s'\n", key.c_str(), soundPath.c_str());
                     auto buf = m_generalAudio[key] = std::make_shared<sf::SoundBuffer>();
                     buf->loadFromFile(soundPath);
+                } else if (line.substr(0, 6) == "shader") {
+                    auto secondspace = line.find(' ', 7);
+                    key = line.substr(7, secondspace - 7);
+                    auto shaderPath = line.substr(line.find_last_of(' ') + 1);
+                    printf("[Apollo] SHADER '%s' - '%s'\n", key.c_str(), shaderPath.c_str());
+                    if (shaderPath.substr(shaderPath.size() - 4) == "vert") {
+                        loadVertexShader(key, shaderPath);
+                    } else if (shaderPath.substr(shaderPath.size() - 4) == "frag") {
+                        loadFragmentShader(key, shaderPath);
+                    } else
+                        printf("[Apollo] SHADER TYPE UNRECOGNIZED '%s' - '%s'\n", key.c_str(), shaderPath.c_str());
                 }
+
             }
-            config.close();
         }
+        config.close();
     }
 
     std::shared_ptr<sf::SoundBuffer> Apollo::lookupAudio(const std::string &audioName) const {
@@ -122,6 +134,22 @@ namespace padi {
 
     void Apollo::addSoundBuffer(const std::string &name, std::shared_ptr<sf::SoundBuffer> sound) {
         m_generalAudio[name] = std::move(sound);
+    }
+
+    bool Apollo::loadShader(const std::string &name, const std::string &vert, const std::string &frag) {
+        return m_shaders[name].loadFromFile(vert, frag);
+    }
+
+    const sf::Shader *Apollo::lookupShader(const std::string &name) const {
+        return &m_shaders.at(name);
+    }
+
+    bool Apollo::loadVertexShader(const std::string &name, const std::string &vert) {
+        return m_shaders[name].loadFromFile(vert, sf::Shader::Type::Vertex);
+    }
+
+    bool Apollo::loadFragmentShader(const std::string &name, const std::string &vert) {
+        return m_shaders[name].loadFromFile(vert, sf::Shader::Type::Fragment);
     }
 
 } // padi
