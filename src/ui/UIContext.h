@@ -29,10 +29,16 @@ namespace padi {
         size_t numQuads() const;
 
         virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
+
         /**
          * Resets the quad counter, etc
          */
         void nextFrame();
+
+        sf::Transform & topTransform();
+
+        sf::Transform popTransform();
+        sf::Transform & pushTransform(sf::Transform const& t = sf::Transform());
 
     private:
 
@@ -42,6 +48,7 @@ namespace padi {
         size_t m_numVerts{0};
 
     protected:
+        std::vector<sf::Transform> m_transformStack{sf::Transform()};
         size_t m_pred{};
         bool m_navUsed{false};
         size_t m_focused{};

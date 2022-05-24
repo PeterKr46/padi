@@ -11,9 +11,7 @@ namespace padi::content {
 
     MainMenu::MainMenu(sf::RenderTarget *renderTarget, std::string const &apollo, std::string const &spritesheet) :
             m_renderTarget(renderTarget) {
-        if (m_vfxBuffer.create(float(renderTarget->getSize().x) / renderTarget->getSize().y * 256, 256)) {
-            handleResize(renderTarget->getSize().x, renderTarget->getSize().y);
-        } else {
+        if (!m_vfxBuffer.create(float(renderTarget->getSize().x) / renderTarget->getSize().y * 256, 256)) {
             printf("[padi::content::MainMenu] Failed to create vfxBuffer.\n");
         }
         m_uiContext.init(apollo, spritesheet);
@@ -37,27 +35,32 @@ namespace padi::content {
 
         m_uiContext.nextFrame();
 
-        static bool state = false;
-        if (Immediate::Button(&m_uiContext, "menu.play", {16, 32, 96, 32})) {
-            m_next = std::make_shared<padi::content::Game>(m_renderTarget);
-            if (m_background.getLevel()->isPaused()) m_background.getLevel()->play();
-            else m_background.getLevel()->pause();
-        }
-        if (Immediate::Switch(&m_uiContext, "menu.toggle", {16, 64, 32, 32}, &state)) {
-            printf("Toggle One");
-        }
-        if (Immediate::Switch(&m_uiContext, "menu.toggle2", {48, 64, 32, 32}, &state)) {
-            printf("Toggle Two");
-        }
-        if (Immediate::Switch(&m_uiContext, "menu.toggle3", {80, 64, 32, 32}, &state)) {
-            printf("Toggle Three");
-        }
+        {
+            auto & t  = m_uiContext.pushTransform();
+            t.translate(16, 32);
+            static bool state = false;
+            if (Immediate::Button(&m_uiContext, "menu.play", {0, 0, 96, 32})) {
+                m_next = std::make_shared<padi::content::Game>(m_renderTarget);
+                if (m_background.getLevel()->isPaused()) m_background.getLevel()->play();
+                else m_background.getLevel()->pause();
+            }
+            if (Immediate::Switch(&m_uiContext, "menu.toggle", {0, 32, 32, 32}, &state)) {
+                printf("Toggle One");
+            }
+            if (Immediate::Switch(&m_uiContext, "menu.toggle2", {32, 32, 32, 32}, &state)) {
+                printf("Toggle Two");
+            }
+            if (Immediate::Switch(&m_uiContext, "menu.toggle3", {64, 32, 32, 32}, &state)) {
+                printf("Toggle Three");
+            }
 
-        if(state) {
-            m_background.getLevel()->pause();
-        } else {
-            m_background.getLevel()->play();
+            if (state) {
+                m_background.getLevel()->pause();
+            } else {
+                m_background.getLevel()->play();
+            }
         }
+        m_uiContext.popTransform();
 
         m_vfxBuffer.draw(*this);
 

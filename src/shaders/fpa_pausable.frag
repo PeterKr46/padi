@@ -1,10 +1,9 @@
 uniform sampler2D   texture;
 uniform float       time;
 uniform bool        paused;
-// BEGIN NOISE
 
-// Noise via https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
 
+// BEGIN NOISE via https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
 float rand(float n){return fract(sin(n) * 43758.5453123);}
 
 float noise(float p){
@@ -18,7 +17,6 @@ float noise(vec2 n) {
     vec2 b = floor(n), f = smoothstep(vec2(0.0), vec2(1.0), fract(n));
     return mix(mix(rand(b), rand(b + d.yx), f.x), mix(rand(b + d.xy), rand(b + d.yy), f.x), f.y);
 }
-
 // END NOISE
 
 //
@@ -91,7 +89,8 @@ vec3 Horz3(vec2 pos, float off){
     float wc=Gaus(dst+0.0, scale);
     float wd=Gaus(dst+1.0, scale);
     // Return filtered sample.
-    return (b*wb+c*wc+d*wd)/(wb+wc+wd); }
+    return (b*wb+c*wc+d*wd)/(wb+wc+wd);
+}
 
 // 5-tap Gaussian filter along horz line.
 vec3 Horz5(vec2 pos, float off){
@@ -115,7 +114,8 @@ vec3 Horz5(vec2 pos, float off){
 // Return scanline weight.
 float Scan(vec2 pos, float off){
     float dst=Dist(pos).y;
-    return Gaus(dst+off, hardScan); }
+    return Gaus(dst+off, hardScan);
+}
 
 // Allow nearest three lines to effect pixel.
 vec3 Tri(vec2 pos){
@@ -125,7 +125,8 @@ vec3 Tri(vec2 pos){
     float wa=Scan(pos, -1.0);
     float wb=Scan(pos, 0.0);
     float wc=Scan(pos, 1.0);
-    return a*wa+b*wb+c*wc; }
+    return a*wa+b*wb+c*wc;
+}
 
 // Distortion of scanlines, and end of screen alpha.
 vec2 Warp(vec2 pos){
@@ -150,19 +151,19 @@ void main(){
     //out vec4 fragColor, in vec2 fragCoord
     vec2 fragCoord = gl_TexCoord[0].xy;
     vec3 additiveNoise = vec3(0,0,0);
+    fragCoord = curveRemapUV(fragCoord);
     if(paused) {
-        fragCoord.x += noise(floor(fragCoord.y * 128) + floor(time * 14) * 32) * (0.4 / 455) - (0.2 / 455);
+        fragCoord.x += noise(floor(fragCoord.y * 128) + floor(time * 14) * 32) * (0.25 / 455) - (0.125 / 455);
         if (noise(floor(fragCoord.y * 128) + noise(time * 24) * 24) > 0.9) {
             additiveNoise.rgb = vec3(noise(fragCoord.y) * 0.1 - 0.05);
         }
     }
-    fragCoord = curveRemapUV(fragCoord);
     vec4 fragColor = texture2D(texture, fragCoord);
 
     vec2 pos=fragCoord;
     fragColor.rgb = Tri(pos) + additiveNoise;
     if(paused) {
-        fragColor.r = fragColor.g = fragColor.b = (fragColor.r + fragColor.b + fragColor.g) / 3;
+        fragColor.r = fragColor.g = fragColor.b = max(fragColor.r, max(fragColor.b, fragColor.g));
     }
 
     // Bloom a little?

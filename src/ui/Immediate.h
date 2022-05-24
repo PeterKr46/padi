@@ -116,8 +116,8 @@ namespace padi {
 
     size_t Immediate::draw(padi::UIContext *ctx, const std::shared_ptr<Animation> &anim, sf::FloatRect const &bound,
                            uint8_t frame, sf::Color color = sf::Color::White) {
-        if (ctx->m_vbo.getVertexCount() < ctx->m_numVerts + 9 * 4) {
-            ctx->m_vbo.resize((ctx->m_numVerts + 4) * 2);
+        while (ctx->m_vbo.getVertexCount() < ctx->m_numVerts + 9 * 4) {
+            ctx->m_vbo.resize((ctx->m_vbo.getVertexCount() + 1) * 2);
         }
         sf::Vertex *quad = &ctx->m_vbo[ctx->m_numVerts];
         sf::Vector2f texSize{padi::UIPadding_px * 2, padi::UIPadding_px * 2};
@@ -132,6 +132,12 @@ namespace padi {
         quad[0].position.y = quad[1].position.y = bound.top;
         quad[2].position.y = quad[3].position.y = bound.top + bound.height;
 
+        auto t = ctx->topTransform();
+        quad[0].position = t.transformPoint(quad[0].position);
+        quad[1].position = t.transformPoint(quad[1].position);
+        quad[2].position = t.transformPoint(quad[2].position);
+        quad[3].position = t.transformPoint(quad[3].position);
+
         quad[0].texCoords = texOffset;
         quad[1].texCoords = texOffset + sf::Vector2f(texSize.x, 0);
         quad[2].texCoords = texOffset + texSize;
@@ -145,8 +151,8 @@ namespace padi {
     size_t
     Immediate::drawScalable(padi::UIContext *ctx, const std::shared_ptr<Animation> &anim, sf::FloatRect const &bound,
                             uint8_t frame, sf::Color color = sf::Color::White) {
-        if (ctx->m_vbo.getVertexCount() < ctx->m_numVerts + 9 * 4) {
-            ctx->m_vbo.resize((ctx->m_numVerts + 9 * 4) * 2);
+        while (ctx->m_vbo.getVertexCount() < ctx->m_numVerts + 9 * 4) {
+            ctx->m_vbo.resize((ctx->m_vbo.getVertexCount() + 1) * 2);
         }
         sf::Vertex *quad = &(ctx->m_vbo[ctx->m_numVerts]);
         sf::Vector2f texSize{padi::UIPadding_px * 2, padi::UIPadding_px * 2};
@@ -176,6 +182,8 @@ namespace padi {
                 texOffset.y + texSize.y - padi::UIPadding_px,
                 texOffset.y + texSize.y};
 
+        auto t = ctx->topTransform();
+
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 3; ++x) {
                 quad[0].position.x = x_anchors[x];
@@ -198,6 +206,11 @@ namespace padi {
                 quad[3].texCoords.x = x_tex[x];
                 quad[3].texCoords.y = y_tex[y + 1];
                 quad[0].color = quad[1].color = quad[2].color = quad[3].color = color;
+                quad[0].position = t.transformPoint(quad[0].position);
+                quad[1].position = t.transformPoint(quad[1].position);
+                quad[2].position = t.transformPoint(quad[2].position);
+                quad[3].position = t.transformPoint(quad[3].position);
+
                 quad += 4;
             }
         }

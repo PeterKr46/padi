@@ -48,4 +48,28 @@ namespace padi {
 
     UIContext::UIContext() : m_vbo(sf::VertexArray(sf::PrimitiveType::Quads, 16)) {
     }
+
+    sf::Transform &UIContext::topTransform() {
+        return m_transformStack.back();
+    }
+
+    sf::Transform UIContext::popTransform() {
+        sf::Transform t;
+        if(m_transformStack.empty()) {
+            printf("[padi::UIContext] ERROR: Transform stack empty before popping!\n");
+        } else {
+            t = m_transformStack.back();
+            m_transformStack.erase(m_transformStack.begin() + (m_transformStack.size() - 1));
+        }
+        return t;
+    }
+
+    sf::Transform & UIContext::pushTransform(sf::Transform const& t) {
+        if(m_transformStack.empty()) {
+            printf("[padi::UIContext] ERROR: Transform stack was depleted!\n");
+            m_transformStack.emplace_back();
+        }
+        return m_transformStack.emplace_back(m_transformStack.back().combine(t));
+        //return m_transformStack.back();
+    }
 } // padi
