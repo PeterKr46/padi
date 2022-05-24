@@ -21,7 +21,7 @@ namespace padi {
             , public CycleListener {
 
     public:
-        explicit LivingEntity(padi::AnimationSet const* moveset, const sf::Vector2i &pos);
+        explicit LivingEntity(std::string  name, padi::AnimationSet const* moveset, const sf::Vector2i &pos);
 
         [[nodiscard]] sf::Vector2i getSize() const override;
 
@@ -66,5 +66,6 @@ namespace padi {
 
         sf::Color m_color{255, 255, 255};
         std::shared_ptr<padi::Animation> m_animation;
+        const std::string m_name;
     };
 }

@@ -41,7 +41,7 @@ namespace padi {
         return m_focused == elemID;
     }
 
-    void UIContext::clear() {
+    void UIContext::nextFrame() {
         m_numVerts  = 0;
         m_navUsed   = false;
     }

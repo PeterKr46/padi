@@ -29,7 +29,10 @@ namespace padi {
         size_t numQuads() const;
 
         virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
-        void clear();
+        /**
+         * Resets the quad counter, etc
+         */
+        void nextFrame();
 
     private:
 

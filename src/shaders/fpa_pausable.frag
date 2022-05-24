@@ -48,12 +48,12 @@ float noise(vec2 n) {
 // Hardness of scanline.
 //  -8.0 = soft
 // -16.0 = medium
-float hardScan=-8.0;
+float hardScan=-6.0;
 
 // Hardness of pixels in scanline.
 // -2.0 = soft
 // -4.0 = hard
-float hardPix=-3.0;
+float hardPix=-2.0;
 
 // Display warp.
 // 0.0 = none
@@ -70,8 +70,7 @@ float maskLight=1.5;
 // Also zero's off screen.
 vec3 Fetch(vec2 pos, vec2 off){
     pos=floor(pos*res+off)/res;
-    if (max(abs(pos.x-0.5), abs(pos.y-0.5))>0.5)return vec3(0.0, 0.0, 0.0);
-    return texture2D(texture, pos.xy, -16.0).rgb;
+    return texture2D(texture, pos.xy, -16.0).rgb * step(pos.x,1.0) * (1.0 - step(pos.x,0.0)) * step(pos.y,1.0) * (1.0 - step(pos.y,0.0));
 }
 
 // Distance in emulated pixels to nearest texel.
@@ -110,7 +109,8 @@ vec3 Horz5(vec2 pos, float off){
     float wd=Gaus(dst+1.0, scale);
     float we=Gaus(dst+2.0, scale);
     // Return filtered sample.
-    return (a*wa+b*wb+c*wc+d*wd+e*we)/(wa+wb+wc+wd+we); }
+    return (a*wa+b*wb+c*wc+d*wd+e*we)/(wa+wb+wc+wd+we);
+}
 
 // Return scanline weight.
 float Scan(vec2 pos, float off){
@@ -131,7 +131,8 @@ vec3 Tri(vec2 pos){
 vec2 Warp(vec2 pos){
     pos=pos*2.0-1.0;
     pos*=vec2(1.0+(pos.y*pos.y)*warp.x, 1.0+(pos.x*pos.x)*warp.y);
-    return pos*0.5+0.5; }
+    return pos*0.5+0.5;
+}
 
 vec2 curvature = vec2(3.5, 3.5);
 vec2 curveRemapUV(vec2 uv)
@@ -148,13 +149,26 @@ vec2 curveRemapUV(vec2 uv)
 void main(){
     //out vec4 fragColor, in vec2 fragCoord
     vec2 fragCoord = gl_TexCoord[0].xy;
-    if(paused) fragCoord.x += noise(floor(fragCoord.y * 128) + floor(time * 14) * 32) * (1.f / 455);
+    vec3 additiveNoise = vec3(0,0,0);
+    if(paused) {
+        fragCoord.x += noise(floor(fragCoord.y * 128) + floor(time * 14) * 32) * (0.4 / 455) - (0.2 / 455);
+        if (noise(floor(fragCoord.y * 128) + noise(time * 24) * 24) > 0.9) {
+            additiveNoise.rgb = vec3(noise(fragCoord.y) * 0.1 - 0.05);
+        }
+    }
     fragCoord = curveRemapUV(fragCoord);
     vec4 fragColor = texture2D(texture, fragCoord);
-    // Unmodified.
+
     vec2 pos=fragCoord;
-    fragColor.rgb=Tri(pos);
-    if(paused) fragColor.r = fragColor.g = fragColor.b = (fragColor.r + fragColor.b + fragColor.g) / 3;
+    fragColor.rgb = Tri(pos) + additiveNoise;
+    if(paused) {
+        fragColor.r = fragColor.g = fragColor.b = (fragColor.r + fragColor.b + fragColor.g) / 3;
+    }
+
+    // Bloom a little?
+    vec3 add = Horz5(fragCoord, 0);
+    fragColor.rgb += ((add.r + add.g + add.b) / 6) - 0.0675;
+
     fragColor.a=1.0;
 
     gl_FragColor = fragColor;

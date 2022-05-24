@@ -92,11 +92,11 @@ namespace padi::content {
                 .withArea({20, 20})
                 .generate();
         std::vector<std::shared_ptr<LivingEntity>> cubes = {
-                std::make_shared<padi::LivingEntity>(m_level->getApollo()->lookupAnimContext("cube"),
+                std::make_shared<padi::LivingEntity>("r", m_level->getApollo()->lookupAnimContext("cube"),
                                                      sf::Vector2i{-2, -5}),
-                std::make_shared<padi::LivingEntity>(m_level->getApollo()->lookupAnimContext("cube"),
+                std::make_shared<padi::LivingEntity>("g", m_level->getApollo()->lookupAnimContext("cube"),
                                                      sf::Vector2i{-5, -2}),
-                std::make_shared<padi::LivingEntity>(m_level->getApollo()->lookupAnimContext("cube"),
+                std::make_shared<padi::LivingEntity>("b", m_level->getApollo()->lookupAnimContext("cube"),
                                                      sf::Vector2i{3, 4})
         };
         m_level->addFrameBeginListener(std::make_shared<Disolver>());

@@ -28,7 +28,8 @@ namespace padi::content {
             m_level->initCursor("cursor"); // TODO
 
             auto apollo = m_level->getApollo();
-            m_player = std::make_shared<padi::LivingEntity>(apollo->lookupAnimContext("cube"), sf::Vector2i{0, 0});
+            // TODO name
+            m_player = std::make_shared<padi::LivingEntity>("player",apollo->lookupAnimContext("cube"), sf::Vector2i{0, 0});
             m_player->setColor({255, 255, 255});
             auto leSpawn = std::make_shared<padi::SpawnEvent>(m_player);
             leSpawn->dispatch(m_level);
@@ -92,6 +93,7 @@ namespace padi::content {
         rState.shader = shader.get();
         rState.texture = &m_vfxBuffer.getTexture();
         m_renderTarget->setView(m_renderTarget->getDefaultView());
+
         m_renderTarget->draw(m_screenQuad, rState);
 
     }

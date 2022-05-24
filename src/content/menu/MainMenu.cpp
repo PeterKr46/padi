@@ -9,8 +9,13 @@
 
 namespace padi::content {
 
-    MainMenu::MainMenu(sf::RenderTarget* renderTarget, std::string const& apollo, std::string const& spritesheet) :
+    MainMenu::MainMenu(sf::RenderTarget *renderTarget, std::string const &apollo, std::string const &spritesheet) :
             m_renderTarget(renderTarget) {
+        if (m_vfxBuffer.create(float(renderTarget->getSize().x) / renderTarget->getSize().y * 256, 256)) {
+            handleResize(renderTarget->getSize().x, renderTarget->getSize().y);
+        } else {
+            printf("[padi::content::MainMenu] Failed to create vfxBuffer.\n");
+        }
         m_uiContext.init(apollo, spritesheet);
         m_font.setSmooth(false);
         m_font.loadFromFile("../media/prstartk.ttf");
@@ -20,31 +25,50 @@ namespace padi::content {
     }
 
     void MainMenu::draw() {
-        m_background.getLevel()->centerView({-3,3});
-        m_renderTarget->clear();
-        m_uiContext.clear();
-
-        m_background.getLevel()->update(m_renderTarget);
-
+        m_background.getLevel()->update(&m_vfxBuffer);
+        m_background.getLevel()->centerView({-3, 3});
         m_background.getLevel()->populateVBO();
-        m_background.draw(*m_renderTarget, sf::RenderStates::Default);
+        m_vfxBuffer.clear();
+
+        auto states = sf::RenderStates::Default;
+        states.transform.scale(
+                sf::Vector2f(256.f / m_vfxBuffer.getView().getSize().y, 256.f / m_vfxBuffer.getView().getSize().y));
+        m_vfxBuffer.draw(m_background, states);
+
+        m_uiContext.nextFrame();
 
         static bool state = false;
-        if(Immediate::Button(&m_uiContext, "menu.play", {16, 32, 96, 32})) {
+        if (Immediate::Button(&m_uiContext, "menu.play", {16, 32, 96, 32})) {
             m_next = std::make_shared<padi::content::Game>(m_renderTarget);
             if (m_background.getLevel()->isPaused()) m_background.getLevel()->play();
             else m_background.getLevel()->pause();
         }
-        if (Immediate::Switch(&m_uiContext,  "menu.toggle", {16, 64, 32,32}, &state)) {
+        if (Immediate::Switch(&m_uiContext, "menu.toggle", {16, 64, 32, 32}, &state)) {
             printf("Toggle One");
         }
-        if(Immediate::Switch(&m_uiContext,  "menu.toggle2", {48, 64, 32,32}, &state)) {
+        if (Immediate::Switch(&m_uiContext, "menu.toggle2", {48, 64, 32, 32}, &state)) {
             printf("Toggle Two");
         }
-        if(Immediate::Switch(&m_uiContext,  "menu.toggle3", {80, 64, 32,32}, &state)) {
+        if (Immediate::Switch(&m_uiContext, "menu.toggle3", {80, 64, 32, 32}, &state)) {
             printf("Toggle Three");
         }
-        m_renderTarget->draw(*this);
+
+        if(state) {
+            m_background.getLevel()->pause();
+        } else {
+            m_background.getLevel()->play();
+        }
+
+        m_vfxBuffer.draw(*this);
+
+        auto rState = sf::RenderStates::Default;
+        auto shader = m_background.getLevel()->getApollo()->lookupShader("fpa");
+        shader->setUniform("time", 0.f);
+        shader->setUniform("paused", m_background.getLevel()->isPaused());
+        rState.shader = shader.get();
+        rState.texture = &m_vfxBuffer.getTexture();
+        m_renderTarget->setView(m_renderTarget->getDefaultView());
+        m_renderTarget->draw(m_screenQuad, rState);
     }
 
     void MainMenu::draw(sf::RenderTarget &target, sf::RenderStates states) const {
@@ -54,10 +78,27 @@ namespace padi::content {
         states.transform.scale(sf::Vector2f(target.getView().getSize().y / 256, target.getView().getSize().y / 256));
 
         // draw the vertex array
-        for(auto const& text : m_text) m_renderTarget->draw(text, states);
+        for (auto const &text: m_text) target.draw(text, states);
     }
 
     std::shared_ptr<padi::Activity> MainMenu::handoff() {
         return m_next ? m_next : shared_from_this();
+    }
+
+    void MainMenu::handleResize(int width, int height) {
+        sf::Vector2f halfSize{float(width), float(height)};
+        halfSize /= 2.f;
+        sf::Vector2f imgSize{m_vfxBuffer.getSize()};
+        m_screenQuad[0].position = {0, 0};
+        m_screenQuad[0].texCoords = {0, imgSize.y};
+
+        m_screenQuad[1].position = {0, float(height)};
+        m_screenQuad[1].texCoords = {0, 0};
+
+        m_screenQuad[2].position = {float(width), float(height)};
+        m_screenQuad[2].texCoords = {imgSize.x, 0};
+
+        m_screenQuad[3].position = {float(width), 0};
+        m_screenQuad[3].texCoords = imgSize;
     }
 } // content
