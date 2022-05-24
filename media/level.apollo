@@ -2,22 +2,28 @@
 # block <context>
 # anim <key>            <w><h>  <x><y> [<stepx> <stepy> <frames>] [repeat]
 # anim cursor             32 32   160 0   0 32    6   1
-anim cursor             32 52   160 232 0 40    6   1
 anim air_strike         32 32   288 0   0 32    12
 anim air_strike_large   32 48   384 0   0 48    12
 anim fire               32 40   352 0   0 40    12
 anim lightning          32 32   480 0   0 32    12
 anim q_mark             32 36   416 0   0 36    12
-anim debug              32 41   992 0   0 32    12
-anim button             18 24   96 0    0 24    4   2
-anim scalable_button    32 32   96 112  0 32    4   2
+
 anim bubble             32 64   448 0   0 64    12
 anim laser_hold         32 48   512 0   0 48    4   2
 anim marker             32 24   160 198
-anim hill               32 40   128 160
-anim rocks              32 40   128 192
-anim mountain           32 40   128 224
-anim peak               32 40   128 256
+
+# details
+anim hill               32 40   992 160
+anim rocks              32 40   992 192
+anim mountain           32 40   992 224
+anim peak               32 40   992 256
+
+# ui
+anim cursor             32 32   960 640     0 32    6  1
+anim cursor_alt         32 52   928 640     0 40    6  1
+
+# debug
+anim debug              32 41   992 640     0 32    12
 
 audio chord_01          ../media/audio/jorgesbcomposer/chord_01.ogg
 audio guitar_01         ../media/audio/jorgesbcomposer/string_01.ogg
@@ -25,20 +31,22 @@ audio guitar_01         ../media/audio/jorgesbcomposer/string_01.ogg
 
 
 block cube
-anim move_x_from    32 32   0 0     0 48    12
+anim move_x_from    32 32   0  0    0 48    12
 anim move_x_to      32 32   16 8    0 48    12
 anim move_y_from    32 32   64 0    0 48    12
 anim move_y_to      32 32   48 8    0 48    12
-anim idle           32 32   0 568   0 32    12
+anim idle           32 32   0  568  0 32    12
 anim spawn          32 32   32 568  0 32    12
 anim spawn_ray      32 32   64 568  0 32    12
 
 block tetrahedron
-anim move_x_from    32 32   192 0   0 48    12
-anim move_x_to      32 32   208 8   0 48    12
-anim move_y_from    32 32   256 0   0 48    12
-anim move_y_to      32 32   240 8   0 48    12
-anim idle           32 32   192 0
+anim move_x_from    32 32   96  0   0 48    12
+anim move_x_to      32 32   112 8   0 48    12
+anim move_y_from    32 32   160 0   0 48    12
+anim move_y_to      32 32   144 8   0 48    12
+anim idle           32 32   96  568 0 32    12
+anim spawn          32 32   128 568 0 32    12
+anim spawn_ray      32 32   64  568 0 32    12
 
 shader fpa ../src/shaders/crt.vert
 shader fpa ../src/shaders/fpa_pausable.frag

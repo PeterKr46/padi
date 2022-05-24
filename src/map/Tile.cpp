@@ -23,11 +23,11 @@ namespace padi {
         quad[3].position = anchor + sf::Vector2f(-tileSize.x / 2, tileSize.y / 2);
         quad[0].color = quad[1].color = quad[2].color = quad[3].color = m_color;
 
-
-        quad[0].texCoords = sf::Vector2f(128 + 0, 0 + m_detail * tileSize.y);
-        quad[1].texCoords = sf::Vector2f(128 + 32, 0 + m_detail * tileSize.y);
-        quad[2].texCoords = sf::Vector2f(128 + 32, 32 + m_detail * tileSize.y);
-        quad[3].texCoords = sf::Vector2f(128 + 0, 32 + m_detail * tileSize.y);
+        // TODO hardcoded lol
+        quad[0].texCoords = sf::Vector2f(992 + 0, 0 + m_detail * tileSize.y);
+        quad[1].texCoords = sf::Vector2f(992 + 32, 0 + m_detail * tileSize.y);
+        quad[2].texCoords = sf::Vector2f(992 + 32, 32 + m_detail * tileSize.y);
+        quad[3].texCoords = sf::Vector2f(992 + 0, 32 + m_detail * tileSize.y);
 
         size_t offset = 0;
         if(m_decoration) {
