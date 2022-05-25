@@ -19,7 +19,7 @@ anim mountain           32 40   992 224
 anim peak               32 40   992 256
 
 # ui
-anim cursor             32 32   960 640     0 32    6  1
+anim cursor             32 32   960 648     0 32    6  1
 anim cursor_alt         32 52   928 640     0 40    6  1
 
 # debug

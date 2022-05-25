@@ -15,6 +15,7 @@ namespace padi {
         auto ose = std::make_shared<padi::OneshotEntityStack>(user->getPosition());
         ose->m_animation = lvl->getApollo()->lookupAnim("lightning");
         ose->m_stackSize = 8;
+        ose->m_color = user->getColor();
         lvl->addCycleEndListener(ose);
         lvl->getMap()->addEntity(ose);
 

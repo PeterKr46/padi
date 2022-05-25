@@ -4,8 +4,13 @@ uniform bool        paused;
 
 
 // BEGIN NOISE via https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
-float rand(float n){return fract(sin(n) * 43758.5453123);}
+float rand(float n) {
+    return fract(sin(n) * 43758.5453123);
+}
 
+float rand(vec2 n) {
+    return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+}
 float noise(float p){
     float fl = floor(p);
     float fc = fract(p);
@@ -150,25 +155,25 @@ vec2 curveRemapUV(vec2 uv)
 void main(){
     //out vec4 fragColor, in vec2 fragCoord
     vec2 fragCoord = gl_TexCoord[0].xy;
-    vec3 additiveNoise = vec3(0,0,0);
+    vec3 multiplicativeNoise = vec3(1.0);
     fragCoord = curveRemapUV(fragCoord);
     if(paused) {
-        fragCoord.x += noise(floor(fragCoord.y * 128) + floor(time * 14) * 32) * (0.25 / 455) - (0.125 / 455);
-        if (noise(floor(fragCoord.y * 128) + noise(time * 24) * 24) > 0.9) {
-            additiveNoise.rgb = vec3(noise(fragCoord.y) * 0.1 - 0.05);
+        fragCoord.x += noise(floor(fragCoord.y * 128.0) + floor(time * 14.0) * 32.0) * (0.25 / 455.0) - (0.125 / 455.0);
+        if (noise(floor(fragCoord.y * 128.0) + noise(time * 24.0) * 24.0) > 0.9) {
+            multiplicativeNoise.rgb = vec3(1.2 + noise(fragCoord.y) * 0.5 - 0.25);
         }
     }
     vec4 fragColor = texture2D(texture, fragCoord);
 
     vec2 pos=fragCoord;
-    fragColor.rgb = Tri(pos) + additiveNoise;
+    fragColor.rgb = Tri(pos) * multiplicativeNoise;
     if(paused) {
         fragColor.r = fragColor.g = fragColor.b = max(fragColor.r, max(fragColor.b, fragColor.g));
     }
 
     // Bloom a little?
-    vec3 add = Horz5(fragCoord, 0);
-    fragColor.rgb += ((add.r + add.g + add.b) / 6) - 0.0675;
+    vec3 add = Horz5(fragCoord, 0.0);
+    fragColor.rgb += ((add.r + add.g + add.b) / 6.0) - 0.0675;
 
     fragColor.a=1.0;
 
