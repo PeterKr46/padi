@@ -159,9 +159,7 @@ void main(){
     fragCoord = curveRemapUV(fragCoord);
     if(paused) {
         fragCoord.x += noise(floor(fragCoord.y * 128.0) + floor(time * 14.0) * 32.0) * (0.25 / 455.0) - (0.125 / 455.0);
-        if (noise(floor(fragCoord.y * 128.0) + noise(time * 24.0) * 24.0) > 0.9) {
-            multiplicativeNoise.rgb = vec3(1.2 + noise(fragCoord.y) * 0.5 - 0.25);
-        }
+        multiplicativeNoise.rgb = vec3(1.0) + vec3(noise(fragCoord.y) * 0.5 - 0.25) * step(noise(floor(fragCoord.y * 128.0) + noise(time * 24.0) * 24.0), 0.9);
     }
     vec4 fragColor = texture2D(texture, fragCoord);
 

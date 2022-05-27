@@ -130,4 +130,40 @@ namespace padi {
             level->getCursor()->m_color = sf::Color::Red;
         }
     }
+
+    bool content::Dash::cast(padi::Level *lvl, const sf::Vector2i &pos) {
+        lvl->hideCursor();
+        auto delta = user->getPosition() - pos;
+        bool x = false;
+        sf::Vector2i dir{Up};
+        if(abs(delta.x) > abs(delta.y)) {
+            x = true;
+            dir = delta.x < 0 ? Right : Left;
+        } else {
+            dir = delta.y < 0 ? Down : Up;
+        }
+        auto finalPos = user->getPosition() + dir * 8;
+        for(int i = 1; i < 8; ++i) {
+            auto laserPart = std::make_shared<padi::OneshotEntity>(user->getPosition() + dir * i);
+            laserPart->m_animation = lvl->getApollo()->lookupAnim(x ? "laser_x_burst" : "laser_y_burst");
+            laserPart->m_color = user->getColor();
+            lvl->getMap()->addEntity(laserPart);
+            lvl->addCycleEndListener(laserPart);
+        }
+        lvl->getMap()->moveEntity(user, finalPos);
+        auto strike = std::make_shared<padi::OneshotEntity>(finalPos);
+        strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
+        strike->m_color = user->getColor();
+        lvl->getMap()->addEntity(strike);
+        lvl->addCycleEndListener(strike);
+        //auto spawnEvent = std::make_shared<padi::SpawnEvent>(user, finalPos);
+        //spawnEvent->onCycleBegin(lvl);
+        lvl->centerView(finalPos);
+        lvl->moveCursor(finalPos);
+        return true;
+    }
+
+    void content::Dash::castIndicator(padi::Level *level) {
+        level->showCursor();
+    }
 }

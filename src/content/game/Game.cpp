@@ -29,10 +29,11 @@ namespace padi::content {
 
             auto apollo = m_level->getApollo();
             // TODO name
-            m_player = std::make_shared<padi::LivingEntity>("player",apollo->lookupAnimContext("tetrahedron"), sf::Vector2i{0, 0});
+            m_player = std::make_shared<padi::LivingEntity>("player",apollo->lookupAnimContext("cube"), sf::Vector2i{0, 0});
             m_player->setColor({255, 0, 0});
             auto leSpawn = std::make_shared<padi::SpawnEvent>(m_player);
             leSpawn->dispatch(m_level);
+            m_level->centerView(m_player->getPosition());
 
             auto walk = std::make_shared<padi::content::Walk>();
             walk->user = m_player;
@@ -43,6 +44,9 @@ namespace padi::content {
             m_playerAbilities.push_back(std::make_shared<padi::content::Lighten>());
 
             m_playerAbilities.push_back(std::make_shared<padi::content::Darken>());
+            auto dash = std::make_shared<padi::content::Dash>();
+            dash->user = m_player;
+            m_playerAbilities.push_back(dash);
 
             printf("[padi::content::Game] VfxBuffer at size %u, %u!\n", m_vfxBuffer.getSize().x, m_vfxBuffer.getSize().y);
         } else {
@@ -54,6 +58,7 @@ namespace padi::content {
         m_level->update(&m_vfxBuffer);
         if (padi::Controls::isKeyDown(sf::Keyboard::Home)) {
             m_level->moveCursor(m_player->getPosition());
+            m_level->centerView(m_player->getPosition());
         }
         if (active != -1) {
             m_playerAbilities[active]->castIndicator(&(*m_level));
@@ -72,12 +77,15 @@ namespace padi::content {
             active = 2;
         } else if (padi::Controls::wasKeyPressed(sf::Keyboard::R)) {
             active = 3;
+        } else if (padi::Controls::wasKeyPressed(sf::Keyboard::D)) {
+            active = 4;
+        }
+        if (padi::Controls::wasKeyPressed(sf::Keyboard::C)) {
+            m_level->centerView(m_level->getCursorLocation());
         }
         if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
             m_level->togglePause();
         }
-
-        m_level->centerView(m_player->getPosition());
 
         m_level->populateVBO();
         m_vfxBuffer.clear();

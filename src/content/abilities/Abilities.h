@@ -7,7 +7,7 @@
 #include "../../player/Ability.h"
 
 namespace padi::content {
-    
+
     class Lighten : public padi::Ability, public padi::CycleListener, public std::enable_shared_from_this<Lighten> {
     public:
         sf::Vector2i strikePos;
@@ -51,6 +51,16 @@ namespace padi::content {
         bool onCycleEnd(Level *) override;
 
         bool onCycleBegin(Level *) override;
+    };
+
+    class Dash : public padi::Ability, public padi::CycleListener, public std::enable_shared_from_this<Dash> {
+    public:
+        std::shared_ptr<padi::LivingEntity> user;
+        sf::Vector2i direction;
+
+        bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
+
+        void castIndicator(padi::Level *level) override;
     };
 
 }

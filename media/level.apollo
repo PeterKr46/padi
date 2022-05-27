@@ -9,7 +9,10 @@ anim lightning          32 32   480 0   0 32    12
 anim q_mark             32 36   416 0   0 36    12
 
 anim bubble             32 64   448 0   0 64    12
-anim laser_hold         32 48   512 0   0 48    4   2
+anim laser_y_burst      32 48   512 0   0 48    12
+anim laser_y_hold       32 48   512 96  0 48    6   1
+anim laser_x_burst      32 48   544 0   0 48    12
+anim laser_x_hold       32 48   544 96  0 48    6   1
 anim marker             32 24   160 198
 
 # details
@@ -17,6 +20,9 @@ anim hill               32 40   992 160
 anim rocks              32 40   992 192
 anim mountain           32 40   992 224
 anim peak               32 40   992 256
+anim houses_a           32 40   992 288
+anim houses_b           32 40   992 320
+anim pillars            32 40   992 352
 
 # ui
 anim cursor             32 32   960 648     0 32    6  1

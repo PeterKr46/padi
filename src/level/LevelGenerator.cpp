@@ -101,6 +101,13 @@ namespace padi {
                         t->m_walkable = m < 0.25;
                         t->setDecoration(e);
                     }
+                    else {
+                        auto e = std::make_shared<padi::StaticEntity>(pos);
+                        e->m_animation = level->m_apollo.lookupAnim(int(m * 12) % 2 ? "pillars" : "houses_b");
+                        t->setVerticalOffset(3);
+                        t->m_walkable = m < 0.25;
+                        t->setDecoration(e);
+                    }
                 }
             }
         }

@@ -91,8 +91,15 @@ namespace padi {
                                                StripAnimation(sf::Vector2i(data[0], data[1]), {data[2], data[3]},
                                                               {data[4], data[5]}, data[6]))
                                       });
-                    } else if (data.size() > 7) {
+                    } else if (data.size() == 8) {
                         printf(" %i frames.\n", data[6]);
+                        block->insert({key,
+                                       std::make_shared<SimpleAnimation>(
+                                               StripAnimation(sf::Vector2i(data[0], data[1]), {data[2], data[3]},
+                                                              {data[4], data[5]}, data[6], data[7]))
+                                      });
+                    } else if (data.size() >= 9) {
+                        printf(" %i frames, x scale: %i\n", data[6], data[8]);
                         block->insert({key,
                                        std::make_shared<SimpleAnimation>(
                                                StripAnimation(sf::Vector2i(data[0], data[1]), {data[2], data[3]},
@@ -137,8 +144,8 @@ namespace padi {
     }
 
     bool Apollo::loadShader(const std::string &name, const std::string &vert, const std::string &frag) {
-        auto & shader = m_shaders[name];
-        if(!shader) {
+        auto &shader = m_shaders[name];
+        if (!shader) {
             shader = std::make_shared<sf::Shader>();
         }
         return shader->loadFromFile(vert, frag);
@@ -146,23 +153,23 @@ namespace padi {
 
     std::shared_ptr<sf::Shader> Apollo::lookupShader(const std::string &name) const {
         auto shader = m_shaders.find(name);
-        if(shader == m_shaders.end()) {
+        if (shader == m_shaders.end()) {
             return nullptr;
         }
         return shader->second;
     }
 
     bool Apollo::loadVertexShader(const std::string &name, const std::string &vert) {
-        auto & shader = m_shaders[name];
-        if(!shader) {
+        auto &shader = m_shaders[name];
+        if (!shader) {
             shader = std::make_shared<sf::Shader>();
         }
         return shader->loadFromFile(vert, sf::Shader::Type::Vertex);
     }
 
     bool Apollo::loadFragmentShader(const std::string &name, const std::string &vert) {
-        auto & shader = m_shaders[name];
-        if(!shader) {
+        auto &shader = m_shaders[name];
+        if (!shader) {
             shader = std::make_shared<sf::Shader>();
         }
         return shader->loadFromFile(vert, sf::Shader::Type::Fragment);
