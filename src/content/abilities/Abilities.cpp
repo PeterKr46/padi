@@ -3,9 +3,12 @@
 //
 
 #include "Abilities.h"
+
+#include <utility>
 #include "../../map/Tile.h"
 #include "../../level/Cursor.h"
 #include "../../AStar.h"
+#include "../../Controls.h"
 
 namespace padi {
 
@@ -33,6 +36,10 @@ namespace padi {
         level->showCursor();
     }
 
+    void content::Teleport::castCancel(padi::Level *level) {
+        level->hideCursor();
+    }
+
     bool content::Lighten::cast(padi::Level *lvl, const sf::Vector2i &pos) {
         lvl->hideCursor();
         strikePos = pos;
@@ -49,8 +56,8 @@ namespace padi {
         level->showCursor();
     }
 
-    bool content::Lighten::onFrameBegin(Level * lvl, uint8_t frame) {
-        if(frame == 8) {
+    bool content::Lighten::onFrameBegin(Level *lvl, uint8_t frame) {
+        if (frame == 8) {
             auto fire = std::make_shared<padi::StaticEntity>(strikePos);
             fire->m_animation = lvl->getApollo()->lookupAnim("fire");
             lvl->getMap()->addEntity(fire);
@@ -59,7 +66,12 @@ namespace padi {
         return true;
     }
 
-    bool content::Darken::cast(padi::Level *lvl, const sf::Vector2i &pos) {lvl->hideCursor();
+    void content::Lighten::castCancel(padi::Level *level) {
+        level->hideCursor();
+    }
+
+    bool content::Darken::cast(padi::Level *lvl, const sf::Vector2i &pos) {
+        lvl->hideCursor();
         strikePos = pos;
         auto strike = std::make_shared<padi::OneshotEntity>(pos);
         strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
@@ -75,13 +87,13 @@ namespace padi {
         level->showCursor();
     }
 
-    bool content::Darken::onFrameBegin(Level * lvl, uint8_t frame) {
+    bool content::Darken::onFrameBegin(Level *lvl, uint8_t frame) {
         auto tile = lvl->getMap()->getTile(strikePos);
         auto color = tile->getColor();
-        color = sf::Color(std::max(48,color.r - 32),std::max(48,color.g - 32),std::max(48,color.b - 32), 255);
+        color = sf::Color(std::max(48, color.r - 32), std::max(48, color.g - 32), std::max(48, color.b - 32), 255);
         tile->setColor(color);
 
-        if(frame == 8) {
+        if (frame == 8) {
             auto fire = std::make_shared<padi::StaticEntity>(strikePos);
             fire->m_animation = lvl->getApollo()->lookupAnim("fire");
             fire->m_color = sf::Color::Black;
@@ -89,6 +101,10 @@ namespace padi {
             return false;
         }
         return true;
+    }
+
+    void content::Darken::castCancel(padi::Level *level) {
+        level->hideCursor();
     }
 
     bool content::Walk::cast(padi::Level *lvl, const sf::Vector2i &pos) {
@@ -126,44 +142,77 @@ namespace padi {
     void content::Walk::castIndicator(padi::Level *level) {
         level->showCursor();
         auto tile = level->getMap()->getTile(level->getCursorLocation());
-        if(!tile || !tile->m_walkable) {
+        if (!tile || !tile->m_walkable) {
             level->getCursor()->m_color = sf::Color::Red;
         }
     }
 
-    bool content::Dash::cast(padi::Level *lvl, const sf::Vector2i &pos) {
-        lvl->hideCursor();
-        auto delta = user->getPosition() - pos;
-        bool x = false;
-        sf::Vector2i dir{Up};
-        if(abs(delta.x) > abs(delta.y)) {
-            x = true;
-            dir = delta.x < 0 ? Right : Left;
-        } else {
-            dir = delta.y < 0 ? Down : Up;
+    void content::Walk::castCancel(padi::Level *level) {
+        level->hideCursor();
+    }
+
+
+    content::Dash::Dash(std::shared_ptr<padi::LivingEntity> user, size_t range)
+            : m_user(std::move(user)) {
+        for (size_t i = 0; i < range; ++i) {
+            m_rangeFX.push_back(std::make_shared<padi::StaticEntity>(m_user->getPosition()));
         }
-        auto finalPos = user->getPosition() + dir * 8;
-        for(int i = 1; i < 8; ++i) {
-            auto laserPart = std::make_shared<padi::OneshotEntity>(user->getPosition() + dir * i);
+    }
+
+    bool content::Dash::cast(padi::Level *lvl, const sf::Vector2i &pos) {
+        if(m_direction.x == 0 && m_direction.y == 0) {
+            castCancel(lvl);
+            return false;
+        }
+        for (auto const &i: m_rangeFX) lvl->getMap()->removeUIObject(i);
+
+        auto delta = m_user->getPosition() - pos;
+        bool x = m_direction.x != 0;
+        auto finalPos = m_user->getPosition() + m_direction * int(m_rangeFX.size() + 1);
+        for (size_t i = 0; i < m_rangeFX.size(); ++i) {
+            auto laserPart = std::make_shared<padi::OneshotEntity>(m_user->getPosition() + m_direction * int(i + 1));
             laserPart->m_animation = lvl->getApollo()->lookupAnim(x ? "laser_x_burst" : "laser_y_burst");
-            laserPart->m_color = user->getColor();
+            laserPart->m_color = m_user->getColor();
             lvl->getMap()->addEntity(laserPart);
             lvl->addCycleEndListener(laserPart);
         }
-        lvl->getMap()->moveEntity(user, finalPos);
+        lvl->getMap()->moveEntity(m_user, finalPos);
         auto strike = std::make_shared<padi::OneshotEntity>(finalPos);
         strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
-        strike->m_color = user->getColor();
+        strike->m_color = m_user->getColor();
         lvl->getMap()->addEntity(strike);
         lvl->addCycleEndListener(strike);
-        //auto spawnEvent = std::make_shared<padi::SpawnEvent>(user, finalPos);
-        //spawnEvent->onCycleBegin(lvl);
         lvl->centerView(finalPos);
-        lvl->moveCursor(finalPos);
+        m_indicatorOOD = true;
+        m_direction = sf::Vector2i(0, 0);
         return true;
     }
 
-    void content::Dash::castIndicator(padi::Level *level) {
-        level->showCursor();
+    void content::Dash::castIndicator(padi::Level *lvl) {
+        if (padi::Controls::wasKeyPressed(sf::Keyboard::Up)) {
+            m_direction = Up;
+            m_indicatorOOD = true;
+        } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Down)) {
+            m_direction = Down;
+            m_indicatorOOD = true;
+        } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Left)) {
+            m_direction = Left;
+            m_indicatorOOD = true;
+        } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Right)) {
+            m_direction = Right;
+            m_indicatorOOD = true;
+        }
+        if (m_indicatorOOD) {
+            m_indicatorOOD = false;
+            for (size_t i = 0; i < m_rangeFX.size(); ++i) {
+                m_rangeFX[i]->m_animation = lvl->getApollo()->lookupAnim("indicator");
+                m_rangeFX[i]->m_color = m_user->getColor();
+                lvl->getMap()->moveUIObject(m_rangeFX[i], m_user->getPosition() + m_direction * int(i + 1));
+            }
+        }
+    }
+
+    void content::Dash::castCancel(padi::Level *lvl) {
+        for (auto const &i: m_rangeFX) lvl->getMap()->removeUIObject(i);
     }
 }

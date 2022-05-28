@@ -12,6 +12,8 @@ namespace padi {
         virtual bool cast(padi::Level *level, sf::Vector2i const &pos) = 0;
 
         virtual void castIndicator(padi::Level *level) = 0;
+
+        virtual void castCancel(padi::Level * level) = 0;
     };
     
 } // padi

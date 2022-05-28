@@ -7,6 +7,8 @@
 #include "../../Controls.h"
 #include "../../level/LevelGenerator.h"
 #include "../../level/SpawnEvent.h"
+#include "../../map/Tile.h"
+#include "../../entity/StaticEntity.h"
 #include "../abilities/Abilities.h"
 
 namespace padi::content {
@@ -44,8 +46,7 @@ namespace padi::content {
             m_playerAbilities.push_back(std::make_shared<padi::content::Lighten>());
 
             m_playerAbilities.push_back(std::make_shared<padi::content::Darken>());
-            auto dash = std::make_shared<padi::content::Dash>();
-            dash->user = m_player;
+            auto dash = std::make_shared<padi::content::Dash>(m_player, 8);
             m_playerAbilities.push_back(dash);
 
             printf("[padi::content::Game] VfxBuffer at size %u, %u!\n", m_vfxBuffer.getSize().x, m_vfxBuffer.getSize().y);
@@ -66,6 +67,7 @@ namespace padi::content {
                 m_player->intentCast(m_playerAbilities[active], m_level->getCursorLocation());
                 active = -1;
             } else if (padi::Controls::isKeyDown(sf::Keyboard::Escape)) {
+                m_playerAbilities[active]->castCancel(&(*m_level));
                 active = -1;
                 m_level->hideCursor();
             }
@@ -84,7 +86,21 @@ namespace padi::content {
             m_level->centerView(m_level->getCursorLocation());
         }
         if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
-            m_level->togglePause();
+            if(m_level->togglePause()) {
+                for(auto dir : AllDirections) {
+                    auto tile = m_level->getMap()->getTile(m_player->getPosition() + dir);
+                    auto ent = std::make_shared<padi::StaticEntity>(tile->getPosition());
+                    ent->m_animation = m_level->getApollo()->lookupAnim("indicator");
+                    ent->m_color = tile->m_walkable ? sf::Color::Green : sf::Color::Black;
+                    m_walkIndicators.push_back(ent);
+                    m_level->getMap()->addEntity(ent);
+                }
+            } else {
+                for(const auto& ind : m_walkIndicators) {
+                    m_level->getMap()->removeEntity(ind);
+                }
+                m_walkIndicators.clear();
+            }
         }
 
         m_level->populateVBO();

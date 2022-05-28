@@ -166,7 +166,7 @@ void main(){
     vec2 pos=fragCoord;
     fragColor.rgb = Tri(pos) * multiplicativeNoise;
     if(paused) {
-        fragColor.r = fragColor.g = fragColor.b = max(fragColor.r, max(fragColor.b, fragColor.g));
+        //fragColor.r = fragColor.g = fragColor.b = max(fragColor.r, max(fragColor.b, fragColor.g));
     }
 
     // Bloom a little?
