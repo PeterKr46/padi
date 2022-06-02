@@ -9,8 +9,9 @@
 
 namespace padi::content {
 
-    MainMenu::MainMenu(sf::RenderTarget *renderTarget, std::string const &apollo, std::string const &spritesheet) :
-            m_renderTarget(renderTarget) {
+    MainMenu::MainMenu(sf::RenderTarget *renderTarget, std::string const &apollo, std::string const &spritesheet)
+            : m_renderTarget(renderTarget)
+            , m_runtime() {
         if (!m_vfxBuffer.create(float(renderTarget->getSize().x) / renderTarget->getSize().y * 256, 256)) {
             printf("[padi::content::MainMenu] Failed to create vfxBuffer.\n");
         }
@@ -20,6 +21,8 @@ namespace padi::content {
         m_text.emplace_back("<Play>", m_font, 7);
         auto halfWidth = m_text.back().getGlobalBounds().width / 4;
         m_text.back().setPosition(32 + halfWidth, 42);
+        m_text.emplace_back("Toggle Pause", m_font, 7);
+        m_text.back().setPosition(40, 76);
     }
 
     void MainMenu::draw() {
@@ -36,8 +39,7 @@ namespace padi::content {
         m_uiContext.nextFrame();
 
         {
-            auto & t  = m_uiContext.pushTransform();
-            t.translate(16, 32);
+            m_uiContext.pushTransform().translate(16, 32);
             static bool state = false;
             if (Immediate::Button(&m_uiContext, "menu.play", {0, 0, 96, 32})) {
                 m_next = std::make_shared<padi::content::Game>(m_renderTarget);
@@ -47,13 +49,6 @@ namespace padi::content {
             if (Immediate::Switch(&m_uiContext, "menu.toggle", {0, 32, 32, 32}, &state)) {
                 printf("Toggle One");
             }
-            if (Immediate::Switch(&m_uiContext, "menu.toggle2", {32, 32, 32, 32}, &state)) {
-                printf("Toggle Two");
-            }
-            if (Immediate::Switch(&m_uiContext, "menu.toggle3", {64, 32, 32, 32}, &state)) {
-                printf("Toggle Three");
-            }
-
             if (state) {
                 m_background.getLevel()->pause();
             } else {
@@ -66,7 +61,7 @@ namespace padi::content {
 
         auto rState = sf::RenderStates::Default;
         auto shader = m_background.getLevel()->getApollo()->lookupShader("fpa");
-        shader->setUniform("time", 0.f);
+        shader->setUniform("time", m_runtime.getElapsedTime().asSeconds());
         shader->setUniform("paused", m_background.getLevel()->isPaused());
         rState.shader = shader.get();
         rState.texture = &m_vfxBuffer.getTexture();

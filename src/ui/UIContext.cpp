@@ -69,7 +69,7 @@ namespace padi {
             printf("[padi::UIContext] ERROR: Transform stack was depleted!\n");
             m_transformStack.emplace_back();
         }
-        return m_transformStack.emplace_back(m_transformStack.back().combine(t));
+        return m_transformStack.emplace_back(sf::Transform(m_transformStack.back()).combine(t));
         //return m_transformStack.back();
     }
 } // padi

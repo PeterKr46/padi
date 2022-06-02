@@ -33,6 +33,7 @@ namespace padi::content {
         padi::content::MenuBackground m_background;
         std::shared_ptr<padi::Activity> m_next{nullptr};
 
+        sf::Clock m_runtime;
         sf::Font m_font;
         std::vector<sf::Text> m_text;
 

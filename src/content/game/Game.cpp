@@ -107,13 +107,11 @@ namespace padi::content {
         m_level->populateVBO();
         m_vfxBuffer.clear();
         auto states = sf::RenderStates::Default;
-        states.transform.scale(
-                sf::Vector2f(256.f / m_vfxBuffer.getView().getSize().y, 256.f / m_vfxBuffer.getView().getSize().y));
+        states.transform.scale(256.f / m_vfxBuffer.getView().getSize().y, 256.f / m_vfxBuffer.getView().getSize().y);
         m_vfxBuffer.draw(*m_level, states);
         m_uiContext.nextFrame();
         if(m_level->isPaused()) {
-            auto & t = m_uiContext.pushTransform();
-            t.translate(8, 256 - 72);
+            m_uiContext.pushTransform().translate(228 - 64, 256 - 72);
             if(padi::Immediate::Button(&m_uiContext, "Q", sf::FloatRect{0,0,32,32})) {
 
             }
