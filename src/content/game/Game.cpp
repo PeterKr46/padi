@@ -8,8 +8,8 @@
 #include "../../level/LevelGenerator.h"
 #include "../../level/SpawnEvent.h"
 #include "../../map/Tile.h"
-#include "../../entity/StaticEntity.h"
 #include "../abilities/Abilities.h"
+#include "../../ui/Immediate.h"
 
 namespace padi::content {
 
@@ -28,6 +28,7 @@ namespace padi::content {
                     .withArea({100, 100})
                     .generate();
             m_level->initCursor("cursor"); // TODO
+            m_uiContext.init("../media/ui.apollo", "../media/ui_sheet.png");
 
             auto apollo = m_level->getApollo();
             // TODO name
@@ -109,6 +110,25 @@ namespace padi::content {
         states.transform.scale(
                 sf::Vector2f(256.f / m_vfxBuffer.getView().getSize().y, 256.f / m_vfxBuffer.getView().getSize().y));
         m_vfxBuffer.draw(*m_level, states);
+        m_uiContext.nextFrame();
+        if(m_level->isPaused()) {
+            auto & t = m_uiContext.pushTransform();
+            t.translate(8, 256 - 72);
+            if(padi::Immediate::Button(&m_uiContext, "Q", sf::FloatRect{0,0,32,32})) {
+
+            }
+            if(padi::Immediate::Button(&m_uiContext, "W", sf::FloatRect{32,0,32,32})) {
+
+            }
+            if(padi::Immediate::Button(&m_uiContext, "E", sf::FloatRect{64,0,32,32})) {
+
+            }
+            if(padi::Immediate::Button(&m_uiContext, "R", sf::FloatRect{96,0,32,32})) {
+
+            }
+            m_uiContext.popTransform();
+        }
+        m_vfxBuffer.draw(m_uiContext);
 
         auto rState = sf::RenderStates::Default;
         auto shader =  m_level->getApollo()->lookupShader("fpa");
@@ -119,7 +139,6 @@ namespace padi::content {
         m_renderTarget->setView(m_renderTarget->getDefaultView());
 
         m_renderTarget->draw(m_screenQuad, rState);
-
     }
 
     void Game::handleResize(int width, int height) {

@@ -89,8 +89,8 @@ bool padi::LivingEntity::onCycleBegin(padi::Level *lvl) {
         std::cout << "[padi::LivingEntity(" << m_name << ")] Casting." << std::endl;
         m_intent.cast = false;
         m_inAction.cast = true;
-        m_intent.cast_ability->cast(lvl, m_intent.cast_pos);
         m_animation = m_apolloCtx->at("idle");
+        m_intent.cast_ability->cast(lvl, m_intent.cast_pos);
     } else {
         std::cout << "[padi::LivingEntity(" << m_name << ")] Idle." << std::endl;
         m_animation = m_apolloCtx->at("idle");

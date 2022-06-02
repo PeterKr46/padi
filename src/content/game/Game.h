@@ -7,6 +7,7 @@
 #include "SFML/Graphics/RenderTexture.hpp"
 #include "../../entity/LivingEntity.h"
 #include "SFML/Graphics/Shader.hpp"
+#include "../../ui/UIContext.h"
 
 namespace padi::content {
     class Game : public padi::Activity {
@@ -27,6 +28,8 @@ namespace padi::content {
         sf::RenderTexture m_vfxBuffer;
         sf::VertexArray m_screenQuad{sf::Quads, 4};
         std::shared_ptr<Level> m_level;
+
+        padi::UIContext m_uiContext;
 
         std::shared_ptr<padi::LivingEntity> m_player;
         std::vector<std::shared_ptr<padi::Ability>> m_playerAbilities;
