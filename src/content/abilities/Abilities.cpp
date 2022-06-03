@@ -13,7 +13,15 @@
 namespace padi {
 
     bool content::Teleport::cast(padi::Level *lvl, const sf::Vector2i &pos) {
+        auto tile = lvl->getMap()->getTile(pos);
+        if (!tile || !tile->m_walkable) {
+            castCancel(lvl);
+            return false;
+        }
+
         lvl->hideCursor();
+        lvl->getMap()->removeEntity(m_ghost);
+        lvl->getMap()->removeEntity(m_ghostFX);
 
         auto ose = std::make_shared<padi::OneshotEntityStack>(m_user->getPosition());
         ose->m_animation = lvl->getApollo()->lookupAnim("lightning");
@@ -34,14 +42,33 @@ namespace padi {
 
     void content::Teleport::castIndicator(padi::Level *level) {
         level->showCursor();
+        auto pos = level->getCursorLocation();
+        auto tile = level->getMap()->getTile(pos);
+        if (!tile || !tile->m_walkable) {
+            level->getMap()->removeEntity(m_ghost);
+            level->getMap()->removeEntity(m_ghostFX);
+            level->getCursor()->m_color = sf::Color::Red;
+        } else {
+            level->getMap()->moveEntity(m_ghost, level->getCursorLocation());
+            level->getMap()->moveEntity(m_ghostFX, level->getCursorLocation());
+        }
+        m_ghost->m_color = m_user->getColor();
+        m_ghost->m_color.a = 128;
+        m_ghostFX->m_color = m_ghost->m_color;
+        if (!m_ghostFX->m_animation) m_ghostFX->m_animation = level->getApollo()->lookupAnim("lightning_hold");
     }
 
     void content::Teleport::castCancel(padi::Level *level) {
         level->hideCursor();
+        level->getMap()->removeEntity(m_ghost);
+        level->getMap()->removeEntity(m_ghostFX);
     }
 
     content::Teleport::Teleport(std::shared_ptr<padi::LivingEntity> user) : Ability(std::move(user)) {
-
+        m_ghost = std::make_shared<StaticEntity>(sf::Vector2i{0, 0});
+        m_ghost->m_animation = m_user->getAnimationSet()->at("idle");
+        m_ghostFX = std::make_shared<EntityStack>(sf::Vector2i{0, 0});
+        m_ghostFX->m_stackSize = 8;
     }
 
     bool content::Lighten::cast(padi::Level *lvl, const sf::Vector2i &pos) {
@@ -74,7 +101,7 @@ namespace padi {
         level->hideCursor();
     }
 
-    content::Lighten::Lighten(std::shared_ptr<LivingEntity> user) : Ability(std::move(user)){
+    content::Lighten::Lighten(std::shared_ptr<LivingEntity> user) : Ability(std::move(user)) {
 
     }
 
@@ -122,7 +149,7 @@ namespace padi {
     bool content::Walk::cast(padi::Level *lvl, const sf::Vector2i &pos) {
         LimitedRangeAbility::cast(lvl, pos);
         lvl->hideCursor();
-        if(std::find(m_inRange.begin(), m_inRange.end(), pos) == m_inRange.end()) {
+        if (std::find(m_inRange.begin(), m_inRange.end(), pos) == m_inRange.end()) {
             return false;
         }
         if (!path.empty()) {
@@ -174,10 +201,10 @@ namespace padi {
 
     }
 
-    void content::Walk::recalculateRange(Level* level) {
+    void content::Walk::recalculateRange(Level *level) {
         m_shortestPaths = padi::Crawl(level->getMap(), m_user->getPosition(), getRange());
         m_inRange.clear();
-        for(auto & m_shortestPath : m_shortestPaths) {
+        for (auto &m_shortestPath: m_shortestPaths) {
             m_inRange.emplace_back(m_shortestPath.first);
         }
         std::cout << m_shortestPaths.size() << std::endl;
@@ -237,7 +264,7 @@ namespace padi {
         LimitedRangeAbility::castCancel(lvl);
     }
 
-    void content::Dash::recalculateRange(Level* level) {
+    void content::Dash::recalculateRange(Level *level) {
         m_inRange.resize(getRange());
         sf::Vector2i min = m_user->getPosition();
         for (int i = 0; i < getRange(); ++i) {

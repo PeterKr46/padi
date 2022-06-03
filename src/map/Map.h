@@ -33,17 +33,17 @@ namespace padi {
 
     class Map {
     public:
-        [[nodiscard]] sf::Vector2i mapWorldPosToTile(sf::Vector2f const& world) const;
-        [[nodiscard]] sf::Vector2f mapTilePosToWorld(sf::Vector2i const& tile, int z = 0) const;
+        [[nodiscard]] static sf::Vector2i mapWorldPosToTile(sf::Vector2f const& world) ;
+        [[nodiscard]] static sf::Vector2f mapTilePosToWorld(sf::Vector2i const& tile, int z = 0) ;
 
         [[nodiscard]] std::shared_ptr<padi::Tile> getTile(sf::Vector2i const& pos) const;
         [[nodiscard]] std::shared_ptr<padi::Tile> getTile(int x, int y) const;
 
-        bool addTile(std::shared_ptr<padi::Tile> tile);
+        bool addTile(const std::shared_ptr<padi::Tile>& tile);
 
         size_t getEntities(sf::Vector2i const& pos, std::vector<std::shared_ptr<Entity>>& entities) const;
 
-        void addEntity(std::shared_ptr<Entity> entity, size_t lower_by = 0);
+        void addEntity(const std::shared_ptr<Entity>& entity, size_t lower_by = 0);
         void addEntity(const std::shared_ptr<Entity>& entity, sf::Vector2i const& where, size_t lower_by = 0);
 
         bool removeEntity(const std::shared_ptr<Entity>& entity);
@@ -63,7 +63,7 @@ namespace padi {
 
         bool addUIObject(const std::shared_ptr<padi::GridObject>& obj);
 
-        bool removeUIObject(std::shared_ptr<padi::GridObject> obj);
+        bool removeUIObject(const std::shared_ptr<padi::GridObject>& obj);
         bool removeUIObject(const std::shared_ptr<padi::GridObject>& obj, sf::Vector2i const& where);
 
         bool moveUIObject(const std::shared_ptr<padi::GridObject> & obj, sf::Vector2i const& pos);

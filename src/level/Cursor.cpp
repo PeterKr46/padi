@@ -30,6 +30,7 @@ namespace padi {
             }
             if (padi::Controls::isAnyKeyPressed<sf::Keyboard::Key *>(&arrows[0], &arrows[4])) {
                 m_color = sf::Color::Yellow;
+                level->centerView(getPosition());
             } else {
                 m_color = sf::Color::White;
             }

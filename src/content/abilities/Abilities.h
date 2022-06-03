@@ -7,6 +7,7 @@
 #include "../../player/Ability.h"
 #include "../../level/CycleListener.h"
 #include "../../Paths.h"
+#include "../../entity/EntityStack.h"
 
 namespace padi {
     class StaticEntity;
@@ -53,6 +54,9 @@ namespace padi::content {
         void castCancel(padi::Level *level) override;
 
         void castIndicator(padi::Level *level) override;
+    private:
+        std::shared_ptr<padi::StaticEntity> m_ghost;
+        std::shared_ptr<padi::EntityStack> m_ghostFX;
     };
 
     class Walk : public padi::LimitedRangeAbility, public padi::CycleListener, public std::enable_shared_from_this<Walk> {

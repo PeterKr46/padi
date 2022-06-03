@@ -13,12 +13,12 @@
 
 namespace padi {
 
-    sf::Vector2i Map::mapWorldPosToTile(const sf::Vector2f &world) const {
+    sf::Vector2i Map::mapWorldPosToTile(const sf::Vector2f &world) {
         sf::Vector2f local = world + sf::Vector2f (padi::TileSize.x / 2.f, padi::TileSize.y / 4.f);
         return {int(2 * local.y + (local.x - padi::TileSize.x / 2)) / padi::TileSize.x, int(2 * local.y - (local.x - padi::TileSize.x / 2)) / padi::TileSize.x};
     }
 
-    sf::Vector2f Map::mapTilePosToWorld(const sf::Vector2i &tile, int z) const {
+    sf::Vector2f Map::mapTilePosToWorld(const sf::Vector2i &tile, int z) {
         return {float(tile.x - tile.y) * 0.5f * padi::TileSize.x, float(tile.x + tile.y - z) * 0.25f * padi::TileSize.y};
     }
 
@@ -134,7 +134,7 @@ namespace padi {
         }
     }
 
-    bool Map::addTile(std::shared_ptr<padi::Tile> t) {
+    bool Map::addTile(const std::shared_ptr<padi::Tile>& t) {
         if(m_tiles.find(t->getPosition()) == m_tiles.end()) {
             m_tiles[t->getPosition()] = {t,{}};
             return true;
@@ -142,7 +142,7 @@ namespace padi {
         return false;
     }
 
-    void Map::addEntity(const std::shared_ptr<Entity> e, size_t lower_by) {
+    void Map::addEntity(const std::shared_ptr<Entity>& e, size_t lower_by) {
         addEntity(e, e->getPosition(), lower_by);
     }
 
@@ -169,7 +169,7 @@ namespace padi {
         return false;
     }
 
-    bool Map::removeUIObject(std::shared_ptr<padi::GridObject> obj) {
+    bool Map::removeUIObject(const std::shared_ptr<padi::GridObject>& obj) {
         return removeUIObject(obj, obj->getPosition());
     }
 

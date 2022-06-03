@@ -99,7 +99,7 @@ namespace padi {
 
     bool Level::centerView(const sf::Vector2i &position) {
         if (!m_viewLocked) {
-            m_viewTarget.setCenter(m_map.mapTilePosToWorld(position));
+            m_viewTarget.setCenter(padi::Map::mapTilePosToWorld(position));
         }
         return m_viewLocked;
     }
