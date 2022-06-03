@@ -21,7 +21,7 @@ namespace padi {
         auto pVertex = &array[vertexOffset];
 
         sf::Vector2f anchor = map->mapTilePosToWorld(getPosition());
-        float verticalOffset = std::min(float(padi::TileSize.y), size.y) / 2;
+        float verticalOffset = getVerticalOffset() + std::min(float(padi::TileSize.y), size.y) / 2;
         pVertex[0].position = anchor + sf::Vector2f(-size.x / 2, verticalOffset - size.y);
         pVertex[1].position = anchor + sf::Vector2f(size.x / 2,  verticalOffset - size.y);
         pVertex[2].position = anchor + sf::Vector2f(size.x / 2,   verticalOffset);

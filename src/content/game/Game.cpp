@@ -119,6 +119,10 @@ namespace padi::content {
 
             }
             m_uiContext.popTransform();
+            m_uiContext.pushTransform().translate(8,8);
+            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{0, 0, 32, 32}, 0,
+                                    m_uiContext.getApollo()->lookupAnim("entity_dock"), sf::Color(200, 200, 200, 128));
+            m_uiContext.popTransform();
         }
         m_vfxBuffer.draw(m_uiContext);
 

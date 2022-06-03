@@ -27,4 +27,12 @@ namespace padi {
     size_t Entity::numQuads() const {
         return 1;
     }
+
+    void Entity::setVerticalOffset(float vo) {
+        m_verticalOffset = vo;
+    }
+
+    float Entity::getVerticalOffset() const {
+        return m_verticalOffset;
+    }
 }

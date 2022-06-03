@@ -46,7 +46,6 @@ namespace padi {
     bool Map::moveEntity(const std::shared_ptr<Entity>& entity, const sf::Vector2i &pos2, size_t lower_by) {
         removeEntity(entity);
         addEntity(entity, pos2, lower_by);
-        entity->m_position = pos2;
         return true; // TODO ?
     }
 
@@ -80,6 +79,7 @@ namespace padi {
                 iter->second.second.insert(iter->second.second.begin() + (iter->second.second.size() - lower_by), entity);
             }
             entity->m_position = where;
+            entity->setVerticalOffset(iter->second.first->getVerticalOffset());
         }
     }
 

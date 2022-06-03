@@ -87,20 +87,18 @@ namespace padi {
                     int r = int(16 * (m_perlin.normalizedOctave2D_01(234 + pos.x * cScale, pos.y * cScale, 2))) * 90;
                     float m = (z * m_perlin.normalizedOctave2D_01(pos.x * mScale, pos.y * mScale, 7));
                     t->setColor(hsv(r, 0.2f,  m * 0.5 + 0.5));
-                    //t->setVerticalOffset(z*4);
+                    //t->setVerticalOffset(int(z * 4));
                     level->getMap()->addTile(t);
                     if (m > 0.12) {
                         auto e = std::make_shared<padi::StaticEntity>(pos);
                         e->m_animation = level->m_apollo.lookupAnim(
                                 m > 0.35 ? "peak" : (m > 0.3 ? "mountain" : (m > 0.25 ? "rocks" : "hill")));
-                        t->setVerticalOffset(3);
                         t->m_walkable = m < 0.25;
                         t->setDecoration(e);
                     }
                     else {
                         auto e = std::make_shared<padi::StaticEntity>(pos);
                         e->m_animation = level->m_apollo.lookupAnim(int(m * 12) % 2 ? "pillars" : "houses_b");
-                        t->setVerticalOffset(3);
                         t->setDecoration(e);
                     }
                 }

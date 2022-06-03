@@ -127,8 +127,9 @@ namespace padi {
         auto color = tile->getColor();
         color = sf::Color(std::max(48, color.r - 32), std::max(48, color.g - 32), std::max(48, color.b - 32), 255);
         tile->setColor(color);
-
+        tile->setVerticalOffset(frame % 2);
         if (frame == 8) {
+            tile->setVerticalOffset(0);
             auto fire = std::make_shared<padi::StaticEntity>(strikePos);
             fire->m_animation = lvl->getApollo()->lookupAnim("fire");
             fire->m_color = sf::Color::Black;
@@ -224,8 +225,8 @@ namespace padi {
         LimitedRangeAbility::cast(lvl, pos);
         auto delta = m_user->getPosition() - pos;
         bool x = m_direction.x != 0;
-        auto finalPos = m_user->getPosition() + m_direction * int(getRange() + 1);
-        for (size_t i = 0; i < getRange(); ++i) {
+        auto finalPos = m_user->getPosition() + m_direction * int(getRange());
+        for (size_t i = 0; i < getRange()-1; ++i) {
             auto laserPart = std::make_shared<padi::OneshotEntity>(m_user->getPosition() + m_direction * int(i + 1));
             laserPart->m_animation = lvl->getApollo()->lookupAnim(x ? "laser_x_burst" : "laser_y_burst");
             laserPart->m_color = m_user->getColor();
@@ -268,7 +269,7 @@ namespace padi {
         m_inRange.resize(getRange());
         sf::Vector2i min = m_user->getPosition();
         for (int i = 0; i < getRange(); ++i) {
-            m_inRange[i] = (min + m_direction * i);
+            m_inRange[i] = (min + m_direction * (i+1));
         }
         m_rangeChanged = false;
     }

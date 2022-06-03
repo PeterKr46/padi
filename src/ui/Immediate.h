@@ -18,8 +18,9 @@ namespace padi {
     public:
         static bool Button(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size);
 
-        static bool
-        Switch(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size, bool *ptr = nullptr);
+        static bool Switch(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size, bool *ptr = nullptr);
+
+        static void Sprite(padi::UIContext *ctx, sf::FloatRect const &size, size_t frame, const std::shared_ptr<Animation> &anim, sf::Color const& color = sf::Color::White);
 
         static bool checkFocusSwitch(padi::UIContext *ctx, size_t id);
 

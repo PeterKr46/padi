@@ -16,7 +16,7 @@ namespace padi {
         sf::Vector2f size{getSize()};
 
         sf::Vector2f anchor = map->mapTilePosToWorld(getPosition());
-        float verticalOffset = m_verticalOffset + std::min(float(padi::TileSize.y), size.y) / 2;
+        float verticalOffset = getVerticalOffset() + m_verticalStep + std::min(float(padi::TileSize.y), size.y) / 2;
         sf::Vertex* quad;
         sf::Vector2f texCoordAnchor;
 

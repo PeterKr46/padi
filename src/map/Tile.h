@@ -23,9 +23,9 @@ namespace padi {
 
         [[nodiscard]] sf::Color getColor() const;
 
-        void setVerticalOffset(int32_t vo);
+        void setVerticalOffset(float vo);
 
-        [[nodiscard]] int32_t getVerticalOffset() const;
+        [[nodiscard]] float getVerticalOffset() const;
 
         std::shared_ptr<padi::Entity> getDecoration() const;
         void setDecoration(std::shared_ptr<padi::Entity> decor);
@@ -36,7 +36,7 @@ namespace padi {
 
     private:
         size_t m_detail{0};
-        int32_t m_verticalOffset{0};
+        float m_verticalOffset{0};
         sf::Color m_color;
         std::shared_ptr<padi::Entity> m_decoration;
     };

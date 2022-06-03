@@ -16,5 +16,9 @@ namespace padi {
 
         [[nodiscard]] virtual sf::Vector2i getSize() const = 0;
 
+        void setVerticalOffset(float vo);
+        float getVerticalOffset() const;
+    private:
+        float m_verticalOffset{0};
     };
 }

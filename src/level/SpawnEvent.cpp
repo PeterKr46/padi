@@ -20,7 +20,7 @@ namespace padi {
         if (apolloCtx->find("spawn_ray") != apolloCtx->end()) {
             m_ray = std::make_shared<OneshotEntityStack>(m_entity->getPosition());
             m_ray->m_animation = apolloCtx->at("spawn_ray");
-            m_ray->m_verticalOffset = padi::TileSize.y;
+            m_ray->m_verticalStep = padi::TileSize.y;
         }
     }*/
 
@@ -33,7 +33,7 @@ namespace padi {
             m_ray->m_color = m_entity->getColor();
             m_ray->m_animation = apolloCtx->at("spawn_ray");
             m_ray->m_stackSize = 16;
-            m_ray->m_verticalOffset = -padi::TileSize.y;
+            m_ray->m_verticalStep = -padi::TileSize.y;
         }
     }
 

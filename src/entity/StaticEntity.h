@@ -20,6 +20,7 @@ namespace padi {
 
         [[nodiscard]] sf::Vector2i getSize() const override;
 
+
         sf::Color m_color{255, 255, 255};
         std::shared_ptr<padi::Animation> m_animation;
     };
