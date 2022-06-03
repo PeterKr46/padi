@@ -62,8 +62,17 @@ namespace padi {
         while (m_cycle.carried_uS > padi::FrameTime_uS) {
             handleFrameEnd(m_cycleListeners.frameEnd, this, m_cycle.frame);
 
-            m_view.setSize(m_viewTarget.getSize());//(m_viewTarget.getSize() * 0.3f + 0.7f * m_view.getSize()));
-            m_view.setCenter((m_viewTarget.getCenter() * 0.9f + 0.1f * m_view.getCenter()));
+            m_view.setSize(m_viewTarget.getSize());
+            auto delta = m_viewTarget.getCenter() - m_view.getCenter();
+            float deltaMag = abs(delta.x) + abs(delta.y); //sqrt(delta.x * delta.x + delta.y * delta.y);
+            if(deltaMag > TileSize.x * 8.f) {
+                m_view.setCenter(m_viewTarget.getCenter());
+            } else if(deltaMag > TileSize.x * 3.f){
+                /*auto deltaDir = delta / sqrt(delta.x * delta.x + delta.y * delta.y);
+                m_view.setCenter(m_view.getCenter() + deltaDir * std::min(deltaMag, float(TileSize.x) / 4));
+            } else {*/
+                m_view.setCenter(m_view.getCenter() + delta * 0.8f * (1 - (TileSize.x * 3) / deltaMag));
+            }
 
             m_cycle.carried_uS -= padi::FrameTime_uS;
 
