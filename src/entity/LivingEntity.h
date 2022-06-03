@@ -8,6 +8,7 @@
 #include "../media/Apollo.h"
 #include "../level/Level.h"
 #include "StaticEntity.h"
+#include "../level/CycleListener.h"
 
 namespace padi {
 

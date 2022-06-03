@@ -9,10 +9,10 @@
 #include <SFML/Graphics/VertexArray.hpp>
 #include "../map/Map.h"
 #include "../media/Apollo.h"
+#include "CycleListener.h"
 
 namespace padi {
 
-    class CycleListener;
     class LevelGenerator;
     class Cursor;
 
@@ -91,17 +91,6 @@ namespace padi {
 
         padi::Map m_map;
         std::shared_ptr<padi::Cursor> m_cursor;
-    };
-
-    class CycleListener {
-    public:
-        virtual bool onCycleBegin(Level *) { return false; }
-
-        virtual bool onCycleEnd(Level *) { return false; }
-
-        virtual bool onFrameBegin(Level *, uint8_t frame) { return false; }
-
-        virtual bool onFrameEnd(Level *, uint8_t frame) { return false; }
     };
 
 } // padi

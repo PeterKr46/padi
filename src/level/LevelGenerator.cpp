@@ -86,11 +86,7 @@ namespace padi {
                     auto t = std::make_shared<padi::Tile>(pos);
                     int r = int(16 * (m_perlin.normalizedOctave2D_01(234 + pos.x * cScale, pos.y * cScale, 2))) * 90;
                     float m = (z * m_perlin.normalizedOctave2D_01(pos.x * mScale, pos.y * mScale, 7));
-                    //t->m_detail = std::max(0.,m_perlin.octave2D_01((pos.x - 320) * zScale, pos.y * zScale, 3) * 3.9 - 0.3);
-
-                    /*uint8_t g = 255.f * z * m_perlin.normalizedOctave2D_01(pos.x * cScale, 2345+ pos.y * cScale, 2);
-                    uint8_t b = 255.f * z * m_perlin.normalizedOctave2D_01( 768 +pos.x * cScale, 789 +pos.y * cScale, 2);*/
-                    t->setColor(hsv(r, 0.2f,  z));
+                    t->setColor(hsv(r, 0.2f,  m * 0.5 + 0.5));
                     //t->setVerticalOffset(z*4);
                     level->getMap()->addTile(t);
                     if (m > 0.12) {
@@ -105,7 +101,6 @@ namespace padi {
                         auto e = std::make_shared<padi::StaticEntity>(pos);
                         e->m_animation = level->m_apollo.lookupAnim(int(m * 12) % 2 ? "pillars" : "houses_b");
                         t->setVerticalOffset(3);
-                        t->m_walkable = m < 0.25;
                         t->setDecoration(e);
                     }
                 }

@@ -10,7 +10,7 @@
 
 namespace padi::content {
 
-    class Disolver : public padi::CycleListener, public std::enable_shared_from_this<Disolver> {
+    class Disolver : public CycleListener, public std::enable_shared_from_this<Disolver> {
     public:
         bool onFrameBegin(Level *level, uint8_t frame) override {
             std::vector<sf::Vector2i> remove;
@@ -47,7 +47,7 @@ namespace padi::content {
         }
     };
 
-    class RandomizedMovement : public padi::CycleListener, public std::enable_shared_from_this<RandomizedMovement> {
+    class RandomizedMovement : public CycleListener, public std::enable_shared_from_this<RandomizedMovement> {
     public:
         explicit RandomizedMovement(std::vector<std::shared_ptr<padi::LivingEntity>> const &entity) {
             m_entities = entity;

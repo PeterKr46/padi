@@ -154,14 +154,11 @@ namespace padi {
     }
 
     bool Map::addUIObject(const std::shared_ptr<padi::GridObject> &t) {
-        if (m_ui.find(t->getPosition()) == m_ui.end()) {
             m_ui[t->getPosition()] = t;
             return true;
-        }
-        return false;
     }
 
-    bool Map::removeUIObject(std::shared_ptr<padi::GridObject> obj, const sf::Vector2i &pos) {
+    bool Map::removeUIObject(const std::shared_ptr<padi::GridObject>& obj, const sf::Vector2i &pos) {
         auto iter = m_ui.find(pos);
         if (iter != m_ui.end()) { // Check entry at pos
             if(iter->second == obj) {

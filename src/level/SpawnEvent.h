@@ -8,10 +8,11 @@
 #include "../entity/LivingEntity.h"
 #include "../entity/EntityStack.h"
 #include "../entity/OneshotEntity.h"
+#include "CycleListener.h"
 
 namespace padi {
     class SpawnEvent
-            : public padi::CycleListener, public std::enable_shared_from_this<SpawnEvent> {
+            : public CycleListener, public std::enable_shared_from_this<SpawnEvent> {
     public:
         explicit SpawnEvent(const std::shared_ptr<LivingEntity>& entity);
         explicit SpawnEvent(std::shared_ptr<LivingEntity> entity, sf::Vector2i const& pos);

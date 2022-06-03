@@ -5,20 +5,20 @@
 #include "Abilities.h"
 
 #include <utility>
-#include "../../map/Tile.h"
 #include "../../level/Cursor.h"
-#include "../../AStar.h"
 #include "../../Controls.h"
+#include "../../entity/OneshotEntity.h"
+#include "../../level/SpawnEvent.h"
 
 namespace padi {
 
     bool content::Teleport::cast(padi::Level *lvl, const sf::Vector2i &pos) {
         lvl->hideCursor();
 
-        auto ose = std::make_shared<padi::OneshotEntityStack>(user->getPosition());
+        auto ose = std::make_shared<padi::OneshotEntityStack>(m_user->getPosition());
         ose->m_animation = lvl->getApollo()->lookupAnim("lightning");
         ose->m_stackSize = 8;
-        ose->m_color = user->getColor();
+        ose->m_color = m_user->getColor();
         lvl->addCycleEndListener(ose);
         lvl->getMap()->addEntity(ose);
 
@@ -26,8 +26,8 @@ namespace padi {
         ap->sound.setPitch((abs(pos.x) + abs(pos.y)) % 2 == 0 ? 1.2 : 1.0);
         lvl->addCycleEndListener(ap);
 
-        lvl->getMap()->removeEntity(user);
-        auto spawnEvent = std::make_shared<padi::SpawnEvent>(user, pos);
+        lvl->getMap()->removeEntity(m_user);
+        auto spawnEvent = std::make_shared<padi::SpawnEvent>(m_user, pos);
         spawnEvent->onCycleBegin(lvl);
         return true;
     }
@@ -38,6 +38,10 @@ namespace padi {
 
     void content::Teleport::castCancel(padi::Level *level) {
         level->hideCursor();
+    }
+
+    content::Teleport::Teleport(std::shared_ptr<padi::LivingEntity> user) : Ability(std::move(user)) {
+
     }
 
     bool content::Lighten::cast(padi::Level *lvl, const sf::Vector2i &pos) {
@@ -68,6 +72,10 @@ namespace padi {
 
     void content::Lighten::castCancel(padi::Level *level) {
         level->hideCursor();
+    }
+
+    content::Lighten::Lighten(std::shared_ptr<LivingEntity> user) : Ability(std::move(user)){
+
     }
 
     bool content::Darken::cast(padi::Level *lvl, const sf::Vector2i &pos) {
@@ -107,14 +115,21 @@ namespace padi {
         level->hideCursor();
     }
 
-    bool content::Walk::cast(padi::Level *lvl, const sf::Vector2i &pos) {
-        lvl->hideCursor();
+    content::Darken::Darken(std::shared_ptr<padi::LivingEntity> user) : Ability(std::move(user)) {
 
+    }
+
+    bool content::Walk::cast(padi::Level *lvl, const sf::Vector2i &pos) {
+        LimitedRangeAbility::cast(lvl, pos);
+        lvl->hideCursor();
+        if(std::find(m_inRange.begin(), m_inRange.end(), pos) == m_inRange.end()) {
+            return false;
+        }
         if (!path.empty()) {
             path.clear();
             return true;
         }
-        path = padi::FindPath(lvl->getMap(), user->getPosition(), pos);
+        path = padi::FindPath(lvl->getMap(), m_user->getPosition(), pos);
         if (path.empty()) {
             return false;
         }
@@ -123,7 +138,7 @@ namespace padi {
     }
 
     bool content::Walk::onCycleEnd(Level *lvl) {
-        user->intentMove(path.front());
+        m_user->intentMove(path.front());
         lvl->addCycleBeginListener(shared_from_this());
 
         path.erase(path.begin());
@@ -136,10 +151,12 @@ namespace padi {
         ap->sound.setPitch(pitches[rand() % 3]);
         ap->sound.setVolume(30);
         lvl->addCycleEndListener(ap);
+        m_rangeChanged = true;
         return false;
     }
 
     void content::Walk::castIndicator(padi::Level *level) {
+        LimitedRangeAbility::castIndicator(level);
         level->showCursor();
         auto tile = level->getMap()->getTile(level->getCursorLocation());
         if (!tile || !tile->m_walkable) {
@@ -148,28 +165,40 @@ namespace padi {
     }
 
     void content::Walk::castCancel(padi::Level *level) {
+        LimitedRangeAbility::castCancel(level);
         level->hideCursor();
+    }
+
+    content::Walk::Walk(std::shared_ptr<padi::LivingEntity> user, size_t range)
+            : padi::LimitedRangeAbility(std::move(user), range) {
+
+    }
+
+    void content::Walk::recalculateRange(Level* level) {
+        m_shortestPaths = padi::Crawl(level->getMap(), m_user->getPosition(), getRange());
+        m_inRange.clear();
+        for(auto & m_shortestPath : m_shortestPaths) {
+            m_inRange.emplace_back(m_shortestPath.first);
+        }
+        std::cout << m_shortestPaths.size() << std::endl;
+        m_rangeChanged = false;
     }
 
 
     content::Dash::Dash(std::shared_ptr<padi::LivingEntity> user, size_t range)
-            : m_user(std::move(user)) {
-        for (size_t i = 0; i < range; ++i) {
-            m_rangeFX.push_back(std::make_shared<padi::StaticEntity>(m_user->getPosition()));
-        }
+            : padi::LimitedRangeAbility(std::move(user), range) {
     }
 
     bool content::Dash::cast(padi::Level *lvl, const sf::Vector2i &pos) {
-        if(m_direction.x == 0 && m_direction.y == 0) {
+        if (m_direction.x == 0 && m_direction.y == 0) {
             castCancel(lvl);
             return false;
         }
-        for (auto const &i: m_rangeFX) lvl->getMap()->removeUIObject(i);
-
+        LimitedRangeAbility::cast(lvl, pos);
         auto delta = m_user->getPosition() - pos;
         bool x = m_direction.x != 0;
-        auto finalPos = m_user->getPosition() + m_direction * int(m_rangeFX.size() + 1);
-        for (size_t i = 0; i < m_rangeFX.size(); ++i) {
+        auto finalPos = m_user->getPosition() + m_direction * int(getRange() + 1);
+        for (size_t i = 0; i < getRange(); ++i) {
             auto laserPart = std::make_shared<padi::OneshotEntity>(m_user->getPosition() + m_direction * int(i + 1));
             laserPart->m_animation = lvl->getApollo()->lookupAnim(x ? "laser_x_burst" : "laser_y_burst");
             laserPart->m_color = m_user->getColor();
@@ -183,7 +212,6 @@ namespace padi {
         lvl->getMap()->addEntity(strike);
         lvl->addCycleEndListener(strike);
         lvl->centerView(finalPos);
-        m_indicatorOOD = true;
         m_direction = sf::Vector2i(0, 0);
         return true;
     }
@@ -191,28 +219,30 @@ namespace padi {
     void content::Dash::castIndicator(padi::Level *lvl) {
         if (padi::Controls::wasKeyPressed(sf::Keyboard::Up)) {
             m_direction = Up;
-            m_indicatorOOD = true;
+            m_rangeChanged = true;
         } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Down)) {
             m_direction = Down;
-            m_indicatorOOD = true;
+            m_rangeChanged = true;
         } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Left)) {
             m_direction = Left;
-            m_indicatorOOD = true;
+            m_rangeChanged = true;
         } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Right)) {
             m_direction = Right;
-            m_indicatorOOD = true;
+            m_rangeChanged = true;
         }
-        if (m_indicatorOOD) {
-            m_indicatorOOD = false;
-            for (size_t i = 0; i < m_rangeFX.size(); ++i) {
-                m_rangeFX[i]->m_animation = lvl->getApollo()->lookupAnim("indicator");
-                m_rangeFX[i]->m_color = m_user->getColor();
-                lvl->getMap()->moveUIObject(m_rangeFX[i], m_user->getPosition() + m_direction * int(i + 1));
-            }
-        }
+        LimitedRangeAbility::castIndicator(lvl);
     }
 
     void content::Dash::castCancel(padi::Level *lvl) {
-        for (auto const &i: m_rangeFX) lvl->getMap()->removeUIObject(i);
+        LimitedRangeAbility::castCancel(lvl);
+    }
+
+    void content::Dash::recalculateRange(Level* level) {
+        m_inRange.resize(getRange());
+        sf::Vector2i min = m_user->getPosition();
+        for (int i = 0; i < getRange(); ++i) {
+            m_inRange[i] = (min + m_direction * i);
+        }
+        m_rangeChanged = false;
     }
 }

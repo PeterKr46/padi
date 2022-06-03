@@ -38,17 +38,11 @@ namespace padi::content {
             leSpawn->dispatch(m_level);
             m_level->centerView(m_player->getPosition());
 
-            auto walk = std::make_shared<padi::content::Walk>();
-            walk->user = m_player;
-            m_playerAbilities.push_back(walk);
-            auto tp = std::make_shared<padi::content::Teleport>();
-            tp->user = m_player;
-            m_playerAbilities.push_back(tp);
-            m_playerAbilities.push_back(std::make_shared<padi::content::Lighten>());
-
-            m_playerAbilities.push_back(std::make_shared<padi::content::Darken>());
-            auto dash = std::make_shared<padi::content::Dash>(m_player, 8);
-            m_playerAbilities.push_back(dash);
+            m_playerAbilities.push_back(std::make_shared<padi::content::Walk>(m_player, 8));
+            m_playerAbilities.push_back(std::make_shared<padi::content::Teleport>(m_player));
+            m_playerAbilities.push_back(std::make_shared<padi::content::Lighten>(m_player));
+            m_playerAbilities.push_back(std::make_shared<padi::content::Darken>(m_player));
+            m_playerAbilities.push_back(std::make_shared<padi::content::Dash>(m_player, 8));
 
             printf("[padi::content::Game] VfxBuffer at size %u, %u!\n", m_vfxBuffer.getSize().x, m_vfxBuffer.getSize().y);
         } else {

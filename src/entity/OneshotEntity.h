@@ -9,6 +9,7 @@
 #include "../level/Level.h"
 #include <SFML/Audio/Sound.hpp>
 #include "../Constants.h"
+#include "../level/CycleListener.h"
 
 namespace padi {
 

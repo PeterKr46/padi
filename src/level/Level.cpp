@@ -7,6 +7,7 @@
 #include "../Constants.h"
 #include "../Controls.h"
 #include "Cursor.h"
+#include "CycleListener.h"
 
 namespace padi {
 

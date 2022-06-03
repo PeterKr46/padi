@@ -1,32 +1,48 @@
 //
-// Created by Peter on 29/04/2022.
+// Created by peter on 03/06/22.
 //
-#pragma once
-
-#include <vector>
-#include <array>
-#include <iostream>
-#include <SFML/System/Vector2.hpp>
-#include "map/Tile.h"
+#include "Paths.h"
 
 namespace padi {
-
-    struct compair { // xd
-        bool
-        operator()(std::pair<size_t, sf::Vector2i> const &left, std::pair<size_t, sf::Vector2i> const &right) const {
-            return left.first > right.first;
-        }
-
-        bool operator()(sf::Vector2i const &left, sf::Vector2i const &right) const {
-            return left.x < right.x || (left.x == right.x && left.y < right.y);
-        }
-    };
 
     int L1(sf::Vector2i const &a, sf::Vector2i const &b) {
         return abs(a.x - b.x) + abs(a.y - b.y);
     }
 
-    std::vector<sf::Vector2i> FindPath(padi::Map *map, sf::Vector2i const &from, sf::Vector2i const &to) {
+    std::map<sf::Vector2i, sf::Vector2i, compair> Crawl(padi::Map *map, const sf::Vector2i &from, size_t range) {
+        std::map<sf::Vector2i, sf::Vector2i, compair> cameFrom;
+        std::map<sf::Vector2i, size_t, compair> geodesicDistance;
+
+        std::priority_queue<std::pair<size_t, sf::Vector2i>, std::vector<std::pair<size_t, sf::Vector2i>>, compair> frontier;
+
+        frontier.push({0, from});
+        geodesicDistance.insert({from, 0});
+
+        while (!frontier.empty()) {
+            auto bestGuess = frontier.top();
+            frontier.pop();
+            if(bestGuess.first <= range) {
+                for (auto d: padi::AllDirections) {
+                    sf::Vector2i neighbor = bestGuess.second + d;
+                    auto neighborTile = map->getTile(neighbor);
+                    if (neighborTile && neighborTile->m_walkable ) {
+                        auto score = geodesicDistance.find(neighbor);
+                        if (score == geodesicDistance.end()) {
+                            frontier.push({bestGuess.first + 1, neighbor});
+                            geodesicDistance.insert({neighbor, bestGuess.first + 1});
+                            cameFrom[neighbor] = bestGuess.second;
+                        } else if (score->second > bestGuess.first + 1) {
+                            score->second = bestGuess.first + 1;
+                            cameFrom[neighbor] = bestGuess.second;
+                        }
+                    }
+                }
+            }
+        }
+        return cameFrom;
+    }
+
+    std::vector<sf::Vector2i> FindPath(padi::Map *map, const sf::Vector2i &from, const sf::Vector2i &to) {
         auto t = map->getTile(from);
         auto result = std::vector<sf::Vector2i>();
 

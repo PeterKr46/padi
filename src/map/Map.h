@@ -64,7 +64,7 @@ namespace padi {
         bool addUIObject(const std::shared_ptr<padi::GridObject>& obj);
 
         bool removeUIObject(std::shared_ptr<padi::GridObject> obj);
-        bool removeUIObject(std::shared_ptr<padi::GridObject> obj, sf::Vector2i const& where);
+        bool removeUIObject(const std::shared_ptr<padi::GridObject>& obj, sf::Vector2i const& where);
 
         bool moveUIObject(const std::shared_ptr<padi::GridObject> & obj, sf::Vector2i const& pos);
 
