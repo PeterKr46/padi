@@ -17,11 +17,13 @@ int main() {
 
     // Ambient sounds
     sf::Music ambient;
-    ambient.openFromFile("../media/audio/rain_hell/youfoundaclue - rain hell - OST -openjam 2020- - 03 charred.flac");
+    //ambient.openFromFile("../media/audio/rain_hell/youfoundaclue - rain hell - OST -openjam 2020- - 03 charred.flac");
+    ambient.openFromFile("../media/audio/shadydave/snowfall.ogg");
     ambient.setLoop(true);
-    ambient.setLoopPoints(sf::Music::TimeSpan(sf::Time(), ambient.getDuration() - sf::seconds(0.8)));
-    ambient.setPitch(120.f / 125.8f);
-    ambient.setVolume(10);
+    //ambient.setLoopPoints(sf::Music::TimeSpan(sf::Time(), ambient.getDuration() - sf::seconds(0.8)));
+    //ambient.setPitch(120.f / 125.8f);
+    ambient.setPitch(120.f/88.f);
+    ambient.setVolume(30);
     ambient.play();
 
     std::shared_ptr<padi::Activity> activity = std::make_shared<padi::content::MainMenu>

@@ -173,11 +173,11 @@ namespace padi {
     }
 
     bool content::Walk::onCycleBegin(Level *lvl) {
-        auto ap = std::make_shared<padi::AudioPlayback>(lvl->getApollo()->lookupAudio("chord_01"));
+       /* auto ap = std::make_shared<padi::AudioPlayback>(lvl->getApollo()->lookupAudio("chord_01"));
         float pitches[3]{1.0, 1.2, 0.8};
         ap->sound.setPitch(pitches[rand() % 3]);
         ap->sound.setVolume(30);
-        lvl->addCycleEndListener(ap);
+        lvl->addCycleEndListener(ap);*/
         m_rangeChanged = true;
         return false;
     }
