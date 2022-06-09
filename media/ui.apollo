@@ -16,3 +16,4 @@ audio switch_off        ../media/audio/greatsoundstube/switch_off.ogg
 anim walk               32 32   96 0    0 0 1
 anim teleport           32 32   96 32   0 0 1
 anim strike             32 32   96 64   0 0 1
+anim dash               32 32   96 96   0 0 1

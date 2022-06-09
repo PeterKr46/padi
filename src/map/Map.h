@@ -57,7 +57,7 @@ namespace padi {
 
         bool moveEntity(const std::shared_ptr<Entity>& entity, sf::Vector2i const& pos2, size_t lower_by = 0);
 
-        bool hasEntities(sf::Vector2i const& pos) const;
+        [[nodiscard]] bool hasEntities(sf::Vector2i const& pos) const;
 
         [[nodiscard]] size_t numQuads() const;
 

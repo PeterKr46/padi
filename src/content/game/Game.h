@@ -39,7 +39,6 @@ namespace padi::content {
         std::vector<std::shared_ptr<padi::Ability>> m_playerAbilities;
         int active = -1;
 
-        std::vector<std::shared_ptr<padi::Entity>> m_walkIndicators;
 
         sf::Clock m_graphicsClock;
     };
