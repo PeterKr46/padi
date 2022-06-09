@@ -45,6 +45,11 @@ namespace padi::content {
             m_playerAbilities.push_back(std::make_shared<padi::content::Dash>(m_player, 8));
 
             printf("[padi::content::Game] VfxBuffer at size %u, %u!\n", m_vfxBuffer.getSize().x, m_vfxBuffer.getSize().y);
+            auto light = std::make_shared<padi::StaticEntity>(sf::Vector2i{0,0});
+            light->m_animation = m_level->getApollo()->lookupAnim("lightshaft");
+            m_level->getMap()->addEntity(light);
+            light->m_color.a = 128;
+            light->setVerticalOffset(-8);
         } else {
             printf("[padi::content::Game] Could not create vfxBuffer Texture!\n");
         }
@@ -106,22 +111,13 @@ namespace padi::content {
         m_uiContext.nextFrame();
         if(m_level->isPaused()) {
             m_uiContext.pushTransform().translate(228 - 64, 256 - 72);
-            if(padi::Immediate::Button(&m_uiContext, "Q", sf::FloatRect{0,0,32,32})) {
-
-            }
-            if(padi::Immediate::Button(&m_uiContext, "W", sf::FloatRect{32,0,32,32})) {
-
-            }
-            if(padi::Immediate::Button(&m_uiContext, "E", sf::FloatRect{64,0,32,32})) {
-
-            }
-            if(padi::Immediate::Button(&m_uiContext, "R", sf::FloatRect{96,0,32,32})) {
-
-            }
-            m_uiContext.popTransform();
-            m_uiContext.pushTransform().translate(8,8);
-            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{0, 0, 32, 32}, 0,
-                                    m_uiContext.getApollo()->lookupAnim("entity_dock"), sf::Color(200, 200, 200, 128));
+            padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4, -4, 128, 40}, 0,
+                                            m_uiContext.getApollo()->lookupAnim("scalable_window"), sf::Color(128,128,128,255));
+            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{0,0,32,32},0,m_uiContext.getApollo()->lookupAnim("walk"));
+            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{40,0,32,32},0,m_uiContext.getApollo()->lookupAnim("teleport"));
+            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{80,0,32,32},0,m_uiContext.getApollo()->lookupAnim("strike"));
+            padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4 + float(active * 40), -4, 40, 40}, 0,
+                                            m_uiContext.getApollo()->lookupAnim("scalable_border"), m_player->getColor());
             m_uiContext.popTransform();
         }
         m_vfxBuffer.draw(m_uiContext);
@@ -160,5 +156,9 @@ namespace padi::content {
 
     void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 
+    }
+
+    std::shared_ptr<Level> Game::getLevel() {
+        return m_level;
     }
 } // content

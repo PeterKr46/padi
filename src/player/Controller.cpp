@@ -4,5 +4,11 @@
 
 #include "Controller.h"
 
+#include <utility>
+
 namespace padi {
+    Controller::Controller(std::shared_ptr<LivingEntity> entity)
+            : m_entity(std::move(entity)) {
+
+    }
 } // padi

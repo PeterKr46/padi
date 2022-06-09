@@ -2,6 +2,8 @@
 # block <context>
 # anim <key>            <w><h>  <x><y> [<stepx> <stepy> <frames>] [repeat]
 anim scalable_button    32 32   0 0     0 32 4
+anim scalable_border    32 32   64 64   0 32 1
+anim scalable_window    32 32   64 0    0 32 1
 anim switch             32 32   32 0    0 32 2
 
 anim entity_dock        32 32   64 32   0 32 11
@@ -9,3 +11,8 @@ anim entity_dock        32 32   64 32   0 32 11
 audio high_clack        ../media/audio/the_sample_workshop/high_clack.ogg
 audio switch_on         ../media/audio/greatsoundstube/switch_on.ogg
 audio switch_off        ../media/audio/greatsoundstube/switch_off.ogg
+
+
+anim walk               32 32   96 0    0 0 1
+anim teleport           32 32   96 32   0 0 1
+anim strike             32 32   96 64   0 0 1

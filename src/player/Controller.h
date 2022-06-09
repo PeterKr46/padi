@@ -10,9 +10,15 @@
 namespace padi {
 
     class Controller {
+    public:
+        explicit Controller(std::shared_ptr<LivingEntity> entity);
+
+        virtual void startTurn(padi::Level *lvl) = 0;
+
+        virtual bool turnComplete() = 0;
 
     protected:
-        std::shared_ptr<LivingEntity> m_entity;
+        std::shared_ptr<LivingEntity> const m_entity;
     };
 
 } // padi

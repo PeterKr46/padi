@@ -27,10 +27,10 @@ namespace padi {
 
         [[nodiscard]] float getVerticalOffset() const;
 
-        std::shared_ptr<padi::Entity> getDecoration() const;
+        [[nodiscard]] std::shared_ptr<padi::Entity> getDecoration() const;
         void setDecoration(std::shared_ptr<padi::Entity> decor);
 
-        size_t numQuads() const override;
+        [[nodiscard]] size_t numQuads() const override;
 
         bool m_walkable{true};
 

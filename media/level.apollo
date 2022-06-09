@@ -6,6 +6,7 @@ anim air_strike         32 32   288 0   0 32    12
 anim air_strike_large   32 48   384 0   0 48    12
 anim fire               32 40   352 0   0 40    12
 anim lightning          32 32   480 0   0 32    12
+anim lightshaft         32 64   576 0   0 64    12
 anim lightning_hold     32 32   480 32  0 32    4   2
 anim q_mark             32 36   416 0   0 36    12
 

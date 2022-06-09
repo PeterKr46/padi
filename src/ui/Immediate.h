@@ -22,6 +22,8 @@ namespace padi {
 
         static void Sprite(padi::UIContext *ctx, sf::FloatRect const &size, size_t frame, const std::shared_ptr<Animation> &anim, sf::Color const& color = sf::Color::White);
 
+        static void ScalableSprite(padi::UIContext *ctx, sf::FloatRect const &size, size_t frame, const std::shared_ptr<Animation> &anim, sf::Color const& color = sf::Color::White);
+
         static bool checkFocusSwitch(padi::UIContext *ctx, size_t id);
 
         static bool isFocused(padi::UIContext *ctx, std::string const &id);

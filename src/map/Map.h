@@ -31,6 +31,12 @@ namespace padi {
     class Tile;
     class Entity;
 
+    /**
+     * Map is a storage class which can be used to represent a board state.
+     * It maps out Tiles, Entities and UIObjects.
+     *
+     */
+
     class Map {
     public:
         [[nodiscard]] static sf::Vector2i mapWorldPosToTile(sf::Vector2f const& world) ;

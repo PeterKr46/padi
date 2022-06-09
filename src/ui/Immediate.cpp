@@ -126,6 +126,11 @@ namespace padi {
         ctx->m_numVerts += draw(ctx, anim, size, frame, color);
     }
 
+    void Immediate::ScalableSprite(padi::UIContext *ctx, const sf::FloatRect &size, size_t frame,
+                                   const std::shared_ptr<Animation> &anim, const sf::Color &color) {
+        ctx->m_numVerts += drawScalable(ctx, anim, size, frame, color);
+    }
+
     size_t
     Immediate::drawScalable(padi::UIContext *ctx, const std::shared_ptr<Animation> &anim, sf::FloatRect const &bound,
                             uint8_t frame, sf::Color color = sf::Color::White) {
