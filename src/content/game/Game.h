@@ -12,6 +12,13 @@
 #include "../../ui/UIContext.h"
 
 namespace padi::content {
+
+    struct Character {
+        std::shared_ptr<padi::LivingEntity> entity;
+        std::vector<std::shared_ptr<padi::Ability>> abilities;
+        std::function<bool(const std::shared_ptr<Level> &, const std::shared_ptr<Character> &)> controller;
+    };
+
     class Game : public padi::Activity {
 
     public:
@@ -27,6 +34,8 @@ namespace padi::content {
 
         std::shared_ptr<padi::Activity> handoff() override;
 
+        bool defaultControls(const std::shared_ptr<Level>& level, const std::shared_ptr<Character>& character);
+
     private:
         sf::RenderTarget *m_renderTarget;
         sf::RenderTexture m_vfxBuffer;
@@ -34,9 +43,9 @@ namespace padi::content {
         std::shared_ptr<Level> m_level;
 
         padi::UIContext m_uiContext;
+        std::shared_ptr<Character> m_activeChar;
 
-        std::shared_ptr<padi::LivingEntity> m_player;
-        std::vector<std::shared_ptr<padi::Ability>> m_playerAbilities;
+        std::shared_ptr<Character> m_player;
         int active = -1;
 
 

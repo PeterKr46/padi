@@ -4,6 +4,7 @@
 
 #include "Game.h"
 #include <SFML/Window/Keyboard.hpp>
+#include <utility>
 #include "../../Controls.h"
 #include "../../level/LevelGenerator.h"
 #include "../../level/SpawnEvent.h"
@@ -16,7 +17,7 @@ namespace padi::content {
 
     Game::Game(sf::RenderTarget *target)
             : m_renderTarget(target), m_graphicsClock() {
-        if (m_vfxBuffer.create(float(target->getSize().x) / target->getSize().y * 256, 256)) {
+        if (m_vfxBuffer.create(int(float(target->getSize().x) / float(target->getSize().y) * 256), 256)) {
             auto levelGen = padi::LevelGenerator();
             time_t seed;
             time(&seed);
@@ -31,18 +32,25 @@ namespace padi::content {
 
             auto apollo = m_level->getApollo();
             // TODO name
-            m_player = std::make_shared<padi::LivingEntity>("player", apollo->lookupAnimContext("cube"),
+            m_player = std::make_shared<Character>();
+            m_player->entity = std::make_shared<padi::LivingEntity>("player", apollo->lookupAnimContext("cube"),
                                                             sf::Vector2i{0, 0});
-            m_player->setColor({255, 64, 64});
-            auto leSpawn = std::make_shared<padi::SpawnEvent>(m_player);
-            leSpawn->dispatch(m_level);
-            m_level->centerView(m_player->getPosition());
+            m_player->controller = [=](const std::shared_ptr<Level>& l, const std::shared_ptr<Character>& c) {
+                return defaultControls(l, c);
+            };
 
-            m_playerAbilities.push_back(std::make_shared<padi::content::Walk>(m_player, 8));
-            m_playerAbilities.push_back(std::make_shared<padi::content::Teleport>(m_player));
-            m_playerAbilities.push_back(std::make_shared<padi::content::Lighten>(m_player));
-            m_playerAbilities.push_back(std::make_shared<padi::content::Dash>(m_player, 8));
-            m_playerAbilities.push_back(std::make_shared<padi::content::Darken>(m_player));
+            m_player->entity->setColor({255, 64, 64});
+            auto leSpawn = std::make_shared<padi::SpawnEvent>( m_player->entity);
+            leSpawn->dispatch(m_level);
+            m_level->centerView( m_player->entity->getPosition());
+
+            m_player->abilities.push_back(std::make_shared<padi::content::Walk>     (m_player->entity, 8));
+            m_player->abilities.push_back(std::make_shared<padi::content::Teleport> (m_player->entity));
+            m_player->abilities.push_back(std::make_shared<padi::content::Lighten>  (m_player->entity));
+            m_player->abilities.push_back(std::make_shared<padi::content::Dash>     (m_player->entity, 8));
+            m_player->abilities.push_back(std::make_shared<padi::content::Darken>   (m_player->entity));
+
+            m_activeChar = m_player;
 
             printf("[padi::content::Game] VfxBuffer at size %u, %u!\n", m_vfxBuffer.getSize().x,
                    m_vfxBuffer.getSize().y);
@@ -58,37 +66,6 @@ namespace padi::content {
 
     void Game::draw() {
         m_level->update(&m_vfxBuffer);
-        if (padi::Controls::isKeyDown(sf::Keyboard::Home)) {
-            m_level->moveCursor(m_player->getPosition());
-            m_level->centerView(m_player->getPosition());
-        }
-        if (active != -1) {
-            m_playerAbilities[active]->castIndicator(&(*m_level));
-            if (padi::Controls::isKeyDown(sf::Keyboard::Enter)) {
-                m_player->intentCast(m_playerAbilities[active], m_level->getCursorLocation());
-                m_level->play();
-                active = -1;
-            } else if (padi::Controls::isKeyDown(sf::Keyboard::Escape)) {
-                m_playerAbilities[active]->castCancel(&(*m_level));
-                active = -1;
-                m_level->hideCursor();
-            }
-            if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
-                m_playerAbilities[active]->castCancel(&(*m_level));
-                active = std::max(0, active - 1);
-            } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
-                m_playerAbilities[active]->castCancel(&(*m_level));
-                active = std::min(int(m_playerAbilities.size()) - 1, active + 1);
-            }
-        }
-        if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
-            if(m_level->togglePause()) {
-                active = 0;
-            } else {
-                if(active != -1) m_playerAbilities[active]->castCancel(&(*m_level));
-                active = -1;
-            }
-        }
 
         m_level->populateVBO();
         m_vfxBuffer.clear();
@@ -96,25 +73,9 @@ namespace padi::content {
         states.transform.scale(256.f / m_vfxBuffer.getView().getSize().y, 256.f / m_vfxBuffer.getView().getSize().y);
         m_vfxBuffer.draw(*m_level, states);
         m_uiContext.nextFrame();
-        if (m_level->isPaused()) {
-            m_uiContext.pushTransform().translate(228 - 64, 256 - 72);
-            padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4, -4, 160, 40}, 0,
-                                            m_uiContext.getApollo()->lookupAnim("scalable_window"),
-                                            sf::Color(128, 128, 128, 255));
-            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{0, 0, 32, 32}, 0,
-                                    m_uiContext.getApollo()->lookupAnim("walk"));
-            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{40, 0, 32, 32}, 0,
-                                    m_uiContext.getApollo()->lookupAnim("teleport"));
-            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{80, 0, 32, 32}, 0,
-                                    m_uiContext.getApollo()->lookupAnim("strike"));
-            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{120, 0, 32, 32}, 0,
-                                    m_uiContext.getApollo()->lookupAnim("dash"));
-            padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4 + float(active * 40), -4, 40, 40}, 0,
-                                            m_uiContext.getApollo()->lookupAnim("scalable_border"),
-                                            m_player->getColor());
-            m_uiContext.popTransform();
-        }
         m_vfxBuffer.draw(m_uiContext);
+
+        m_activeChar->controller(m_level, m_activeChar);
 
         auto rState = sf::RenderStates::Default;
         auto shader = m_level->getApollo()->lookupShader("fpa");
@@ -154,5 +115,58 @@ namespace padi::content {
 
     std::shared_ptr<Level> Game::getLevel() {
         return m_level;
+    }
+
+    bool Game::defaultControls(const std::shared_ptr<Level>& level, const std::shared_ptr<Character>& character) {
+        if (padi::Controls::isKeyDown(sf::Keyboard::Home)) {
+            m_level->moveCursor(m_player->entity->getPosition());
+            m_level->centerView(m_player->entity->getPosition());
+        }
+        if (active != -1) {
+            m_player->abilities[active]->castIndicator(&(*m_level));
+            if (padi::Controls::isKeyDown(sf::Keyboard::Enter)) {
+                m_player->entity->intentCast(m_player->abilities[active], m_level->getCursorLocation());
+                m_level->play();
+                active = -1;
+            } else if (padi::Controls::isKeyDown(sf::Keyboard::Escape)) {
+                m_player->abilities[active]->castCancel(&(*m_level));
+                active = -1;
+                m_level->hideCursor();
+            }
+            if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
+                m_player->abilities[active]->castCancel(&(*m_level));
+                active = std::max(0, active - 1);
+            } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
+                m_player->abilities[active]->castCancel(&(*m_level));
+                active = std::min(int(m_player->abilities.size()) - 1, active + 1);
+            }
+        }
+        if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
+            if(m_level->togglePause()) {
+                active = 0;
+            } else {
+                if(active != -1) m_player->abilities[active]->castCancel(&(*m_level));
+                active = -1;
+            }
+        }
+        if (m_level->isPaused()) {
+            m_uiContext.pushTransform().translate(228 - 64, 256 - 72);
+            padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4, -4, 160, 40}, 0,
+                                            m_uiContext.getApollo()->lookupAnim("scalable_window"),
+                                            sf::Color(128, 128, 128, 255));
+            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{0, 0, 32, 32}, 0,
+                                    m_uiContext.getApollo()->lookupAnim("walk"));
+            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{40, 0, 32, 32}, 0,
+                                    m_uiContext.getApollo()->lookupAnim("teleport"));
+            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{80, 0, 32, 32}, 0,
+                                    m_uiContext.getApollo()->lookupAnim("strike"));
+            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{120, 0, 32, 32}, 0,
+                                    m_uiContext.getApollo()->lookupAnim("dash"));
+            padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4 + float(active * 40), -4, 40, 40}, 0,
+                                            m_uiContext.getApollo()->lookupAnim("scalable_border"),
+                                            m_player->entity->getColor());
+            m_uiContext.popTransform();
+        }
+        return true;
     }
 } // content
