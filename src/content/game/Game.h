@@ -43,10 +43,13 @@ namespace padi::content {
         std::shared_ptr<Level> m_level;
 
         padi::UIContext m_uiContext;
-        std::shared_ptr<Character> m_activeChar;
 
         std::queue<std::shared_ptr<Character>> m_characters;
-        int active = -1;
+        std::shared_ptr<Character> m_activeChar;
+
+
+        int activeAbility = -1;
+        bool hasCast = false;
 
 
         sf::Clock m_graphicsClock;

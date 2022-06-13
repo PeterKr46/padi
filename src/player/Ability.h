@@ -25,6 +25,8 @@ namespace padi {
 
         virtual void castCancel(padi::Level *level) = 0;
 
+        virtual bool isCastComplete() = 0;
+
         [[nodiscard]] std::shared_ptr<padi::LivingEntity> getUser() const;
 
     protected:
@@ -44,6 +46,8 @@ namespace padi {
         [[nodiscard]] size_t getRange() const;
 
         void setRange(size_t range);
+
+        bool isCastComplete() override = 0;
 
     protected:
         virtual void recalculateRange(Level* level);

@@ -20,6 +20,10 @@ namespace padi::content {
         if (!m_turnStarted) {
             m_walk->castIndicator(level.get());
             auto const &targets = m_walk->getPossibleTargets();
+            if(targets.empty()) {
+                m_walk->castCancel(level.get());
+                return true; // TODO
+            }
             m_walk->cast(level.get(), targets.back());
             m_turnStarted = true;
         }

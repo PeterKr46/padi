@@ -37,6 +37,7 @@ namespace padi {
         lvl->getMap()->removeEntity(m_user);
         auto spawnEvent = std::make_shared<padi::SpawnEvent>(m_user, pos);
         spawnEvent->onCycleBegin(lvl);
+        lvl->addCycleEndListener(shared_from_this());
         return true;
     }
 
@@ -71,6 +72,15 @@ namespace padi {
         m_ghostFX->m_stackSize = 8;
     }
 
+    bool content::Teleport::isCastComplete() {
+        return m_complete;
+    }
+
+    bool content::Teleport::onCycleEnd(padi::Level *) {
+        m_complete = true;
+        return false;
+    }
+
     bool content::Lighten::cast(padi::Level *lvl, const sf::Vector2i &pos) {
         lvl->hideCursor();
         strikePos = pos;
@@ -80,6 +90,7 @@ namespace padi {
         lvl->getMap()->addEntity(strike);
         lvl->getMap()->getTile(pos)->m_walkable = false;
         lvl->addFrameBeginListener(shared_from_this());
+        m_complete = false;
         return true;
     }
 
@@ -92,6 +103,8 @@ namespace padi {
             auto fire = std::make_shared<padi::StaticEntity>(strikePos);
             fire->m_animation = lvl->getApollo()->lookupAnim("fire");
             lvl->getMap()->addEntity(fire);
+        } else if (frame == 11) {
+            m_complete = true;
             return false;
         }
         return true;
@@ -105,6 +118,10 @@ namespace padi {
 
     }
 
+    bool content::Lighten::isCastComplete() {
+        return m_complete;
+    }
+
     bool content::Darken::cast(padi::Level *lvl, const sf::Vector2i &pos) {
         lvl->hideCursor();
         strikePos = pos;
@@ -115,6 +132,7 @@ namespace padi {
         lvl->getMap()->addEntity(strike);
         lvl->getMap()->getTile(pos)->m_walkable = false;
         lvl->addFrameBeginListener(shared_from_this());
+        m_complete = false;
         return true;
     }
 
@@ -124,16 +142,19 @@ namespace padi {
 
     bool content::Darken::onFrameBegin(Level *lvl, uint8_t frame) {
         auto tile = lvl->getMap()->getTile(strikePos);
-        auto color = tile->getColor();
-        color = sf::Color(std::max(48, color.r - 32), std::max(48, color.g - 32), std::max(48, color.b - 32), 255);
-        tile->setColor(color);
-        tile->setVerticalOffset(frame % 2);
-        if (frame == 8) {
+        if (frame < 8) {
+            auto color = tile->getColor();
+            color = sf::Color(std::max(48, color.r - 32), std::max(48, color.g - 32), std::max(48, color.b - 32), 255);
+            tile->setColor(color);
+            tile->setVerticalOffset(frame % 2);
+        } else if (frame == 8) {
             tile->setVerticalOffset(0);
             auto fire = std::make_shared<padi::StaticEntity>(strikePos);
             fire->m_animation = lvl->getApollo()->lookupAnim("fire");
             fire->m_color = sf::Color::Black;
             lvl->getMap()->addEntity(fire);
+        } else if(frame == 11) {
+            m_complete = true;
             return false;
         }
         return true;
@@ -145,6 +166,10 @@ namespace padi {
 
     content::Darken::Darken(std::shared_ptr<padi::LivingEntity> user) : Ability(std::move(user)) {
 
+    }
+
+    bool content::Darken::isCastComplete() {
+        return m_complete;
     }
 
     bool content::Walk::cast(padi::Level *lvl, const sf::Vector2i &pos) {
@@ -162,6 +187,7 @@ namespace padi {
             return false;
         }
         lvl->addCycleEndListener(shared_from_this());
+        m_complete = false;
         return true;
     }
 
@@ -170,15 +196,16 @@ namespace padi {
         lvl->addCycleBeginListener(shared_from_this());
 
         m_path.erase(m_path.begin());
+        if(m_path.empty()) m_complete = true;
         return !m_path.empty();
     }
 
     bool content::Walk::onCycleBegin(Level *lvl) {
-       /* auto ap = std::make_shared<padi::AudioPlayback>(lvl->getApollo()->lookupAudio("chord_01"));
-        float pitches[3]{1.0, 1.2, 0.8};
-        ap->sound.setPitch(pitches[rand() % 3]);
-        ap->sound.setVolume(30);
-        lvl->addCycleEndListener(ap);*/
+        /* auto ap = std::make_shared<padi::AudioPlayback>(lvl->getApollo()->lookupAudio("chord_01"));
+         float pitches[3]{1.0, 1.2, 0.8};
+         ap->sound.setPitch(pitches[rand() % 3]);
+         ap->sound.setVolume(30);
+         lvl->addCycleEndListener(ap);*/
         m_rangeChanged = true;
         return false;
     }
@@ -220,6 +247,10 @@ namespace padi {
         return m_inRange;
     }
 
+    bool content::Walk::isCastComplete() {
+        return m_complete;
+    }
+
 
     content::Dash::Dash(std::shared_ptr<padi::LivingEntity> user, size_t range)
             : padi::LimitedRangeAbility(std::move(user), range) {
@@ -234,7 +265,7 @@ namespace padi {
         auto delta = m_user->getPosition() - pos;
         bool x = m_direction.x != 0;
         auto finalPos = m_user->getPosition() + m_direction * int(getRange());
-        for (size_t i = 0; i < getRange()-1; ++i) {
+        for (size_t i = 0; i < getRange() - 1; ++i) {
             auto laserPart = std::make_shared<padi::OneshotEntity>(m_user->getPosition() + m_direction * int(i + 1));
             laserPart->m_animation = lvl->getApollo()->lookupAnim(x ? "laser_x_burst" : "laser_y_burst");
             laserPart->m_color = m_user->getColor();
@@ -249,6 +280,9 @@ namespace padi {
         lvl->addCycleEndListener(strike);
         lvl->centerView(finalPos);
         m_direction = sf::Vector2i(0, 0);
+
+        lvl->addCycleEndListener(shared_from_this());
+        m_complete = false;
         return true;
     }
 
@@ -277,8 +311,17 @@ namespace padi {
         m_inRange.resize(getRange());
         sf::Vector2i min = m_user->getPosition();
         for (int i = 0; i < getRange(); ++i) {
-            m_inRange[i] = (min + m_direction * (i+1));
+            m_inRange[i] = (min + m_direction * (i + 1));
         }
         m_rangeChanged = false;
+    }
+
+    bool content::Dash::isCastComplete() {
+        return m_complete;
+    }
+
+    bool content::Dash::onCycleEnd(padi::Level *) {
+        m_complete = true;
+        return false;
     }
 }

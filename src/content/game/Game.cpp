@@ -33,27 +33,32 @@ namespace padi::content {
 
             auto apollo = m_level->getApollo();
             // TODO name
-            auto player = std::make_shared<Character>();
-            player->entity = std::make_shared<padi::LivingEntity>("player", apollo->lookupAnimContext("cube"),
-                                                                  sf::Vector2i{0, 0});
-            player->controller = [=](const std::shared_ptr<Level>& l, const std::shared_ptr<Character>& c) {
-                return defaultControls(l, c);
-            };
+            for( int i = 0; i < 3; ++i) {
+                auto player = std::make_shared<Character>();
+                player->entity = std::make_shared<padi::LivingEntity>("player", apollo->lookupAnimContext("cube"),
+                                                                      sf::Vector2i{0, 0});
+                player->controller = [=](const std::shared_ptr<Level> &l, const std::shared_ptr<Character> &c) {
+                    return defaultControls(l, c);
+                };
 
-            player->entity->setColor({255, 64, 64});
-            auto leSpawn = std::make_shared<padi::SpawnEvent>(player->entity);
-            leSpawn->dispatch(m_level);
-            m_level->centerView(player->entity->getPosition());
+                player->entity->setColor({255, 64, 64});
+                auto leSpawn = std::make_shared<padi::SpawnEvent>(player->entity);
+                leSpawn->dispatch(m_level);
+                m_level->centerView(player->entity->getPosition());
 
-            player->abilities.push_back(std::make_shared<padi::content::Walk>     (player->entity, 8));
-            player->abilities.push_back(std::make_shared<padi::content::Teleport> (player->entity));
-            player->abilities.push_back(std::make_shared<padi::content::Lighten>  (player->entity));
-            player->abilities.push_back(std::make_shared<padi::content::Dash>     (player->entity, 8));
-            player->abilities.push_back(std::make_shared<padi::content::Darken>   (player->entity));
+                player->abilities.push_back(std::make_shared<padi::content::Walk>(player->entity, 8));
+                player->abilities.push_back(std::make_shared<padi::content::Teleport>(player->entity));
+                player->abilities.push_back(std::make_shared<padi::content::Lighten>(player->entity));
+                player->abilities.push_back(std::make_shared<padi::content::Dash>(player->entity, 8));
+                player->abilities.push_back(std::make_shared<padi::content::Darken>(player->entity));
+                m_characters.push(player);
+            }
 
-            m_activeChar = player;
+            m_activeChar = m_characters.front();
+            m_characters.pop();
 
-            auto mob = std::make_shared<padi::content::Mob>("mob", apollo->lookupAnimContext("bubbleboi"), sf::Vector2i{2,2});
+            auto mob = std::make_shared<padi::content::Mob>("mob", apollo->lookupAnimContext("bubbleboi"),
+                                                            sf::Vector2i{2, 2});
             auto mobSpawn = std::make_shared<padi::SpawnEvent>(mob);
             mobSpawn->dispatch(m_level);
             m_characters.push(std::make_shared<Character>(mob->asCharacter()));
@@ -80,7 +85,7 @@ namespace padi::content {
         m_vfxBuffer.draw(*m_level, states);
         m_uiContext.nextFrame();
 
-        if(m_activeChar->controller(m_level, m_activeChar)) {
+        if (m_activeChar->controller(m_level, m_activeChar)) {
             m_characters.push(m_activeChar);
             m_activeChar = m_characters.front();
             m_characters.pop();
@@ -127,37 +132,36 @@ namespace padi::content {
         return m_level;
     }
 
-    bool Game::defaultControls(const std::shared_ptr<Level>& level, const std::shared_ptr<Character>& character) {
+    bool Game::defaultControls(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &character) {
         if (padi::Controls::isKeyDown(sf::Keyboard::Home)) {
             m_level->moveCursor(character->entity->getPosition());
             m_level->centerView(character->entity->getPosition());
         }
-        if (active != -1) {
-            character->abilities[active]->castIndicator(&(*m_level));
+        if (activeAbility != -1 && !hasCast) {
+            character->abilities[activeAbility]->castIndicator(&(*m_level));
             if (padi::Controls::isKeyDown(sf::Keyboard::Enter)) {
-                character->entity->intentCast(character->abilities[active], m_level->getCursorLocation());
+                character->entity->intentCast(character->abilities[activeAbility], m_level->getCursorLocation());
                 m_level->play();
-                active = -1;
-                return true; // TODO Err
+                hasCast = true;
             } else if (padi::Controls::isKeyDown(sf::Keyboard::Escape)) {
-                character->abilities[active]->castCancel(&(*m_level));
-                active = -1;
+                character->abilities[activeAbility]->castCancel(&(*m_level));
+                activeAbility = -1;
                 m_level->hideCursor();
             }
             if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
-                character->abilities[active]->castCancel(&(*m_level));
-                active = std::max(0, active - 1);
+                character->abilities[activeAbility]->castCancel(&(*m_level));
+                activeAbility = std::max(0, activeAbility - 1);
             } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
-                character->abilities[active]->castCancel(&(*m_level));
-                active = std::min(int(character->abilities.size()) - 1, active + 1);
+                character->abilities[activeAbility]->castCancel(&(*m_level));
+                activeAbility = std::min(int(character->abilities.size()) - 1, activeAbility + 1);
             }
         }
-        if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
-            if(m_level->togglePause()) {
-                active = 0;
+        if (!hasCast && padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
+            if (m_level->togglePause()) {
+                activeAbility = 0;
             } else {
-                if(active != -1) character->abilities[active]->castCancel(&(*m_level));
-                active = -1;
+                if (activeAbility != -1) character->abilities[activeAbility]->castCancel(&(*m_level));
+                activeAbility = -1;
             }
         }
         if (m_level->isPaused()) {
@@ -173,10 +177,15 @@ namespace padi::content {
                                     m_uiContext.getApollo()->lookupAnim("strike"));
             padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{120, 0, 32, 32}, 0,
                                     m_uiContext.getApollo()->lookupAnim("dash"));
-            padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4 + float(active * 40), -4, 40, 40}, 0,
+            padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4 + float(activeAbility * 40), -4, 40, 40}, 0,
                                             m_uiContext.getApollo()->lookupAnim("scalable_border"),
                                             character->entity->getColor());
             m_uiContext.popTransform();
+        }
+        if (hasCast && !character->entity->hasCastIntent() && character->abilities[activeAbility]->isCastComplete()) {
+            hasCast = false;
+            activeAbility = -1;
+            return true;
         }
         return false;
     }
