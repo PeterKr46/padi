@@ -153,7 +153,7 @@ namespace padi {
             fire->m_animation = lvl->getApollo()->lookupAnim("fire");
             fire->m_color = sf::Color::Black;
             lvl->getMap()->addEntity(fire);
-        } else if(frame == 11) {
+        } else if (frame == 11) {
             m_complete = true;
             return false;
         }
@@ -192,12 +192,16 @@ namespace padi {
     }
 
     bool content::Walk::onCycleEnd(Level *lvl) {
-        m_user->intentMove(m_path.front());
-        lvl->addCycleBeginListener(shared_from_this());
+        if (m_path.empty()) {
+            m_complete = true;
+            return false;
+        } else {
+            m_user->intentMove(m_path.front());
+            lvl->addCycleBeginListener(shared_from_this());
 
-        m_path.erase(m_path.begin());
-        if(m_path.empty()) m_complete = true;
-        return !m_path.empty();
+            m_path.erase(m_path.begin());
+            return true;
+        }
     }
 
     bool content::Walk::onCycleBegin(Level *lvl) {

@@ -33,7 +33,8 @@ namespace padi::content {
 
             auto apollo = m_level->getApollo();
             // TODO name
-            for( int i = 0; i < 3; ++i) {
+            sf::Color colors[3]{{255, 64, 64},{64, 255, 64},{64, 64, 255}};
+            for(auto & color : colors) {
                 auto player = std::make_shared<Character>();
                 player->entity = std::make_shared<padi::LivingEntity>("player", apollo->lookupAnimContext("cube"),
                                                                       sf::Vector2i{0, 0});
@@ -41,7 +42,7 @@ namespace padi::content {
                     return defaultControls(l, c);
                 };
 
-                player->entity->setColor({255, 64, 64});
+                player->entity->setColor(color);
                 auto leSpawn = std::make_shared<padi::SpawnEvent>(player->entity);
                 leSpawn->dispatch(m_level);
                 m_level->centerView(player->entity->getPosition());

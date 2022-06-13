@@ -11,6 +11,7 @@ namespace padi::content {
     Mob::Mob(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos)
             : LivingEntity(std::move(name), moveset, pos) {
         m_turnStarted = false;
+        setColor(sf::Color(64,64,64));
     }
 
     bool Mob::takeTurn(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &chr) {
@@ -24,13 +25,13 @@ namespace padi::content {
                 m_walk->castCancel(level.get());
                 return true; // TODO
             }
-            m_walk->cast(level.get(), targets.back());
+            chr->entity->intentCast(m_walk, targets.back());
             m_turnStarted = true;
         }
-        if(m_walk->getPath().empty()) {
+        if(!chr->entity->hasCastIntent() && m_walk->isCastComplete()) {
             m_turnStarted = false;
         }
-        return m_walk->getPath().empty();
+        return !chr->entity->hasCastIntent() && m_walk->isCastComplete();
     }
 
     Character Mob::asCharacter() {
