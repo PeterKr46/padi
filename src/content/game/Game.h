@@ -45,7 +45,7 @@ namespace padi::content {
         padi::UIContext m_uiContext;
         std::shared_ptr<Character> m_activeChar;
 
-        std::shared_ptr<Character> m_player;
+        std::queue<std::shared_ptr<Character>> m_characters;
         int active = -1;
 
 

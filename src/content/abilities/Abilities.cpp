@@ -153,24 +153,24 @@ namespace padi {
         if (std::find(m_inRange.begin(), m_inRange.end(), pos) == m_inRange.end()) {
             return false;
         }
-        if (!path.empty()) {
-            path.clear();
+        if (!m_path.empty()) {
+            m_path.clear();
             return true;
         }
-        path = padi::FindPath(lvl->getMap(), m_user->getPosition(), pos);
-        if (path.empty()) {
+        m_path = padi::FindPath(lvl->getMap(), m_user->getPosition(), pos);
+        if (m_path.empty()) {
             return false;
         }
         lvl->addCycleEndListener(shared_from_this());
-        return false;
+        return true;
     }
 
     bool content::Walk::onCycleEnd(Level *lvl) {
-        m_user->intentMove(path.front());
+        m_user->intentMove(m_path.front());
         lvl->addCycleBeginListener(shared_from_this());
 
-        path.erase(path.begin());
-        return !path.empty();
+        m_path.erase(m_path.begin());
+        return !m_path.empty();
     }
 
     bool content::Walk::onCycleBegin(Level *lvl) {
@@ -210,6 +210,14 @@ namespace padi {
         }
         std::cout << m_shortestPaths.size() << std::endl;
         m_rangeChanged = false;
+    }
+
+    std::vector<sf::Vector2i> const &content::Walk::getPath() const {
+        return m_path;
+    }
+
+    std::vector<sf::Vector2i> const &content::Walk::getPossibleTargets() const {
+        return m_inRange;
     }
 
 

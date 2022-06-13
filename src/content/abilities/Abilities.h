@@ -75,8 +75,11 @@ namespace padi::content {
 
         void recalculateRange(Level* level) override;
 
+        std::vector<sf::Vector2i> const& getPath() const;
+        std::vector<sf::Vector2i> const& getPossibleTargets() const;
+
     private:
-        std::vector<sf::Vector2i> path;
+        std::vector<sf::Vector2i> m_path;
         std::map<sf::Vector2i, sf::Vector2i, padi::compair> m_shortestPaths;
     };
 
