@@ -53,6 +53,7 @@ namespace padi {
         bool addTile(const std::shared_ptr<padi::Tile> &tile);
 
         size_t getEntities(sf::Vector2i const &pos, std::vector<std::shared_ptr<Entity>> &entities) const;
+        [[nodiscard]] const std::vector<std::shared_ptr<Entity>> & getEntities(sf::Vector2i const &pos) const;
 
         void addEntity(const std::shared_ptr<Entity> &entity, size_t lower_by = 0);
 
@@ -71,7 +72,7 @@ namespace padi {
         size_t populate(sf::VertexArray &array, size_t vertexOffset, uint8_t frame, sf::View const &viewport) const;
 
         void for_each(const std::function<void(std::shared_ptr<padi::Tile>)> &);
-        const std::unordered_set<std::shared_ptr<Entity>> & allEntities() const;
+        [[nodiscard]] const std::unordered_set<std::shared_ptr<Entity>> & allEntities() const;
 
         void removeTile(sf::Vector2i const &vector2);
 

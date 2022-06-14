@@ -85,7 +85,7 @@ namespace padi {
                         tileIter->second.second.begin() + (tileIter->second.second.size() - lower_by), entity);
             }
             entity->m_position = where;
-            entity->setVerticalOffset(tileIter->second.first->getVerticalOffset());
+            //entity->setVerticalOffset(tileIter->second.first->getVerticalOffset());
             m_entities.insert(entity);
         }
     }
@@ -194,6 +194,14 @@ namespace padi {
 
     const std::unordered_set<std::shared_ptr<Entity>> &Map::allEntities() const {
         return m_entities;
+    }
+
+    const std::vector<std::shared_ptr<Entity>> &Map::getEntities(const sf::Vector2i &pos) const {
+        auto iter = m_tiles.find(pos);
+        if (iter != m_tiles.end()) {
+            return iter->second.second;
+        }
+        return {};
     }
 
 

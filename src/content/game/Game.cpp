@@ -12,6 +12,7 @@
 #include "../abilities/Abilities.h"
 #include "../../ui/Immediate.h"
 #include "../npc/Mob.h"
+#include "MapShaker.h"
 
 namespace padi::content {
 
@@ -30,11 +31,15 @@ namespace padi::content {
                     .generate();
             m_level->initCursor("cursor"); // TODO
             m_uiContext.init("../media/ui.apollo", "../media/ui_sheet.png");
+            auto shake = std::make_shared<MapShaker>();
+            m_level->addFrameBeginListener(shake);
 
             auto apollo = m_level->getApollo();
             // TODO name
-            sf::Color colors[3]{{255, 64, 64},{64, 255, 64},{64, 64, 255}};
-            for(auto & color : colors) {
+            sf::Color colors[3]{{255, 64,  64},
+                                {64,  255, 64},
+                                {64,  64,  255}};
+            for (auto &color: colors) {
                 auto player = std::make_shared<Character>();
                 player->entity = std::make_shared<padi::LivingEntity>("player", apollo->lookupAnimContext("cube"),
                                                                       sf::Vector2i{0, 0});
@@ -133,61 +138,84 @@ namespace padi::content {
         return m_level;
     }
 
+    enum TurnState : int {
+        IDLE = 0,
+        SELECTING = 1,
+        CASTING = 2,
+        DONE = 3
+    };
+
     bool Game::defaultControls(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &character) {
         if (padi::Controls::isKeyDown(sf::Keyboard::Home)) {
             m_level->moveCursor(character->entity->getPosition());
             m_level->centerView(character->entity->getPosition());
         }
-        if (activeAbility != -1 && !hasCast) {
-            character->abilities[activeAbility]->castIndicator(&(*m_level));
-            if (padi::Controls::isKeyDown(sf::Keyboard::Enter)) {
-                character->entity->intentCast(character->abilities[activeAbility], m_level->getCursorLocation());
-                m_level->play();
-                hasCast = true;
-            } else if (padi::Controls::isKeyDown(sf::Keyboard::Escape)) {
-                character->abilities[activeAbility]->castCancel(&(*m_level));
-                activeAbility = -1;
-                m_level->hideCursor();
-            }
-            if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
-                character->abilities[activeAbility]->castCancel(&(*m_level));
-                activeAbility = std::max(0, activeAbility - 1);
-            } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
-                character->abilities[activeAbility]->castCancel(&(*m_level));
-                activeAbility = std::min(int(character->abilities.size()) - 1, activeAbility + 1);
+        TurnState state = IDLE;
+        if (activeAbility != -1) {
+            state = SELECTING;
+            if (hasCast) {
+                state = CASTING;
+                if (!character->entity->hasCastIntent() && character->abilities[activeAbility]->isCastComplete()) {
+                    state = DONE;
+                }
             }
         }
-        if (!hasCast && padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
-            if (m_level->togglePause()) {
+
+        if (state == IDLE) {
+            if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
+                m_level->pause();
                 activeAbility = 0;
-            } else {
-                if (activeAbility != -1) character->abilities[activeAbility]->castCancel(&(*m_level));
+            }
+        } else if (state == SELECTING) {
+            if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
                 activeAbility = -1;
+                m_level->play();
+            } else if (!m_level->isPaused()) {
+                character->abilities[activeAbility]->castIndicator(m_level.get());
+                if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
+                    character->entity->intentCast(character->abilities[activeAbility], m_level->getCursorLocation());
+                    hasCast = true;
+                } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
+                    character->abilities[activeAbility]->castCancel(m_level.get());
+                    m_level->pause();
+                }
+            } else {
+                if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
+                    m_level->play();
+                } else {
+                    if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
+                        character->abilities[activeAbility]->castCancel(&(*m_level));
+                        activeAbility = std::max(0, activeAbility - 1);
+                    }
+                    if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
+                        character->abilities[activeAbility]->castCancel(&(*m_level));
+                        activeAbility = std::min(int(character->abilities.size()) - 1, activeAbility + 1);
+                    }
+                    m_uiContext.pushTransform().translate(228 - 64, 256 - 72);
+                    padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4, -4, 160, 40}, 0,
+                                                    m_uiContext.getApollo()->lookupAnim("scalable_window"),
+                                                    sf::Color(128, 128, 128, 255));
+                    padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{0, 0, 32, 32}, 0,
+                                            m_uiContext.getApollo()->lookupAnim("walk"));
+                    padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{40, 0, 32, 32}, 0,
+                                            m_uiContext.getApollo()->lookupAnim("teleport"));
+                    padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{80, 0, 32, 32}, 0,
+                                            m_uiContext.getApollo()->lookupAnim("strike"));
+                    padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{120, 0, 32, 32}, 0,
+                                            m_uiContext.getApollo()->lookupAnim("dash"));
+                    padi::Immediate::ScalableSprite(&m_uiContext,
+                                                    sf::FloatRect{-4 + float(activeAbility * 40), -4, 40, 40},
+                                                    0,
+                                                    m_uiContext.getApollo()->lookupAnim("scalable_border"),
+                                                    character->entity->getColor());
+                    m_uiContext.popTransform();
+                }
             }
         }
-        if (m_level->isPaused()) {
-            m_uiContext.pushTransform().translate(228 - 64, 256 - 72);
-            padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4, -4, 160, 40}, 0,
-                                            m_uiContext.getApollo()->lookupAnim("scalable_window"),
-                                            sf::Color(128, 128, 128, 255));
-            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{0, 0, 32, 32}, 0,
-                                    m_uiContext.getApollo()->lookupAnim("walk"));
-            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{40, 0, 32, 32}, 0,
-                                    m_uiContext.getApollo()->lookupAnim("teleport"));
-            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{80, 0, 32, 32}, 0,
-                                    m_uiContext.getApollo()->lookupAnim("strike"));
-            padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{120, 0, 32, 32}, 0,
-                                    m_uiContext.getApollo()->lookupAnim("dash"));
-            padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4 + float(activeAbility * 40), -4, 40, 40}, 0,
-                                            m_uiContext.getApollo()->lookupAnim("scalable_border"),
-                                            character->entity->getColor());
-            m_uiContext.popTransform();
-        }
-        if (hasCast && !character->entity->hasCastIntent() && character->abilities[activeAbility]->isCastComplete()) {
+        if(state == DONE) {
             hasCast = false;
             activeAbility = -1;
-            return true;
         }
-        return false;
+        return state == DONE;
     }
 } // content
