@@ -3,7 +3,6 @@
 //
 
 #include "Mob.h"
-#include "../game/Game.h"
 
 #include <utility>
 
@@ -25,7 +24,7 @@ namespace padi::content {
                 m_walk->castCancel(level.get());
                 return true; // TODO
             }
-            auto target = targets.back();
+            auto target = targets[std::rand() % (targets.size()-1)];
             for (auto pos: targets) {
                 if (level->getMap()->hasEntities(pos)) {
                     target = pos;

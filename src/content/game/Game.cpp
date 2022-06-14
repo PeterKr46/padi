@@ -95,6 +95,8 @@ namespace padi::content {
             m_characters.push(m_activeChar);
             m_activeChar = m_characters.front();
             m_characters.pop();
+            m_level->centerView(m_activeChar->entity->getPosition());
+            m_level->moveCursor(m_activeChar->entity->getPosition());
         }
         m_vfxBuffer.draw(m_uiContext);
 
@@ -167,10 +169,7 @@ namespace padi::content {
                 activeAbility = 0;
             }
         } else if (state == SELECTING) {
-            if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
-                activeAbility = -1;
-                m_level->play();
-            } else if (!m_level->isPaused()) {
+            if (!m_level->isPaused()) {
                 character->abilities[activeAbility]->castIndicator(m_level.get());
                 if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
                     character->entity->intentCast(character->abilities[activeAbility], m_level->getCursorLocation());
@@ -183,18 +182,20 @@ namespace padi::content {
                 if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
                     m_level->play();
                 } else {
-                    if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
+                    if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
+                        character->abilities[activeAbility]->castCancel(m_level.get());
+                        m_level->play();
+                    } else if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
                         character->abilities[activeAbility]->castCancel(&(*m_level));
                         activeAbility = std::max(0, activeAbility - 1);
-                    }
-                    if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
+                    } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
                         character->abilities[activeAbility]->castCancel(&(*m_level));
                         activeAbility = std::min(int(character->abilities.size()) - 1, activeAbility + 1);
                     }
                     m_uiContext.pushTransform().translate(228 - 64, 256 - 72);
                     padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4, -4, 160, 40}, 0,
                                                     m_uiContext.getApollo()->lookupAnim("scalable_window"),
-                                                    sf::Color(128, 128, 128, 255));
+                                                    sf::Color(168, 168, 168, 255));
                     padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{0, 0, 32, 32}, 0,
                                             m_uiContext.getApollo()->lookupAnim("walk"));
                     padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{40, 0, 32, 32}, 0,
@@ -212,10 +213,10 @@ namespace padi::content {
                 }
             }
         }
-        if(state == DONE) {
+        if (state == DONE) {
             hasCast = false;
             activeAbility = -1;
         }
         return state == DONE;
     }
-} // content
+}

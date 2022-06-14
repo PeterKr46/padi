@@ -38,6 +38,7 @@ namespace padi {
         auto spawnEvent = std::make_shared<padi::SpawnEvent>(m_user, pos);
         spawnEvent->onCycleBegin(lvl);
         lvl->addCycleEndListener(shared_from_this());
+        m_complete = false;
         return true;
     }
 

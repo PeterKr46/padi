@@ -12,7 +12,7 @@ namespace padi::content {
         ++m_numFrames;
         lvl->getMap()->for_each([&](const std::shared_ptr<padi::Tile>& tile) {
             int s = tile->getPosition().x + tile->getPosition().y;
-            tile->setVerticalOffset( m_magnitude * std::sin(float(s) * m_scale + m_frequency * float(m_numFrames)) * (1.f - (float(m_numFrames) / float(m_maxFrames))));
+            tile->setVerticalOffset( m_magnitude * std::sin(m_offset + float(s) * m_scale + m_frequency * float(m_numFrames)) * (1.f - (float(m_numFrames) / float(m_maxFrames))));
         });
 
         return m_numFrames < m_maxFrames;

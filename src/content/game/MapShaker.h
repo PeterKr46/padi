@@ -16,6 +16,7 @@ namespace padi::content {
         int m_maxFrames = 14;
         float m_frequency = 0.45;
         float m_scale = 0.1;
+        float m_offset = 2;
         float m_magnitude = 128;
     };
 
