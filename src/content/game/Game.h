@@ -14,9 +14,10 @@
 namespace padi::content {
 
     struct Character {
-        std::shared_ptr<padi::LivingEntity> entity;
+        std::shared_ptr<padi::LivingEntity> entity; // OPTIONAL
         std::vector<std::shared_ptr<padi::Ability>> abilities;
         std::function<bool(const std::shared_ptr<Level> &, const std::shared_ptr<Character> &)> controller;
+        bool alive{true};
     };
 
     class Game : public padi::Activity {
@@ -34,7 +35,9 @@ namespace padi::content {
 
         std::shared_ptr<padi::Activity> handoff() override;
 
-        bool defaultControls(const std::shared_ptr<Level>& level, const std::shared_ptr<Character>& character);
+        bool defaultControls(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &character);
+
+        void addCharacter(const std::shared_ptr<Character> &character);
 
     private:
         sf::RenderTarget *m_renderTarget;

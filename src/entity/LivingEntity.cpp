@@ -88,9 +88,9 @@ bool padi::LivingEntity::onCycleBegin(padi::Level *lvl) {
     } else if (m_intent.cast) {
         std::cout << "[padi::LivingEntity(" << m_name << ")] Casting." << std::endl;
         m_intent.cast = false;
-        m_inAction.cast = true;
         m_animation = m_apolloCtx->at("idle");
-        m_intent.cast_ability->cast(lvl, m_intent.cast_pos);
+        m_inAction.cast = true;
+        m_inAction.cast_failed = ! m_intent.cast_ability->cast(lvl, m_intent.cast_pos);
     } else {
         std::cout << "[padi::LivingEntity(" << m_name << ")] Idle." << std::endl;
         m_animation = m_apolloCtx->at("idle");
@@ -105,8 +105,9 @@ bool padi::LivingEntity::onCycleEnd(padi::Level *lvl) {
         lvl->getMap()->moveEntity(shared_from_this(), m_slaves.front()->getPosition());
         m_animation = m_apolloCtx->at("idle");
     }
-    if (m_inAction.cast) {
+    if (m_inAction.cast || m_inAction.cast_failed) {
         m_inAction.cast = false; // hm
+        m_inAction.cast_failed = false; // hm
     }
     return true;
 }
@@ -158,5 +159,9 @@ void padi::LivingEntity::trySetAnimation(std::string const &anim) {
 
 padi::AnimationSet const *padi::LivingEntity::getAnimationSet() const {
     return m_apolloCtx;
+}
+
+bool padi::LivingEntity::hasFailedCast() const {
+    return m_inAction.cast_failed;
 }
 

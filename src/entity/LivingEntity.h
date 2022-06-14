@@ -36,6 +36,7 @@ namespace padi {
         sf::Vector2i currentMoveDirection() const;
         bool hasMoveIntent() const;
         bool hasCastIntent() const;
+        bool hasFailedCast() const;
         bool isCasting() const;
 
         padi::AnimationSet const* getAnimationSet() const;
@@ -55,6 +56,7 @@ namespace padi {
         struct {
             bool move{false};
             bool cast{false};
+            bool cast_failed{false};
         } m_inAction;
 
         struct {

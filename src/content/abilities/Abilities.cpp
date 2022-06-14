@@ -64,6 +64,7 @@ namespace padi {
         level->hideCursor();
         level->getMap()->removeEntity(m_ghost);
         level->getMap()->removeEntity(m_ghostFX);
+        m_complete = true;
     }
 
     content::Teleport::Teleport(std::shared_ptr<padi::LivingEntity> user) : Ability(std::move(user)) {
@@ -114,6 +115,7 @@ namespace padi {
 
     void content::Lighten::castCancel(padi::Level *level) {
         level->hideCursor();
+        m_complete = true;
     }
 
     content::Lighten::Lighten(std::shared_ptr<LivingEntity> user) : Ability(std::move(user)) {
@@ -164,6 +166,7 @@ namespace padi {
 
     void content::Darken::castCancel(padi::Level *level) {
         level->hideCursor();
+        m_complete = true;
     }
 
     content::Darken::Darken(std::shared_ptr<padi::LivingEntity> user) : Ability(std::move(user)) {
@@ -228,6 +231,7 @@ namespace padi {
     void content::Walk::castCancel(padi::Level *level) {
         LimitedRangeAbility::castCancel(level);
         level->hideCursor();
+        m_complete = true;
     }
 
     content::Walk::Walk(std::shared_ptr<padi::LivingEntity> user, size_t range)
@@ -264,19 +268,21 @@ namespace padi {
     }
 
     bool content::Dash::cast(padi::Level *lvl, const sf::Vector2i &pos) {
-        if (m_direction.x == 0 && m_direction.y == 0) {
+        auto finalPos = m_user->getPosition() + m_direction * int(getRange());
+        if ((m_direction.x == 0 && m_direction.y == 0) || !lvl->getMap()->getTile(finalPos)->m_walkable) {
             castCancel(lvl);
             return false;
         }
         LimitedRangeAbility::cast(lvl, pos);
-        auto delta = m_user->getPosition() - pos;
         bool x = m_direction.x != 0;
-        auto finalPos = m_user->getPosition() + m_direction * int(getRange());
         for (size_t i = 0; i < getRange() - 1; ++i) {
-            auto laserPart = std::make_shared<padi::OneshotEntity>(m_user->getPosition() + m_direction * int(i + 1));
+            auto iPos = m_user->getPosition() + m_direction * int(i + 1);
+            auto laserPart = std::make_shared<padi::OneshotEntity>(iPos);
             laserPart->m_animation = lvl->getApollo()->lookupAnim(x ? "laser_x_burst" : "laser_y_burst");
             laserPart->m_color = m_user->getColor();
             lvl->getMap()->addEntity(laserPart);
+            auto tile = lvl->getMap()->getTile(iPos);
+            tile->setColor(tile->getColor() + m_user->getColor());
             lvl->addCycleEndListener(laserPart);
         }
         lvl->getMap()->moveEntity(m_user, finalPos);
@@ -312,6 +318,7 @@ namespace padi {
 
     void content::Dash::castCancel(padi::Level *lvl) {
         LimitedRangeAbility::castCancel(lvl);
+        m_complete = true;
     }
 
     void content::Dash::recalculateRange(Level *level) {

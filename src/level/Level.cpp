@@ -8,6 +8,7 @@
 #include "../Controls.h"
 #include "Cursor.h"
 #include "CycleListener.h"
+#include "SFML/Audio/Listener.hpp"
 
 namespace padi {
 
@@ -101,6 +102,7 @@ namespace padi {
 
         // draw the vertex array
         target.draw(&m_vbo[0], m_numVerts, sf::PrimitiveType::Quads, states);
+        sf::Listener::setPosition(m_view.getCenter().x, m_view.getCenter().y, 1);
     }
 
     bool Level::centerView(const sf::Vector2i &position) {

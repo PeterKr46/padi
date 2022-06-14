@@ -21,8 +21,8 @@ namespace padi::content {
             : m_renderTarget(target), m_graphicsClock() {
         if (m_vfxBuffer.create(int(float(target->getSize().x) / float(target->getSize().y) * 256), 256)) {
             auto levelGen = padi::LevelGenerator();
-            time_t seed;
-            time(&seed);
+            time_t seed = 1655244295;
+            //time(&seed);
             m_level = levelGen
                     .withSpritesheet("../media/level_sheet.png")    // TODO
                     .withApollo("../media/level.apollo")            // TODO
@@ -36,9 +36,9 @@ namespace padi::content {
 
             auto apollo = m_level->getApollo();
             // TODO name
-            sf::Color colors[3]{{255, 64,  64},
-                                {64,  255, 64},
-                                {64,  64,  255}};
+            sf::Color colors[1]{{255, 64,  64}};
+                                /*{64,  255, 64},
+                                {64,  64,  255}};*/
             for (auto &color: colors) {
                 auto player = std::make_shared<Character>();
                 player->entity = std::make_shared<padi::LivingEntity>("player", apollo->lookupAnimContext("cube"),
@@ -71,11 +71,6 @@ namespace padi::content {
 
             printf("[padi::content::Game] VfxBuffer at size %u, %u!\n", m_vfxBuffer.getSize().x,
                    m_vfxBuffer.getSize().y);
-            auto light = std::make_shared<padi::StaticEntity>(sf::Vector2i{0, 0});
-            light->m_animation = m_level->getApollo()->lookupAnim("lightshaft");
-            m_level->getMap()->addEntity(light);
-            light->m_color.a = 128;
-            light->setVerticalOffset(-8);
         } else {
             printf("[padi::content::Game] Could not create vfxBuffer Texture!\n");
         }
@@ -92,11 +87,15 @@ namespace padi::content {
         m_uiContext.nextFrame();
 
         if (m_activeChar->controller(m_level, m_activeChar)) {
-            m_characters.push(m_activeChar);
+            if(m_activeChar->alive) {
+                m_characters.push(m_activeChar);
+            }
             m_activeChar = m_characters.front();
             m_characters.pop();
-            m_level->centerView(m_activeChar->entity->getPosition());
-            m_level->moveCursor(m_activeChar->entity->getPosition());
+            if(m_activeChar->entity) {
+                m_level->centerView(m_activeChar->entity->getPosition());
+                m_level->moveCursor(m_activeChar->entity->getPosition());
+            }
         }
         m_vfxBuffer.draw(m_uiContext);
 
@@ -157,17 +156,18 @@ namespace padi::content {
             state = SELECTING;
             if (hasCast) {
                 state = CASTING;
-                if (!character->entity->hasCastIntent() && character->abilities[activeAbility]->isCastComplete()) {
-                    state = DONE;
+                if (!character->entity->hasCastIntent()) {
+                    if (!character->entity->hasFailedCast() && character->abilities[activeAbility]->isCastComplete()) {
+                        state = DONE;
+                    }
                 }
             }
         }
-
         if (state == IDLE) {
             if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
                 m_level->pause();
                 activeAbility = 0;
-                m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8,8});
+                m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8, 8});
             }
         } else if (state == SELECTING) {
             if (!m_level->isPaused()) {
@@ -175,10 +175,11 @@ namespace padi::content {
                 if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
                     character->entity->intentCast(character->abilities[activeAbility], m_level->getCursorLocation());
                     hasCast = true;
+                    m_level->hideCursor();
                 } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
                     character->abilities[activeAbility]->castCancel(m_level.get());
                     m_level->pause();
-                    m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8,8});
+                    m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8, 8});
                 }
             } else {
                 if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
@@ -193,11 +194,11 @@ namespace padi::content {
                     } else if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
                         character->abilities[activeAbility]->castCancel(&(*m_level));
                         activeAbility = std::max(0, activeAbility - 1);
-                        m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8,8});
+                        m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8, 8});
                     } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
                         character->abilities[activeAbility]->castCancel(&(*m_level));
                         activeAbility = std::min(int(character->abilities.size()) - 1, activeAbility + 1);
-                        m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8,8});
+                        m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8, 8});
                     }
                     m_uiContext.pushTransform().translate(228 - 64, 256 - 72);
                     padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4, -4, 160, 40}, 0,
@@ -219,11 +220,20 @@ namespace padi::content {
                     m_uiContext.popTransform();
                 }
             }
+        } else if (state == CASTING) {
+            if(character->entity->hasFailedCast()) {
+                hasCast = false;
+            }
         }
+
         if (state == DONE) {
             hasCast = false;
             activeAbility = -1;
         }
         return state == DONE;
+    }
+
+    void Game::addCharacter(const std::shared_ptr<Character> &character) {
+        m_characters.push(character);
     }
 }
