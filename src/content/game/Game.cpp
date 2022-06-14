@@ -167,6 +167,7 @@ namespace padi::content {
             if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
                 m_level->pause();
                 activeAbility = 0;
+                m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8,8});
             }
         } else if (state == SELECTING) {
             if (!m_level->isPaused()) {
@@ -177,20 +178,26 @@ namespace padi::content {
                 } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
                     character->abilities[activeAbility]->castCancel(m_level.get());
                     m_level->pause();
+                    m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8,8});
                 }
             } else {
                 if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
                     m_level->play();
+                    m_uiContext.removeText("ability");
                 } else {
                     if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
                         character->abilities[activeAbility]->castCancel(m_level.get());
                         m_level->play();
+                        m_uiContext.removeText("ability");
+                        activeAbility = -1;
                     } else if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
                         character->abilities[activeAbility]->castCancel(&(*m_level));
                         activeAbility = std::max(0, activeAbility - 1);
+                        m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8,8});
                     } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
                         character->abilities[activeAbility]->castCancel(&(*m_level));
                         activeAbility = std::min(int(character->abilities.size()) - 1, activeAbility + 1);
+                        m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8,8});
                     }
                     m_uiContext.pushTransform().translate(228 - 64, 256 - 72);
                     padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4, -4, 160, 40}, 0,

@@ -27,10 +27,14 @@ namespace padi {
 
         virtual bool isCastComplete() = 0;
 
+        [[nodiscard]] virtual std::string const& getDescription() const;
+        virtual void setDescription(std::string const& description);
+
         [[nodiscard]] std::shared_ptr<padi::LivingEntity> getUser() const;
 
     protected:
         std::shared_ptr<padi::LivingEntity> m_user;
+        std::string m_description;
     };
 
     class LimitedRangeAbility : public Ability {

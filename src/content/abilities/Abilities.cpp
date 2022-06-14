@@ -71,6 +71,7 @@ namespace padi {
         m_ghost->m_animation = m_user->getAnimationSet()->at("idle");
         m_ghostFX = std::make_shared<EntityStack>(sf::Vector2i{0, 0});
         m_ghostFX->m_stackSize = 8;
+        m_description = "TELEPORT\n\n  Instantly travel to a location of your choice!";
     }
 
     bool content::Teleport::isCastComplete() {
@@ -231,6 +232,7 @@ namespace padi {
 
     content::Walk::Walk(std::shared_ptr<padi::LivingEntity> user, size_t range)
             : padi::LimitedRangeAbility(std::move(user), range) {
+        m_description = "WALK\n\n  Travel to a location of your choice - the old-fashioned way.";
 
     }
 

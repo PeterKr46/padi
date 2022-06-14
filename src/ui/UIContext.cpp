@@ -17,7 +17,9 @@ namespace padi {
 
         // draw the vertex array
         target.draw(&m_vbo[0], m_numVerts, sf::PrimitiveType::Quads, states);
-
+        for (auto const &[k, v]: m_text) {
+            target.draw(v, states);
+        }
     }
 
     size_t UIContext::numQuads() const {
@@ -27,6 +29,9 @@ namespace padi {
     void UIContext::init(const std::string &apollo, const std::string &sprite) {
         m_apollo.loadFromFile(apollo);
         m_sprites.loadFromFile(sprite);
+
+        m_font.setSmooth(false);
+        m_font.loadFromFile("../media/prstartk.ttf");
     }
 
     const padi::Apollo *UIContext::getApollo() const {
@@ -42,8 +47,8 @@ namespace padi {
     }
 
     void UIContext::nextFrame() {
-        m_numVerts  = 0;
-        m_navUsed   = false;
+        m_numVerts = 0;
+        m_navUsed = false;
     }
 
     UIContext::UIContext() : m_vbo(sf::VertexArray(sf::PrimitiveType::Quads, 16)) {
@@ -55,7 +60,7 @@ namespace padi {
 
     sf::Transform UIContext::popTransform() {
         sf::Transform t;
-        if(m_transformStack.empty()) {
+        if (m_transformStack.empty()) {
             printf("[padi::UIContext] ERROR: Transform stack empty before popping!\n");
         } else {
             t = m_transformStack.back();
@@ -64,12 +69,47 @@ namespace padi {
         return t;
     }
 
-    sf::Transform & UIContext::pushTransform(sf::Transform const& t) {
-        if(m_transformStack.empty()) {
+    sf::Transform &UIContext::pushTransform(sf::Transform const &t) {
+        if (m_transformStack.empty()) {
             printf("[padi::UIContext] ERROR: Transform stack was depleted!\n");
             m_transformStack.emplace_back();
         }
         return m_transformStack.emplace_back(sf::Transform(m_transformStack.back()).combine(t));
         //return m_transformStack.back();
+    }
+
+    void UIContext::setText(const std::string &id, const std::string &text) {
+        static const auto hash = std::hash<std::string>();
+        auto idHash = hash(id);
+        auto found = m_text.find(idHash);
+        if (found != m_text.end()) {
+            found->second.setString(text);
+        } else {
+            m_text[idHash] = sf::Text(text, m_font, 7);
+        }
+    }
+
+    void UIContext::removeText(const std::string &id) {
+        static const auto hash = std::hash<std::string>();
+        auto idHash = hash(id);
+        auto found = m_text.find(idHash);
+        if (found != m_text.end()) {
+            m_text.erase(found);
+        }
+    }
+
+    void UIContext::setText(const std::string &id, const std::string &text, const sf::Vector2f &pos) {
+        static const auto hash = std::hash<std::string>();
+        auto idHash = hash(id);
+        auto found = m_text.find(idHash);
+        if (found != m_text.end()) {
+            found->second.setString(text);
+            found->second.setPosition(m_transformStack.back().transformPoint(pos));
+        } else {
+            auto txt = sf::Text(text, m_font, 7);
+            txt.setLineSpacing(1.25);
+            txt.setPosition(m_transformStack.back().transformPoint(pos));
+            m_text[idHash] = txt;
+        }
     }
 } // padi

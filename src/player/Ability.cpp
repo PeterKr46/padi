@@ -9,12 +9,20 @@
 
 namespace padi {
 
-    Ability::Ability(std::shared_ptr<padi::LivingEntity> user) : m_user(std::move(user)) {
+    Ability::Ability(std::shared_ptr<padi::LivingEntity> user) : m_user(std::move(user)), m_description("Peter forgot to put text here... :|") {
 
     }
 
     std::shared_ptr<padi::LivingEntity> Ability::getUser() const {
         return m_user;
+    }
+
+    std::string const &Ability::getDescription() const {
+        return m_description;
+    }
+
+    void Ability::setDescription(const std::string &description) {
+        m_description = description;
     }
 
     LimitedRangeAbility::LimitedRangeAbility(std::shared_ptr<padi::LivingEntity> user, size_t range)
