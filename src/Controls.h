@@ -34,7 +34,7 @@ namespace padi {
             return false;
         }
         static std::string const& textInput();
-        static bool textInput(std::string & out);
+        static bool textInput(std::string & out, size_t max_len = ~0u);
 
         static void keyDown(sf::Keyboard::Key key);
         static void keyReleased(sf::Keyboard::Key key);

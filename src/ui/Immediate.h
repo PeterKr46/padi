@@ -20,7 +20,7 @@ namespace padi {
 
         static bool Switch(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size, bool *ptr = nullptr);
 
-        static bool TextInput(padi::UIContext *ctx, std::string const &label, std::string *ptr = nullptr);
+        static bool TextInput(padi::UIContext *ctx, std::string const &label, std::string *ptr = nullptr, size_t max_len = ~0u);
 
         static void Sprite(padi::UIContext *ctx, sf::FloatRect const &size, size_t frame, const std::shared_ptr<Animation> &anim, sf::Color const& color = sf::Color::White);
 
@@ -29,6 +29,7 @@ namespace padi {
         static bool checkFocusSwitch(padi::UIContext *ctx, size_t id);
 
         static bool isFocused(padi::UIContext *ctx, std::string const &id);
+        static bool isAnyFocused(padi::UIContext *ctx, std::string* id, size_t numIDs);
 
     protected:
         static size_t

@@ -30,7 +30,7 @@ namespace padi {
         m_apollo.loadFromFile(apollo);
         m_sprites.loadFromFile(sprite);
 
-        m_font.setSmooth(false);
+        m_font.setSmooth(true);
         m_font.loadFromFile("../media/prstartk.ttf");
         m_transformStack = {sf::Transform()};
     }
@@ -79,7 +79,7 @@ namespace padi {
         //return m_transformStack.back();
     }
 
-    size_t hash_c_string(const char* p, size_t s) {
+    size_t hash_c_string(const char *p, size_t s) {
         size_t result = 0;
         const size_t prime = 31;
         for (size_t i = 0; i < s; ++i) {
@@ -125,25 +125,50 @@ namespace padi {
         return result;
     }
 
-    void UIContext::updateTextString(const char *id, const std::string &text) {
+    void UIContext::updateTextString(const char *id, const std::string &str) {
         auto idHash = hash_c_string(id, strlen(id));
         auto found = m_text.find(idHash);
         if (found != m_text.end()) {
+            auto &text = found->second.text;
+            bool centered = found->second.centered;
             auto p = found->second.text.getPosition();
-            if (found->second.centered) {
-                p += (found->second.text.getGlobalBounds().getSize() / 2.f);
+            if (centered) {
+                p += (text.getGlobalBounds().getSize() / 2.f);
             }
-            found->second.text.setString(text);
-            found->second.text.setPosition(p - (found->second.centered ?
-                                                (found->second.text.getGlobalBounds().getSize() / 2.f) : sf::Vector2f(0, 0)));
+            text.setString(str);
+            text.setPosition(p - (centered ? (text.getGlobalBounds().getSize() / 2.f) : sf::Vector2f(0, 0)));
         }
     }
 
-    void UIContext::updateTextColor(const char *id, sf::Color const& color) {
+    void UIContext::updateTextColor(const char *id, sf::Color const &color) {
         auto idHash = hash_c_string(id, strlen(id));
         auto found = m_text.find(idHash);
         if (found != m_text.end()) {
             found->second.text.setFillColor(color);
+        }
+    }
+
+    void UIContext::updateTextOutline(const char *id, const sf::Color &color, float thickness) {
+        auto idHash = hash_c_string(id, strlen(id));
+        auto found = m_text.find(idHash);
+        if (found != m_text.end()) {
+            found->second.text.setOutlineColor(color);
+            found->second.text.setOutlineThickness(thickness);
+        }
+    }
+
+    void UIContext::updateTextSize(const char *id, float size) {
+        auto idHash = hash_c_string(id, strlen(id));
+        auto found = m_text.find(idHash);
+        if (found != m_text.end()) {
+            auto &text = found->second.text;
+            bool centered = found->second.centered;
+            auto p = text.getPosition();
+            if (centered) {
+                p += (text.getGlobalBounds().getSize() / 2.f);
+            }
+            text.setCharacterSize(char(7 * size));
+            text.setPosition(p - (centered ? (text.getGlobalBounds().getSize() / 2.f) : sf::Vector2f(0, 0)));
         }
     }
 } // padi

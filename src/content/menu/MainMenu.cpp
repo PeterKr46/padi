@@ -6,8 +6,10 @@
 #include <SFML/Graphics.hpp>
 #include "../../ui/Immediate.h"
 #include "../game/Game.h"
+#include "SFML/Network/IpAddress.hpp"
 
 namespace padi::content {
+
 
     MainMenu::MainMenu(sf::RenderTarget *renderTarget, std::string const &apollo, std::string const &spritesheet)
             : m_renderTarget(renderTarget), m_runtime() {
@@ -16,10 +18,23 @@ namespace padi::content {
         }
         m_uiContext.init(apollo, spritesheet);
         m_uiContext.pushTransform().translate(16, 32);
-        m_uiContext.setText("play", "Play (SP)",        {8, 6}, false);
-        m_uiContext.setText("ip_label", "IP",           {8, 48}, false);
-        m_uiContext.setText("ip_input", "127.0.0.1",    {24, 48}, false);
-        m_uiContext.setText("connect", "Connect",       {8, 66}, false);
+        m_uiContext.setText("play", "Play (SP)",        {72, 12}, true);
+        m_uiContext.updateTextSize("play", 1.5);
+        m_uiContext.updateTextOutline("play", sf::Color::Black, 0.5);
+
+        m_uiContext.pushTransform().translate(0, 32);
+        m_uiContext.setText("join_title", "JOIN REMOTE PLAY",       {72, 8}, true);
+        m_uiContext.setText("ip_label", "IP",           {8, 16});
+        m_uiContext.setText("ip_input", "127.0.0.1",    {24, 16});
+        m_uiContext.setText("connect", "Connect",       {8, 34});
+        m_uiContext.popTransform();
+
+        m_uiContext.pushTransform().translate(0, 90);
+        m_uiContext.setText("host_title", "HOST REMOTE",{72, 8}, true);
+        m_uiContext.setText("own_ip", "",               {72, 20}, true);
+        m_uiContext.setText("host", "Host!",            {8, 34});
+        m_uiContext.setText("num_clients", "0 clients", {8, 56});
+        m_uiContext.popTransform();
         m_uiContext.popTransform();
     }
 
@@ -38,18 +53,44 @@ namespace padi::content {
 
         {
             m_uiContext.pushTransform().translate(16, 32);
-            m_uiContext.updateTextColor("play", Immediate::isFocused(&m_uiContext, "play") ? sf::Color::White : sf::Color(64));
-            if (Immediate::Button(&m_uiContext, "play", {0, 0, 96, 24})) {
+            m_uiContext.updateTextColor("play", Immediate::isFocused(&m_uiContext, "play") ? sf::Color::White : sf::Color(128));
+            if (Immediate::Button(&m_uiContext, "play", {-6, 0, 152, 32})) {
                 m_next = std::make_shared<padi::content::Game>(m_renderTarget);
             }
-            std::string t = m_uiContext.getText("ip_input");
-            m_uiContext.updateTextColor("ip_input", Immediate::isFocused(&m_uiContext, "ip_input") ? sf::Color::Yellow : sf::Color::White);
-            if (Immediate::TextInput(&m_uiContext, "ip_input", &t)) {
-                m_uiContext.updateTextString("ip_input", t);
+            {
+                m_uiContext.pushTransform().translate(0, 32);
+                Immediate::ScalableSprite(&m_uiContext, {-4, 0, 148, 56}, 0,
+                                          m_uiContext.getApollo()->lookupAnim("scalable_border"));
+                std::string t = m_uiContext.getText("ip_input");
+                m_uiContext.updateTextColor("ip_input",
+                                            Immediate::isFocused(&m_uiContext, "ip_input") ? sf::Color::Yellow
+                                                                                           : sf::Color::White);
+                if (Immediate::TextInput(&m_uiContext, "ip_input", &t, 15)) {
+                    m_uiContext.updateTextString("ip_input", t);
+                }
+                m_uiContext.updateTextColor("connect", Immediate::isFocused(&m_uiContext, "connect") ? sf::Color::White
+                                                                                                     : sf::Color(64));
+                if (Immediate::Button(&m_uiContext, "connect", {0, 28, 140, 24})) {
+                    printf("asd");
+                }
+                m_uiContext.popTransform();
             }
-            m_uiContext.updateTextColor("connect", Immediate::isFocused(&m_uiContext, "connect") ? sf::Color::White : sf::Color(64));
-            if (Immediate::Button(&m_uiContext, "connect", {0, 60, 96, 24})) {
-                printf("asd");
+            {
+                m_uiContext.pushTransform().translate(0, 90);
+                Immediate::ScalableSprite(&m_uiContext, {-4, 0, 148, 72}, 0,
+                                          m_uiContext.getApollo()->lookupAnim("scalable_border"));
+                m_uiContext.updateTextColor("host",
+                                            Immediate::isFocused(&m_uiContext, "host") ? sf::Color::White : sf::Color(
+                                                    64));
+                if (Immediate::Button(&m_uiContext, "host", {0, 28, 140, 24})) {
+                    printf("asd");
+                }
+                if (Immediate::isFocused(&m_uiContext, "host")) {
+                    m_uiContext.updateTextString("own_ip", sf::IpAddress::getLocalAddress().toString());
+                } else {
+                    m_uiContext.updateTextString("own_ip", "<IP Hidden>");
+                }
+                m_uiContext.popTransform();
             }
             m_uiContext.popTransform();
         }

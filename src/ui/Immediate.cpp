@@ -88,7 +88,7 @@ namespace padi {
         return changed;
     }
 
-    bool Immediate::TextInput(padi::UIContext *ctx, const std::string &label, std::string *ptr) {
+    bool Immediate::TextInput(padi::UIContext *ctx, const std::string &label, std::string *ptr, size_t max_len) {
         static auto hash = std::hash<std::string>();
 
         size_t id = hash(label);
@@ -98,12 +98,13 @@ namespace padi {
         if (ctx->isFocused(id)) {
             // Tab to cycle... for now
             checkFocusSwitch(ctx, id);
-            Controls::textInput(*ptr);
+            Controls::textInput(*ptr, max_len);
             changed = true;
         } else {
             if (ctx->m_focused == 0)
                 ctx->m_focused = id;
         }
+        ctx->m_pred = id;
         return changed;
     }
 
@@ -224,6 +225,14 @@ namespace padi {
     bool Immediate::isFocused(padi::UIContext *ctx, const std::string &id) {
         static auto hash = std::hash<std::string>();
         return hash(id) == ctx->m_focused;
+    }
+
+    bool Immediate::isAnyFocused(padi::UIContext *ctx, std::string *ids, size_t num) {
+        static auto hash = std::hash<std::string>();
+        for(size_t i = 0; i < num; ++i) {
+            if (ctx->m_focused == hash(ids[i])) return true;
+        }
+        return false;
     }
 
 }

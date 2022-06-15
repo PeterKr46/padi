@@ -46,8 +46,10 @@ namespace padi {
         sf::Transform &pushTransform(sf::Transform const &t = sf::Transform());
 
         void setText(const char* id, std::string const &text, sf::Vector2f const &pos, bool centered = false);
-        void updateTextString(const char* id, std::string const &text);
+        void updateTextString(const char* id, std::string const &str);
         void updateTextColor(const char* id, sf::Color const& color);
+        void updateTextOutline(const char *id, const sf::Color &color, float thickness);
+        void updateTextSize(const char *id, float size);
 
         void removeText(const char* id);
 

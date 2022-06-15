@@ -13,4 +13,4 @@ set(PADI src/map/Map.cpp src/map/Map.h src/entity/LivingEntity.cpp src/entity/Li
 add_executable(padi main.cpp ${PERLIN_NOISE} ${PADI})
 #target_compile_features(padi PRIVATE cxx_std_17)
 #set_property(TARGET padi PROPERTY CXX_STANDARD 17)
-target_link_libraries(padi sfml-system sfml-graphics sfml-audio)
+target_link_libraries(padi sfml-system sfml-graphics sfml-audio sfml-network)

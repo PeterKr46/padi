@@ -54,12 +54,13 @@ namespace padi {
         s_text += chr;
     }
 
-    bool Controls::textInput(std::string &out) {
-        for(uint32_t chr : s_text) {
-            if(chr == '\b') {
-                if(!out.empty()) out.pop_back();
+    bool Controls::textInput(std::string &out, size_t max_len) {
+        for (uint32_t chr: s_text) {
+            if (chr == '\b') {
+                if (!out.empty()) out.pop_back();
             } else {
-                out += chr;
+                if (out.size() < max_len)
+                    out += chr;
             }
         }
         return !s_text.empty();
