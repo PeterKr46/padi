@@ -15,7 +15,7 @@ namespace padi {
 
         virtual void handleResize(int width, int height) { };
 
-        virtual void draw() = 0;
+        virtual void draw(sf::RenderTarget* target) = 0;
 
     };
 

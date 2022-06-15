@@ -55,7 +55,7 @@ namespace padi::content {
         m_uiContext.popTransform();
     }
 
-    void MainMenu::draw() {
+    void MainMenu::draw(sf::RenderTarget* target) {
         m_background.getLevel()->update(&m_vfxBuffer);
         m_background.getLevel()->centerView({-3, 3});
         m_background.getLevel()->populateVBO();

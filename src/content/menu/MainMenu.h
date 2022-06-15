@@ -20,7 +20,7 @@ namespace padi::content {
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
-        void draw() override;
+        void draw(sf::RenderTarget* target) override;
 
         void handleResize(int width, int height) override;
 

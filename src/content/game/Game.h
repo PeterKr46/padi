@@ -10,22 +10,17 @@
 
 #include "../../entity/LivingEntity.h"
 #include "../../ui/UIContext.h"
+#include "Character.h"
+#include "CRTMonitor.h"
 
 namespace padi::content {
-
-    struct Character {
-        std::shared_ptr<padi::LivingEntity> entity; // OPTIONAL
-        std::vector<std::shared_ptr<padi::Ability>> abilities;
-        std::function<bool(const std::shared_ptr<Level> &, const std::shared_ptr<Character> &)> controller;
-        bool alive{true};
-    };
 
     class Game : public padi::Activity {
 
     public:
         explicit Game(sf::RenderTarget *target);
 
-        void draw() override;
+        void draw(sf::RenderTarget* target) override;
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
@@ -38,17 +33,14 @@ namespace padi::content {
         void addCharacter(const std::shared_ptr<Character> &character);
 
     private:
-        sf::RenderTarget *m_renderTarget;
-        sf::RenderTexture m_vfxBuffer;
-        sf::VertexArray m_screenQuad{sf::Quads, 4};
-        std::shared_ptr<Level> m_level;
-
+        CRTMonitor m_crt;
         padi::UIContext m_uiContext;
+
+        std::shared_ptr<Level> m_level;
 
         std::queue<std::shared_ptr<Character>> m_characters;
         std::shared_ptr<Character> m_activeChar;
 
-        sf::Clock m_graphicsClock;
     };
 
 } // content
