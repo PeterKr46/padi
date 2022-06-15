@@ -11,13 +11,28 @@
 #include "../Activity.h"
 #include "Character.h"
 #include "CRTMonitor.h"
-#include "SFML/Network/TcpSocket.hpp"
+#include <SFML/Network.hpp>
 
 namespace padi {
     class Level;
 }
 
 namespace padi::content {
+
+    template<typename T>
+    bool ReconstructPayload(sf::Packet &packet, T &t) {
+        uint8_t recvType = *reinterpret_cast<const uint8_t *>(packet.getData());
+        if (recvType != t.type) {
+            printf("[Packet] PAYLOAD ERROR - Type mismatch (expected %hhu, got %hhu).\n", t.type, recvType);
+        } else if (packet.getDataSize() != sizeof(T)) {
+            printf("[Packet] PAYLOAD ERROR - Size mismatch (expected %zu, got %zu).\n", sizeof(T), packet.getDataSize());
+        } else {
+            std::memcpy(&t, packet.getData(), packet.getDataSize());
+            return true;
+        }
+        return false;
+    }
+
     struct alignas(64) LobbySizePayload {
         const uint8_t type = 6;
         uint8_t players{};
