@@ -18,7 +18,7 @@ namespace padi::content {
     class Game : public padi::Activity {
 
     public:
-        explicit Game(sf::RenderTarget *target);
+        explicit Game();
 
         void draw(sf::RenderTarget* target) override;
 

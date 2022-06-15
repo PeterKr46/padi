@@ -15,11 +15,10 @@ namespace padi::content {
 
 
     MainMenu::MainMenu(sf::RenderTarget *renderTarget, std::string const &apollo, std::string const &spritesheet)
-            : m_renderTarget(renderTarget), m_runtime() {
-        if (!m_vfxBuffer.create(float(renderTarget->getSize().x) / renderTarget->getSize().y * 256, 256)) {
-            printf("[padi::content::MainMenu] Failed to create vfxBuffer.\n");
-        }
+    {
+        m_crt.handleResize(int(float(renderTarget->getSize().x) / renderTarget->getSize().y * 256), 256);
         m_uiContext.init(apollo, spritesheet);
+        m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
 
         m_uiContext.pushTransform().translate(16, 32);
 
@@ -56,15 +55,15 @@ namespace padi::content {
     }
 
     void MainMenu::draw(sf::RenderTarget* target) {
-        m_background.getLevel()->update(&m_vfxBuffer);
+        m_background.getLevel()->update(m_crt.asTarget());
         m_background.getLevel()->centerView({-3, 3});
         m_background.getLevel()->populateVBO();
-        m_vfxBuffer.clear();
+        m_crt.asTarget()->clear();
 
         auto states = sf::RenderStates::Default;
         states.transform.scale(
-                sf::Vector2f(256.f / m_vfxBuffer.getView().getSize().y, 256.f / m_vfxBuffer.getView().getSize().y));
-        m_vfxBuffer.draw(m_background, states);
+                sf::Vector2f(256.f / m_crt.asTarget()->getView().getSize().y, 256.f /m_crt.asTarget()->getView().getSize().y));
+        m_crt.asTarget()->draw(m_background, states);
 
         m_uiContext.nextFrame();
 
@@ -73,7 +72,7 @@ namespace padi::content {
             if ( !(hostRole.active || clientRole.client)) {
                 m_uiContext.updateTextColor("play",Immediate::isFocused(&m_uiContext, "play") ? sf::Color::White : sf::Color(0x999999ff));
                 if (Immediate::Button(&m_uiContext, "play", {-6, 0, 152, 32})) {
-                    m_next = std::make_shared<padi::content::Game>(m_renderTarget);
+                    m_next = std::make_shared<padi::content::Game>();
                 }
             }
             { // CLIENT CONFIGURATION
@@ -173,16 +172,10 @@ namespace padi::content {
             updateClient();
         }
 
-        m_vfxBuffer.draw(*this);
+        m_crt.asTarget()->draw(m_uiContext);
 
-        auto rState = sf::RenderStates::Default;
-        auto shader = m_background.getLevel()->getApollo()->lookupShader("fpa");
-        shader->setUniform("time", m_runtime.getElapsedTime().asSeconds());
-        shader->setUniform("paused", m_background.getLevel()->isPaused());
-        rState.shader = shader.get();
-        rState.texture = &m_vfxBuffer.getTexture();
-        m_renderTarget->setView(m_renderTarget->getDefaultView());
-        m_renderTarget->draw(m_screenQuad, rState);
+        //target->setView(m_renderTarget->getDefaultView());
+        target->draw(m_crt);
     }
 
     void MainMenu::draw(sf::RenderTarget &target, sf::RenderStates states) const {
@@ -197,20 +190,7 @@ namespace padi::content {
     }
 
     void MainMenu::handleResize(int width, int height) {
-        sf::Vector2f halfSize{float(width), float(height)};
-        halfSize /= 2.f;
-        sf::Vector2f imgSize{m_vfxBuffer.getSize()};
-        m_screenQuad[0].position = {0, 0};
-        m_screenQuad[0].texCoords = {0, imgSize.y};
-
-        m_screenQuad[1].position = {0, float(height)};
-        m_screenQuad[1].texCoords = {0, 0};
-
-        m_screenQuad[2].position = {float(width), float(height)};
-        m_screenQuad[2].texCoords = {imgSize.x, 0};
-
-        m_screenQuad[3].position = {float(width), 0};
-        m_screenQuad[3].texCoords = imgSize;
+        m_crt.handleResize(width, height);
     }
 
     void MainMenu::initializeHostSession() {

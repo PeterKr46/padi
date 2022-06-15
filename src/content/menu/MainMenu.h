@@ -11,6 +11,7 @@
 #include "../Activity.h"
 #include "SFML/Network/TcpListener.hpp"
 #include "SFML/Network/Packet.hpp"
+#include "../game/CRTMonitor.h"
 
 namespace padi::content {
 
@@ -27,15 +28,11 @@ namespace padi::content {
         std::shared_ptr<padi::Activity> handoff() override;
 
     private:
-        sf::RenderTarget *m_renderTarget;
+        padi::content::CRTMonitor m_crt;
         padi::UIContext m_uiContext;
-        sf::RenderTexture m_vfxBuffer;
-        sf::VertexArray m_screenQuad{sf::Quads, 4};
 
         padi::content::MenuBackground m_background;
         std::shared_ptr<padi::Activity> m_next{nullptr};
-
-        sf::Clock m_runtime;
 
         struct {
             bool active{false};

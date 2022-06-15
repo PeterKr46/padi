@@ -65,6 +65,3 @@ anim move_y_to      32 32   240 8   0 48    12
 anim idle           32 32   192  568 0 32    12
 anim spawn          32 32   224 568 0 32    12
 anim spawn_ray      32 32   64  568 0 32    12
-
-shader fpa ../src/shaders/crt.vert
-shader fpa ../src/shaders/fpa_pausable.frag

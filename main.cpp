@@ -6,14 +6,14 @@
 
 int main() {
     std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
+    auto style = sf::Style::Fullscreen;
     auto mode = modes[0];
-    mode.width = 1280;
-    mode.height = 720;
-    sf::RenderWindow window(
-            mode
-            // sf::VideoMode(960, 1080)
-            , "PAdI"//, sf::Style::Fullscreen
-    );
+    if (true) {
+        mode.width = 1280;
+        mode.height = 720;
+        style = sf::Style::Default;
+    }
+    sf::RenderWindow window(mode, "PAdI", style);
 
     // Ambient sounds
     sf::Music ambient;
@@ -22,7 +22,7 @@ int main() {
     ambient.setLoop(true);
     //ambient.setLoopPoints(sf::Music::TimeSpan(sf::Time(), ambient.getDuration() - sf::seconds(0.8)));
     //ambient.setPitch(120.f / 125.8f);
-    ambient.setPitch(120.f/88.f);
+    ambient.setPitch(120.f / 88.f);
     ambient.setVolume(30);
     ambient.play();
 
@@ -55,7 +55,7 @@ int main() {
 
         activity->draw(&window);
         auto nextActivity = activity->handoff();
-        if(nextActivity != activity) {
+        if (nextActivity != activity) {
             nextActivity->handleResize(int(window.getSize().x), int(window.getSize().y));
             activity = nextActivity;
         }

@@ -19,7 +19,7 @@
 namespace padi::content {
 
 
-    Game::Game(sf::RenderTarget *target) : m_crt(nullptr) {
+    Game::Game() : m_crt(nullptr) {
         auto levelGen = padi::LevelGenerator();
         time_t seed = 1655244295;
         //time(&seed);
@@ -30,9 +30,9 @@ namespace padi::content {
                 .withArea({100, 100})
                 .generate();
         m_level->initCursor("cursor"); // TODO
-        m_crt.handleResize(int(target->getSize().x), int(target->getSize().y));
-        m_crt.setShader(m_level->getApollo()->lookupShader("fpa"));
+        m_crt.handleResize(455, 255);
         m_uiContext.init("../media/ui.apollo", "../media/ui_sheet.png");
+        m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
         auto shake = std::make_shared<MapShaker>();
         m_level->addFrameBeginListener(shake);
 
