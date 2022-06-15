@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include "SFML/Network/TcpSocket.hpp"
 
 namespace padi {
 
@@ -21,7 +22,12 @@ namespace padi::content {
 
     class RemotePlayerTurn {
     public:
-        bool operator()(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &character);
+        explicit RemotePlayerTurn(std::shared_ptr<sf::TcpSocket>  socket);
+        bool operator()(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &chr);
+    private:
+        bool m_turnStarted = false;
+        uint8_t m_casting = 0;
+        std::shared_ptr<sf::TcpSocket> m_socket;
     };
 
 } // content

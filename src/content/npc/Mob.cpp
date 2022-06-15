@@ -34,7 +34,6 @@ namespace padi::content {
                     return corruption.expand(level, chr);
                 };
                 chr->entity.reset();
-                printf("[Mob] exploding.");
             } else {
                 m_walk->castIndicator(level.get());
                 auto const &targets = m_walk->getPossibleTargets();
@@ -42,7 +41,7 @@ namespace padi::content {
                     m_walk->castCancel(level.get());
                     return true; // TODO
                 }
-                auto target = targets[std::rand() % (targets.size() - 1)];
+                auto target = targets.back();
                 for (auto pos: targets) {
                     for (auto dir: AllDirections) {
                         if (pos + dir != chr->entity->getPosition() && level->getMap()->hasEntities(pos + dir)) {

@@ -11,7 +11,7 @@
 #include "../Activity.h"
 #include "SFML/Network/TcpListener.hpp"
 #include "SFML/Network/Packet.hpp"
-#include "../game/CRTMonitor.h"
+#include "../vfx/CRTMonitor.h"
 
 namespace padi::content {
 

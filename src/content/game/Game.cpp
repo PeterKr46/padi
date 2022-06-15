@@ -10,9 +10,9 @@
 #include "../abilities/Abilities.h"
 #include "../../ui/Immediate.h"
 #include "../npc/Mob.h"
-#include "MapShaker.h"
+#include "../vfx/MapShaker.h"
 #include "LocalPlayerTurn.h"
-#include "CRTMonitor.h"
+#include "../vfx/CRTMonitor.h"
 
 namespace padi::content {
 
@@ -38,11 +38,12 @@ namespace padi::content {
         sf::Color colors[1]{{255, 64,  64}};
                             /*{64,  255, 64},
                             {64,  64,  255}};*/
+        auto sockets = std::vector<std::shared_ptr<sf::TcpSocket>>();
         for (auto &color: colors) {
             auto player = std::make_shared<Character>();
             player->entity = std::make_shared<padi::LivingEntity>("player", apollo->lookupAnimContext("cube"),
                                                                   sf::Vector2i{0, 0});
-            LocalPlayerTurn local(&m_uiContext);
+            LocalPlayerTurn local(&m_uiContext, sockets);
             player->controller = [=](const std::shared_ptr<Level> &l, const std::shared_ptr<Character> &c) mutable {
                 return local(l, c);
             };
@@ -63,11 +64,11 @@ namespace padi::content {
         m_activeChar = m_characters.front();
         m_characters.pop();
 
-        auto mob = std::make_shared<padi::content::Mob>("mob", apollo->lookupAnimContext("bubbleboi"),
+        /*auto mob = std::make_shared<padi::content::Mob>("mob", apollo->lookupAnimContext("bubbleboi"),
                                                         sf::Vector2i{2, 2});
         auto mobSpawn = std::make_shared<padi::SpawnEvent>(mob);
         mobSpawn->dispatch(m_level);
-        m_characters.push(std::make_shared<Character>(mob->asCharacter()));
+        m_characters.push(std::make_shared<Character>(mob->asCharacter()));*/
     }
 
     void Game::draw(sf::RenderTarget* target) {

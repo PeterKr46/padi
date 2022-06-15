@@ -10,7 +10,7 @@
 #include "../../ui/UIContext.h"
 #include "../Activity.h"
 #include "Character.h"
-#include "CRTMonitor.h"
+#include "../vfx/CRTMonitor.h"
 #include <SFML/Network.hpp>
 
 namespace padi {
@@ -25,7 +25,8 @@ namespace padi::content {
         if (recvType != t.type) {
             printf("[Packet] PAYLOAD ERROR - Type mismatch (expected %hhu, got %hhu).\n", t.type, recvType);
         } else if (packet.getDataSize() != sizeof(T)) {
-            printf("[Packet] PAYLOAD ERROR - Size mismatch (expected %zu, got %zu).\n", sizeof(T), packet.getDataSize());
+            printf("[Packet] PAYLOAD ERROR - Size mismatch (expected %zu, got %zu).\n", sizeof(T),
+                   packet.getDataSize());
         } else {
             std::memcpy(&t, packet.getData(), packet.getDataSize());
             return true;
@@ -54,6 +55,12 @@ namespace padi::content {
         sf::Vector2i pos;
         sf::Color color;
         bool local{};
+    };
+
+    struct alignas(64) PlayerCastPayload {
+        const uint8_t type = 10;
+        uint8_t ability{};
+        sf::Vector2i pos;
     };
 
     class OnlineGame : public padi::Activity {

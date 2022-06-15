@@ -11,6 +11,7 @@
 
 // TODO
 #include "Game.h"
+#include "OnlineGame.h"
 
 namespace padi::content {
     enum TurnState : int {
@@ -20,8 +21,8 @@ namespace padi::content {
         DONE = 3
     };
 
-    LocalPlayerTurn::LocalPlayerTurn(UIContext *uiContext)
-            : m_uiContext(uiContext) {
+    LocalPlayerTurn::LocalPlayerTurn(UIContext *uiContext, std::vector<std::shared_ptr<sf::TcpSocket>> &sockets)
+            : m_uiContext(uiContext), m_sockets(sockets) {
 
     }
 
@@ -54,6 +55,18 @@ namespace padi::content {
                 character->abilities[m_activeAbility]->castIndicator(level.get());
                 if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
                     character->entity->intentCast(character->abilities[m_activeAbility], level->getCursorLocation());
+                    {
+                        sf::Packet packet;
+                        PlayerCastPayload payload;
+                        payload.ability = uint8_t(m_activeAbility);
+                        payload.pos = level->getCursorLocation();
+                        printf("[LocalPlayerTurn] Casting %u at (%i, %i)\n", m_activeAbility, payload.pos.x, payload.pos.y);
+                        packet.append(&payload, sizeof(payload));
+                        for (auto &socket: m_sockets) {
+                            socket->send(packet);
+                        }
+                    }
+
                     m_hasCast = true;
                     level->hideCursor();
                 } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
@@ -74,11 +87,13 @@ namespace padi::content {
                     } else if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
                         character->abilities[m_activeAbility]->castCancel(&(*level));
                         m_activeAbility = std::max(0, m_activeAbility - 1);
-                        m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(), {8, 8});
+                        m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),
+                                             {8, 8});
                     } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
                         character->abilities[m_activeAbility]->castCancel(&(*level));
                         m_activeAbility = std::min(int(character->abilities.size()) - 1, m_activeAbility + 1);
-                        m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(), {8, 8});
+                        m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),
+                                             {8, 8});
                     }
                     m_uiContext->pushTransform().translate(228 - 64, 256 - 72);
                     padi::Immediate::ScalableSprite(m_uiContext, sf::FloatRect{-4, -4, 160, 40}, 0,

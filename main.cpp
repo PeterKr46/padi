@@ -23,7 +23,7 @@ int main() {
     //ambient.setLoopPoints(sf::Music::TimeSpan(sf::Time(), ambient.getDuration() - sf::seconds(0.8)));
     //ambient.setPitch(120.f / 125.8f);
     ambient.setPitch(120.f / 88.f);
-    ambient.setVolume(30);
+    ambient.setVolume(3);
     ambient.play();
 
     std::shared_ptr<padi::Activity> activity = std::make_shared<padi::content::MainMenu>

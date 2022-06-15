@@ -268,8 +268,14 @@ namespace padi {
     }
 
     bool content::Dash::cast(padi::Level *lvl, const sf::Vector2i &pos) {
-        auto finalPos = m_user->getPosition() + m_direction * int(getRange());
-        if ((m_direction.x == 0 && m_direction.y == 0) || !lvl->getMap()->getTile(finalPos)->m_walkable) {
+        auto delta = pos - m_user->getPosition();
+
+        if(delta.x < 0) m_direction = Left;
+        else if(delta.x > 0) m_direction = Right;
+        else if(delta.y > 0) m_direction = Down;
+        else if(delta.y < 0) m_direction = Up;
+
+        if ((m_direction.x == 0 && m_direction.y == 0) || !lvl->getMap()->getTile(pos)->m_walkable) {
             castCancel(lvl);
             return false;
         }
@@ -285,16 +291,17 @@ namespace padi {
             tile->setColor(tile->getColor() + m_user->getColor());
             lvl->addCycleEndListener(laserPart);
         }
-        lvl->getMap()->moveEntity(m_user, finalPos);
-        auto strike = std::make_shared<padi::OneshotEntity>(finalPos);
+        lvl->getMap()->moveEntity(m_user, pos);
+        auto strike = std::make_shared<padi::OneshotEntity>(pos);
         strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
         strike->m_color = m_user->getColor();
         lvl->getMap()->addEntity(strike);
         lvl->addCycleEndListener(strike);
-        lvl->centerView(finalPos);
+        lvl->centerView(pos);
         m_direction = sf::Vector2i(0, 0);
 
         lvl->addCycleEndListener(shared_from_this());
+        lvl->getCursor()->unlock();
         m_complete = false;
         return true;
     }
@@ -314,11 +321,15 @@ namespace padi {
             m_rangeChanged = true;
         }
         LimitedRangeAbility::castIndicator(lvl);
+        lvl->moveCursor(m_user->getPosition() + m_direction * int(getRange()));
+        lvl->hideCursor();
+        lvl->getCursor()->lock();
     }
 
     void content::Dash::castCancel(padi::Level *lvl) {
         LimitedRangeAbility::castCancel(lvl);
         m_complete = true;
+        lvl->getCursor()->unlock();
     }
 
     void content::Dash::recalculateRange(Level *level) {

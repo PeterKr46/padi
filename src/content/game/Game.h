@@ -11,7 +11,7 @@
 #include "../../entity/LivingEntity.h"
 #include "../../ui/UIContext.h"
 #include "Character.h"
-#include "CRTMonitor.h"
+#include "../vfx/CRTMonitor.h"
 
 namespace padi::content {
 

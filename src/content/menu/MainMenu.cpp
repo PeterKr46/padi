@@ -189,7 +189,6 @@ namespace padi::content {
 
     void MainMenu::initializeHostSession() {
         hostRole.listener.setBlocking(false);
-        printf("[padi::content::MainMenu] Begin Hosting!\n");
         if (hostRole.listener.listen(42069) != sf::Socket::Done) {
             printf("[padi::content::MainMenu] Error setting up TCP Listener.\n");
             m_uiContext.updateTextString("num_clients", "Host setup failed.");
@@ -201,11 +200,11 @@ namespace padi::content {
             m_uiContext.updateTextString("num_clients", "Host online!");
             m_uiContext.updateTextString("connect", "Unavailable");
             m_uiContext.updateTextString("host_play", "Start playing");
+            sendChatMessage("Host session started.");
         }
     }
 
     void MainMenu::closeHostSession() {
-        printf("[padi::content::MainMenu] Stop Hosting!\n");
         hostRole.listener.close();
         for (auto &client: hostRole.clients) {
             client->disconnect();
@@ -214,16 +213,12 @@ namespace padi::content {
         m_uiContext.updateTextString("num_clients", "");
         m_uiContext.updateTextString("connect", "Connect");
         m_uiContext.updateTextString("host_play", "Offline");
-        printf("[padi::content::MainMenu] TCP Listener inactive.\n");
         sendChatMessage("Host session closed.");
     }
 
     void MainMenu::updateHost() {
         auto result = hostRole.listener.accept(*hostRole.nextClient);
         if (result == sf::Socket::Done) {
-            printf("[padi::content::MainMenu] Accepted a new client!\n");
-            printf("[padi::content::MainMenu] Remote IP: %s\n",
-                   hostRole.nextClient->getRemoteAddress().toString().c_str());
             hostRole.clients.push_back(hostRole.nextClient);
             hostRole.nextClient = std::make_shared<sf::TcpSocket>();
             hostRole.nextClient->setBlocking(false);
@@ -256,10 +251,7 @@ namespace padi::content {
                 clientRole.client = std::make_shared<sf::TcpSocket>();
                 clientRole.client->setBlocking(true);
                 if (clientRole.client->connect(hostIp, 42069, sf::seconds(0.5)) == sf::Socket::Done) {
-                    printf("[padi::content::MainMenu] Client connected!\n");
                     clientRole.client->setBlocking(false);
-                } else {
-                    printf("[padi::content::MainMenu] Client failed to connect.\n");
                 }
             }
         }
@@ -270,7 +262,6 @@ namespace padi::content {
         auto result = clientRole.client->receive(packet);
         if (result == sf::Socket::Disconnected) {
             clientRole.client.reset();
-            printf("[padi::content::MainMenu] Client is disconnected!\n");
             sendChatMessage("Connection closed.");
         } else if (result == sf::Socket::Done) {
             auto data = reinterpret_cast<const uint8_t *>(packet.getData());

@@ -82,8 +82,7 @@ namespace padi::content {
         sf::Packet packet;
         PlayerSpawnPayload payload;
         std::shared_ptr<Character> player;
-        LocalPlayerTurn localPlayerTurn(&m_uiContext);
-        RemotePlayerTurn remotePlayerTurn;
+        LocalPlayerTurn localPlayerTurn(&m_uiContext, m_lobby.sockets);
         if (m_lobby.isHost) {
             for (size_t id = 0; id < m_lobby.sockets.size() + 1; ++id) {
                 payload.pos = sf::Vector2i{int(id), 0};
@@ -108,10 +107,13 @@ namespace padi::content {
                 player->abilities.push_back(std::make_shared<padi::content::Lighten>(player->entity));
                 player->abilities.push_back(std::make_shared<padi::content::Dash>(player->entity, 8));
                 player->abilities.push_back(std::make_shared<padi::content::Darken>(player->entity));
-
-                player->controller = [=](const std::shared_ptr<Level> &l, const std::shared_ptr<Character> &c) mutable {
-                    return remotePlayerTurn(l, c);
-                };
+                if(m_lobby.sockets.size() > id) {
+                    RemotePlayerTurn remotePlayerTurn(m_lobby.sockets[id]);
+                    player->controller = [=](const std::shared_ptr<Level> &l,
+                                             const std::shared_ptr<Character> &c) mutable {
+                        return remotePlayerTurn(l, c);
+                    };
+                }
 
                 auto spawnEvent = std::make_shared<padi::SpawnEvent>(player->entity);
                 spawnEvent->dispatch(m_level);
@@ -123,6 +125,7 @@ namespace padi::content {
             };
         } else {
             auto & host = m_lobby.sockets.front();
+            RemotePlayerTurn remotePlayerTurn(host);
             for (size_t id = 0; id < m_lobby.sockets.size() + 1; ++id) {
                 auto status = host->receive(packet);
                 if (status != sf::Socket::Done) {
@@ -159,6 +162,8 @@ namespace padi::content {
                 m_characters.push(player);
             }
         }
+        m_activeChar = m_characters.front();
+        m_characters.pop();
     }
 
     void OnlineGame::propagateSeed() {
