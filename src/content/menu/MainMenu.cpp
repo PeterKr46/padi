@@ -4,9 +4,12 @@
 
 #include "MainMenu.h"
 #include <SFML/Graphics.hpp>
+#include "SFML/Network/IpAddress.hpp"
+#include "SFML/Network/TcpSocket.hpp"
 #include "../../ui/Immediate.h"
 #include "../game/Game.h"
-#include "SFML/Network/IpAddress.hpp"
+#include "../../Controls.h"
+#include "SFML/Network/Packet.hpp"
 
 namespace padi::content {
 
@@ -17,24 +20,37 @@ namespace padi::content {
             printf("[padi::content::MainMenu] Failed to create vfxBuffer.\n");
         }
         m_uiContext.init(apollo, spritesheet);
+
         m_uiContext.pushTransform().translate(16, 32);
-        m_uiContext.setText("play", "Play (SP)",        {72, 12}, true);
+
+        m_uiContext.setText("play", "Play (SP)", {72, 12}, true);
         m_uiContext.updateTextSize("play", 1.5);
         m_uiContext.updateTextOutline("play", sf::Color::Black, 0.5);
 
         m_uiContext.pushTransform().translate(0, 32);
-        m_uiContext.setText("join_title", "JOIN REMOTE PLAY",       {72, 8}, true);
-        m_uiContext.setText("ip_label", "IP",           {8, 16});
-        m_uiContext.setText("ip_input", "127.0.0.1",    {24, 16});
-        m_uiContext.setText("connect", "Connect",       {8, 34});
+        m_uiContext.setText("join_title", "JOIN REMOTE PLAY", {72, 8}, true);
+        m_uiContext.setText("ip_label", "IP", {8, 16});
+        m_uiContext.setText("ip_input", "127.0.0.1", {24, 16});
+        m_uiContext.setText("connect", "Connect", {8, 34});
         m_uiContext.popTransform();
 
         m_uiContext.pushTransform().translate(0, 90);
-        m_uiContext.setText("host_title", "HOST REMOTE",{72, 8}, true);
-        m_uiContext.setText("own_ip", "",               {72, 20}, true);
-        m_uiContext.setText("host", "Host!",            {8, 34});
+        m_uiContext.setText("host_title", "HOST REMOTE", {72, 8}, true);
+        m_uiContext.setText("own_ip", "", {72, 20}, true);
+        m_uiContext.setText("host", "Start Playing!", {86, 38}, true);
         m_uiContext.setText("num_clients", "0 clients", {8, 56});
         m_uiContext.popTransform();
+
+        m_uiContext.pushTransform().translate(0, 168);
+        m_uiContext.setText("nick_label", "Nick", {0, 0});
+        m_uiContext.setText("nick_input", "Red", {32, 0});
+        m_uiContext.popTransform();
+
+        m_uiContext.popTransform();
+
+        m_uiContext.pushTransform().translate(235, 180);
+        m_uiContext.setText("chat_log", "1\n2\n3\n4\n5\nGame Started.", {0, 0});
+        m_uiContext.setText("chat_input", "###", {0, 60});
         m_uiContext.popTransform();
     }
 
@@ -53,11 +69,12 @@ namespace padi::content {
 
         {
             m_uiContext.pushTransform().translate(16, 32);
-            m_uiContext.updateTextColor("play", Immediate::isFocused(&m_uiContext, "play") ? sf::Color::White : sf::Color(128));
+            m_uiContext.updateTextColor("play",
+                                        Immediate::isFocused(&m_uiContext, "play") ? sf::Color::White : sf::Color(128));
             if (Immediate::Button(&m_uiContext, "play", {-6, 0, 152, 32})) {
                 m_next = std::make_shared<padi::content::Game>(m_renderTarget);
             }
-            {
+            { // CLIENT CONFIGURATION
                 m_uiContext.pushTransform().translate(0, 32);
                 Immediate::ScalableSprite(&m_uiContext, {-4, 0, 148, 56}, 0,
                                           m_uiContext.getApollo()->lookupAnim("scalable_border"));
@@ -71,18 +88,25 @@ namespace padi::content {
                 m_uiContext.updateTextColor("connect", Immediate::isFocused(&m_uiContext, "connect") ? sf::Color::White
                                                                                                      : sf::Color(64));
                 if (Immediate::Button(&m_uiContext, "connect", {0, 28, 140, 24})) {
-                    printf("asd");
+                    initializeClientSession(); // TODO prevent acting as host AND client
                 }
                 m_uiContext.popTransform();
             }
-            {
+            { // HOST CONFIGURATION
                 m_uiContext.pushTransform().translate(0, 90);
                 Immediate::ScalableSprite(&m_uiContext, {-4, 0, 148, 72}, 0,
                                           m_uiContext.getApollo()->lookupAnim("scalable_border"));
                 m_uiContext.updateTextColor("host",
                                             Immediate::isFocused(&m_uiContext, "host") ? sf::Color::White : sf::Color(
                                                     64));
-                if (Immediate::Button(&m_uiContext, "host", {0, 28, 140, 24})) {
+                if (Immediate::Switch(&m_uiContext, "host_switch", {-4, 24, 32, 32}, &hostRole.active)) {
+                    if (hostRole.active) {
+                        initializeHostSession(); // TODO prevent acting as host AND client
+                    } else {
+                        closeHostSession();
+                    }
+                }
+                if (Immediate::Button(&m_uiContext, "host", {24, 28, 120, 24})) {
                     printf("asd");
                 }
                 if (Immediate::isFocused(&m_uiContext, "host")) {
@@ -93,6 +117,50 @@ namespace padi::content {
                 m_uiContext.popTransform();
             }
             m_uiContext.popTransform();
+        }
+        // NICKNAME CONFIGURATION
+        if (!clientRole.client && !hostRole.active) {
+            std::string t = m_uiContext.getText("nick_input");
+            if (Immediate::isFocused(&m_uiContext, "nick_input")) {
+                m_uiContext.updateTextColor("nick_input", sf::Color::Yellow);
+            } else {
+                m_uiContext.updateTextColor("nick_input", sf::Color::White);
+                if (t.empty()) {
+                    t = "Red";
+                    m_uiContext.updateTextString("nick_input", t);
+                }
+            }
+            if (Immediate::TextInput(&m_uiContext, "nick_input", &t, 8)) {
+                m_uiContext.updateTextString("nick_input", t);
+            }
+        }
+        // CHAT
+        {
+            m_uiContext.pushTransform().translate(235, 180);
+            Immediate::ScalableSprite(&m_uiContext, {-4, -4, 208, 60}, 0,
+                                      m_uiContext.getApollo()->lookupAnim("scalable_border"));
+            Immediate::ScalableSprite(&m_uiContext, {-4, 54, 208, 16}, 0,
+                                      m_uiContext.getApollo()->lookupAnim("scalable_border"),
+                                      Immediate::isFocused(&m_uiContext, "chat_input") ? sf::Color::Yellow
+                                                                                       : sf::Color::White);
+            m_uiContext.popTransform();
+            std::string t = m_uiContext.getText("chat_input");
+            m_uiContext.updateTextColor("chat_input",
+                                        Immediate::isFocused(&m_uiContext, "chat_input") ? sf::Color::Yellow
+                                                                                         : sf::Color::White);
+            if (Immediate::TextInput(&m_uiContext, "chat_input", &t, 18)) {
+                m_uiContext.updateTextString("chat_input", t);
+            }
+            if (Immediate::isFocused(&m_uiContext, "chat_input") &&
+                padi::Controls::wasKeyReleased(sf::Keyboard::Enter)) {
+                sendChatMessage(m_uiContext.getText("nick_input") + ": " + t);
+            }
+        }
+        if (hostRole.active) {
+            updateHost();
+        }
+        if (clientRole.client) {
+            updateClient();
         }
 
         m_vfxBuffer.draw(*this);
@@ -133,5 +201,126 @@ namespace padi::content {
 
         m_screenQuad[3].position = {float(width), 0};
         m_screenQuad[3].texCoords = imgSize;
+    }
+
+    void MainMenu::initializeHostSession() {
+        hostRole.listener.setBlocking(false);
+        printf("[padi::content::MainMenu] Begin Hosting!\n");
+        if (hostRole.listener.listen(42069) != sf::Socket::Done) {
+            printf("[padi::content::MainMenu] Error setting up TCP Listener.\n");
+            m_uiContext.updateTextString("num_clients", "Host setup failed.");
+        } else {
+            hostRole.nextClient = std::make_shared<sf::TcpSocket>();
+            hostRole.nextClient->setBlocking(false);
+            printf("[padi::content::MainMenu] TCP Listener active.\n");
+            m_uiContext.updateTextString("num_clients", "Host online!");
+        }
+    }
+
+    void MainMenu::closeHostSession() {
+        printf("[padi::content::MainMenu] Stop Hosting!\n");
+        hostRole.listener.close();
+        for (auto &client: hostRole.clients) {
+            client->disconnect();
+        }
+        hostRole.clients.clear();
+        m_uiContext.updateTextString("num_clients", "Offline.");
+        printf("[padi::content::MainMenu] TCP Listener inactive.\n");
+    }
+
+    void MainMenu::updateHost() {
+        auto result = hostRole.listener.accept(*hostRole.nextClient);
+        if (result == sf::Socket::Done) {
+            printf("[padi::content::MainMenu] Accepted a new client!\n");
+            printf("[padi::content::MainMenu] Remote IP: %s\n",
+                   hostRole.nextClient->getRemoteAddress().toString().c_str());
+            hostRole.clients.push_back(hostRole.nextClient);
+            hostRole.nextClient = std::make_shared<sf::TcpSocket>();
+            hostRole.nextClient->setBlocking(false);
+            m_uiContext.updateTextString("num_clients", std::to_string(hostRole.clients.size()) + " clients");
+        }
+
+        sf::Packet packet;
+        for (auto &client: hostRole.clients) {
+            result = client->receive(packet);
+            if (result == sf::Socket::Done) {
+                auto data = reinterpret_cast<const uint8_t *>(packet.getData());
+                if (data[0] == 0) { // CHAT
+                    handleChatPacket(packet);
+                } else {
+                    printf("[padi::content::MainMenu] Unknown Packet type %u!\n", data[0]);
+                }
+            }
+        }
+    }
+
+    void MainMenu::initializeClientSession() {
+        if (!clientRole.client) {
+            printf("[padi::content::MainMenu] Start Client!\n");
+            auto hostIp = sf::IpAddress(m_uiContext.getText("ip_input"));
+            if (hostIp == sf::IpAddress::None) {
+                Immediate::setFocus(&m_uiContext, "ip_input");
+                printf("[padi::content::MainMenu] Invalid IP Address!\n");
+            } else {
+                clientRole.client = std::make_shared<sf::TcpSocket>();
+                clientRole.client->setBlocking(true);
+                if (clientRole.client->connect(hostIp, 42069, sf::seconds(0.5)) == sf::Socket::Done) {
+                    printf("[padi::content::MainMenu] Client connected!\n");
+                    clientRole.client->setBlocking(false);
+                } else {
+                    printf("[padi::content::MainMenu] Client failed to connect.\n");
+                }
+            }
+        }
+    }
+
+    void MainMenu::updateClient() {
+        sf::Packet packet;
+        auto result = clientRole.client->receive(packet);
+        if (result == sf::Socket::Disconnected) {
+            clientRole.client.reset();
+            printf("[padi::content::MainMenu] Client is disconnected!\n");
+        } else if (result == sf::Socket::Done) {
+            auto data = reinterpret_cast<const uint8_t *>(packet.getData());
+            if (data[0] == 0) { // CHAT
+                handleChatPacket(packet);
+            } else {
+                printf("[padi::content::MainMenu] Unknown Packet type %u!\n", data[0]);
+            }
+        }
+    }
+
+    void MainMenu::appendChatMessage(const std::string &msg) {
+        auto chatlog = m_uiContext.getText("chat_log");
+        chatlog = chatlog.substr(chatlog.find_first_of('\n') + 1) + '\n' + msg;
+        m_uiContext.updateTextString("chat_input", "");
+        m_uiContext.updateTextString("chat_log", chatlog);
+    }
+
+    void MainMenu::handleChatPacket(sf::Packet &packet) {
+        auto data = reinterpret_cast<const uint8_t *>(packet.getData());
+        if (packet.getDataSize() < 2) {
+            printf("[padi::content::MainMenu] Corrupted CHAT package!\n");
+        } else {
+            auto len = data[1];
+            auto msg = std::string(reinterpret_cast<const char *>(data) + 2, len);
+            appendChatMessage(msg);
+        }
+    }
+
+    void MainMenu::sendChatMessage(const std::string &msg) {
+        sf::Packet packet;
+        uint8_t type = 0;
+        uint8_t len = msg.length();
+        packet.append(&type, 1);
+        packet.append(&len, 1);
+        packet.append(msg.c_str(), msg.length());
+        if (clientRole.client) {
+            clientRole.client->send(packet);
+        } else if (hostRole.active) {
+            for (auto &client: hostRole.clients) {
+                client->send(packet);
+            }
+        }
     }
 } // content

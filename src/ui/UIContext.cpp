@@ -30,7 +30,7 @@ namespace padi {
         m_apollo.loadFromFile(apollo);
         m_sprites.loadFromFile(sprite);
 
-        m_font.setSmooth(true);
+        m_font.setSmooth(false);
         m_font.loadFromFile("../media/prstartk.ttf");
         m_transformStack = {sf::Transform()};
     }

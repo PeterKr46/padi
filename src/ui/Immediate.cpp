@@ -235,4 +235,9 @@ namespace padi {
         return false;
     }
 
+    void Immediate::setFocus(padi::UIContext *ctx, const std::string &id) {
+        static auto hash = std::hash<std::string>();
+        ctx->m_focused = hash(id);
+    }
+
 }

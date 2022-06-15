@@ -77,7 +77,7 @@ padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_
 
 bool padi::LivingEntity::onCycleBegin(padi::Level *lvl) {
     if (m_intent.move) {
-        std::cout << "[padi::LivingEntity(" << m_name << ")] Moving." << std::endl;
+        //std::cout << "[padi::LivingEntity(" << m_name << ")] Moving." << std::endl;
         m_intent.move = false;
         m_inAction.move = true;
         auto anims = determineAnims(m_apolloCtx, m_intent.move_dir);
@@ -86,13 +86,13 @@ bool padi::LivingEntity::onCycleBegin(padi::Level *lvl) {
         m_slaves.front()->m_color = m_color;
         lvl->getMap()->addEntity(m_slaves.front(), getPosition() + m_intent.move_dir);
     } else if (m_intent.cast) {
-        std::cout << "[padi::LivingEntity(" << m_name << ")] Casting." << std::endl;
+        //std::cout << "[padi::LivingEntity(" << m_name << ")] Casting." << std::endl;
         m_intent.cast = false;
         m_animation = m_apolloCtx->at("idle");
         m_inAction.cast = true;
         m_inAction.cast_failed = ! m_intent.cast_ability->cast(lvl, m_intent.cast_pos);
     } else {
-        std::cout << "[padi::LivingEntity(" << m_name << ")] Idle." << std::endl;
+        //std::cout << "[padi::LivingEntity(" << m_name << ")] Idle." << std::endl;
         m_animation = m_apolloCtx->at("idle");
     }
     return true;

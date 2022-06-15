@@ -9,6 +9,8 @@
 #include "MenuBackground.h"
 #include "../../ui/UIContext.h"
 #include "../Activity.h"
+#include "SFML/Network/TcpListener.hpp"
+#include "SFML/Network/Packet.hpp"
 
 namespace padi::content {
 
@@ -35,6 +37,32 @@ namespace padi::content {
 
         sf::Clock m_runtime;
 
+        struct {
+            bool active{false};
+            sf::TcpListener listener;
+            std::vector<std::shared_ptr<sf::TcpSocket>> clients;
+            // The next client to accept on
+            std::shared_ptr<sf::TcpSocket> nextClient;
+        } hostRole;
+
+        struct {
+            std::shared_ptr<sf::TcpSocket> client;
+        } clientRole;
+
+        void initializeHostSession();
+
+        void closeHostSession();
+
+        void updateHost();
+
+        void initializeClientSession();
+
+        void updateClient();
+
+        void appendChatMessage(const std::string& msg);
+        void sendChatMessage(const std::string& msg);
+
+        void handleChatPacket(sf::Packet &packet);
     };
 
 } // content

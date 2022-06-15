@@ -28,6 +28,7 @@ namespace padi {
 
         static bool checkFocusSwitch(padi::UIContext *ctx, size_t id);
 
+        static void setFocus(padi::UIContext *ctx, std::string const &id);
         static bool isFocused(padi::UIContext *ctx, std::string const &id);
         static bool isAnyFocused(padi::UIContext *ctx, std::string* id, size_t numIDs);
 
