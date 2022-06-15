@@ -88,6 +88,25 @@ namespace padi {
         return changed;
     }
 
+    bool Immediate::TextInput(padi::UIContext *ctx, const std::string &label, std::string *ptr) {
+        static auto hash = std::hash<std::string>();
+
+        size_t id = hash(label);
+
+        bool changed = false;
+
+        if (ctx->isFocused(id)) {
+            // Tab to cycle... for now
+            checkFocusSwitch(ctx, id);
+            Controls::textInput(*ptr);
+            changed = true;
+        } else {
+            if (ctx->m_focused == 0)
+                ctx->m_focused = id;
+        }
+        return changed;
+    }
+
     size_t Immediate::draw(padi::UIContext *ctx, const std::shared_ptr<Animation> &anim, sf::FloatRect const &bound,
                            uint8_t frame, sf::Color color = sf::Color::White) {
         while (ctx->m_vbo.getVertexCount() < ctx->m_numVerts + 9 * 4) {
@@ -122,7 +141,8 @@ namespace padi {
         return 4;
     }
 
-    void Immediate::Sprite(padi::UIContext *ctx, sf::FloatRect const &size, size_t frame, const std::shared_ptr<Animation> &anim, sf::Color const& color) {
+    void Immediate::Sprite(padi::UIContext *ctx, sf::FloatRect const &size, size_t frame,
+                           const std::shared_ptr<Animation> &anim, sf::Color const &color) {
         ctx->m_numVerts += draw(ctx, anim, size, frame, color);
     }
 

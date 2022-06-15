@@ -34,8 +34,6 @@ namespace padi::content {
         std::shared_ptr<padi::Activity> m_next{nullptr};
 
         sf::Clock m_runtime;
-        sf::Font m_font;
-        std::vector<sf::Text> m_text;
 
     };
 

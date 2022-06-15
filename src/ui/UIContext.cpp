@@ -18,7 +18,7 @@ namespace padi {
         // draw the vertex array
         target.draw(&m_vbo[0], m_numVerts, sf::PrimitiveType::Quads, states);
         for (auto const &[k, v]: m_text) {
-            target.draw(v, states);
+            target.draw(v.text, states);
         }
     }
 
@@ -32,6 +32,7 @@ namespace padi {
 
         m_font.setSmooth(false);
         m_font.loadFromFile("../media/prstartk.ttf");
+        m_transformStack = {sf::Transform()};
     }
 
     const padi::Apollo *UIContext::getApollo() const {
@@ -78,38 +79,71 @@ namespace padi {
         //return m_transformStack.back();
     }
 
-    void UIContext::setText(const std::string &id, const std::string &text) {
-        static const auto hash = std::hash<std::string>();
-        auto idHash = hash(id);
-        auto found = m_text.find(idHash);
-        if (found != m_text.end()) {
-            found->second.setString(text);
-        } else {
-            m_text[idHash] = sf::Text(text, m_font, 7);
+    size_t hash_c_string(const char* p, size_t s) {
+        size_t result = 0;
+        const size_t prime = 31;
+        for (size_t i = 0; i < s; ++i) {
+            result = p[i] + (result * prime);
         }
+        return result;
     }
 
-    void UIContext::removeText(const std::string &id) {
-        static const auto hash = std::hash<std::string>();
-        auto idHash = hash(id);
+    void UIContext::removeText(const char *id) {
+        auto idHash = hash_c_string(id, strlen(id));
         auto found = m_text.find(idHash);
         if (found != m_text.end()) {
             m_text.erase(found);
         }
     }
 
-    void UIContext::setText(const std::string &id, const std::string &text, const sf::Vector2f &pos) {
-        static const auto hash = std::hash<std::string>();
-        auto idHash = hash(id);
+    void UIContext::setText(const char *id, const std::string &text, const sf::Vector2f &pos, bool centered) {
+        auto idHash = hash_c_string(id, strlen(id));
         auto found = m_text.find(idHash);
         if (found != m_text.end()) {
-            found->second.setString(text);
-            found->second.setPosition(m_transformStack.back().transformPoint(pos));
+            found->second.text.setString(text);
+            found->second.text.setPosition(m_transformStack.back().transformPoint(pos) -
+                                           (centered ? (found->second.text.getGlobalBounds().getSize() / 2.f)
+                                                     : sf::Vector2f(0, 0)));
         } else {
-            auto txt = sf::Text(text, m_font, 7);
-            txt.setLineSpacing(1.25);
-            txt.setPosition(m_transformStack.back().transformPoint(pos));
-            m_text[idHash] = txt;
+            Text &t = m_text[idHash];
+            t.text = sf::Text(text, m_font, 7);
+            t.text.setLineSpacing(1.25);
+            t.text.setPosition(topTransform().transformPoint(pos) -
+                               (centered ? (t.text.getGlobalBounds().getSize() / 2.f)
+                                         : sf::Vector2f(0, 0)));
+            t.centered = centered;
+        }
+    }
+
+    std::string UIContext::getText(const char *id) {
+        auto idHash = hash_c_string(id, strlen(id));
+        auto found = m_text.find(idHash);
+        std::string result;
+        if (found != m_text.end()) {
+            result = found->second.text.getString();
+        }
+        return result;
+    }
+
+    void UIContext::updateTextString(const char *id, const std::string &text) {
+        auto idHash = hash_c_string(id, strlen(id));
+        auto found = m_text.find(idHash);
+        if (found != m_text.end()) {
+            auto p = found->second.text.getPosition();
+            if (found->second.centered) {
+                p += (found->second.text.getGlobalBounds().getSize() / 2.f);
+            }
+            found->second.text.setString(text);
+            found->second.text.setPosition(p - (found->second.centered ?
+                                                (found->second.text.getGlobalBounds().getSize() / 2.f) : sf::Vector2f(0, 0)));
+        }
+    }
+
+    void UIContext::updateTextColor(const char *id, sf::Color const& color) {
+        auto idHash = hash_c_string(id, strlen(id));
+        auto found = m_text.find(idHash);
+        if (found != m_text.end()) {
+            found->second.text.setFillColor(color);
         }
     }
 } // padi

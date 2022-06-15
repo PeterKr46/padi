@@ -33,14 +33,17 @@ namespace padi {
             }
             return false;
         }
-
+        static std::string const& textInput();
+        static bool textInput(std::string & out);
 
         static void keyDown(sf::Keyboard::Key key);
         static void keyReleased(sf::Keyboard::Key key);
+        static void textEntered(uint32_t unicode);
 
         static void resetKeyStates();
 
     protected:
         inline static std::map<sf::Keyboard::Key, uint8_t> s_state;
+        inline static std::string s_text;
     };
 }

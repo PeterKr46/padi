@@ -15,17 +15,19 @@ namespace padi {
 
     class UIContext
             : public sf::Drawable {
-    private: friend class Immediate;
+    private:
+        friend class Immediate;
 
     public:
 
         UIContext();
 
-        void init(std::string const& apollo, std::string const& sprite);
+        void init(std::string const &apollo, std::string const &sprite);
 
-        const padi::Apollo* getApollo() const;
+        const padi::Apollo *getApollo() const;
 
         bool isFocused(size_t elemID) const;
+
         void setFocus(size_t elemID);
 
         size_t numQuads() const;
@@ -37,14 +39,19 @@ namespace padi {
          */
         void nextFrame();
 
-        sf::Transform & topTransform();
+        sf::Transform &topTransform();
 
         sf::Transform popTransform();
-        sf::Transform & pushTransform(sf::Transform const& t = sf::Transform());
 
-        void setText(std::string const& id, std::string const& text);
-        void setText(std::string const& id, std::string const& text, sf::Vector2f const& pos);
-        void removeText(std::string const& id);
+        sf::Transform &pushTransform(sf::Transform const &t = sf::Transform());
+
+        void setText(const char* id, std::string const &text, sf::Vector2f const &pos, bool centered = false);
+        void updateTextString(const char* id, std::string const &text);
+        void updateTextColor(const char* id, sf::Color const& color);
+
+        void removeText(const char* id);
+
+        std::string getText(const char * id);
 
     private:
 
@@ -53,8 +60,13 @@ namespace padi {
         sf::VertexArray m_vbo;
         size_t m_numVerts{0};
 
+        struct Text {
+            sf::Text text;
+            bool centered{};
+        };
+
         sf::Font m_font;
-        std::map<size_t, sf::Text> m_text;
+        std::map<size_t, Text> m_text;
 
     protected:
         std::vector<sf::Transform> m_transformStack{sf::Transform()};

@@ -45,6 +45,8 @@ int main() {
                 padi::Controls::keyDown(event.key.code);
             } else if (event.type == sf::Event::KeyReleased) {
                 padi::Controls::keyReleased(event.key.code);
+            } else if (event.type == sf::Event::TextEntered) {
+                padi::Controls::textEntered(event.text.unicode);
             } else if (event.type == sf::Event::Resized) {
                 activity->handleResize(int(event.size.width), int(event.size.height));
             }

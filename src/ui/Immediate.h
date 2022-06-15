@@ -20,6 +20,8 @@ namespace padi {
 
         static bool Switch(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size, bool *ptr = nullptr);
 
+        static bool TextInput(padi::UIContext *ctx, std::string const &label, std::string *ptr = nullptr);
+
         static void Sprite(padi::UIContext *ctx, sf::FloatRect const &size, size_t frame, const std::shared_ptr<Animation> &anim, sf::Color const& color = sf::Color::White);
 
         static void ScalableSprite(padi::UIContext *ctx, sf::FloatRect const &size, size_t frame, const std::shared_ptr<Animation> &anim, sf::Color const& color = sf::Color::White);
