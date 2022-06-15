@@ -7,12 +7,12 @@
 int main() {
     std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
     auto mode = modes[0];
-    //mode.width = 1920;
-    //mode.height = 1440;
+    mode.width = 1280;
+    mode.height = 720;
     sf::RenderWindow window(
             mode
             // sf::VideoMode(960, 1080)
-            , "PAdI", sf::Style::Fullscreen
+            , "PAdI"//, sf::Style::Fullscreen
     );
 
     // Ambient sounds

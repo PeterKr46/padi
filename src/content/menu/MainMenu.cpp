@@ -23,7 +23,7 @@ namespace padi::content {
 
         m_uiContext.pushTransform().translate(16, 32);
 
-        m_uiContext.setText("play", "Play (SP)", {72, 12}, true);
+        m_uiContext.setText("play", "Play", {72, 12}, true);
         m_uiContext.updateTextSize("play", 1.5);
         m_uiContext.updateTextOutline("play", sf::Color::Black, 0.5);
 
@@ -35,10 +35,10 @@ namespace padi::content {
         m_uiContext.popTransform();
 
         m_uiContext.pushTransform().translate(0, 90);
-        m_uiContext.setText("host_title", "HOST REMOTE", {72, 8}, true);
+        m_uiContext.setText("host_title", "HOST REMOTE PLAY", {72, 8}, true);
         m_uiContext.setText("own_ip", "", {72, 20}, true);
-        m_uiContext.setText("host", "Start Playing!", {86, 38}, true);
-        m_uiContext.setText("num_clients", "0 clients", {8, 56});
+        m_uiContext.setText("host_play", "Offline", {86, 38}, true);
+        m_uiContext.setText("num_clients", "", {8, 56});
         m_uiContext.popTransform();
 
         m_uiContext.pushTransform().translate(0, 168);
@@ -49,8 +49,9 @@ namespace padi::content {
         m_uiContext.popTransform();
 
         m_uiContext.pushTransform().translate(235, 180);
-        m_uiContext.setText("chat_log", "1\n2\n3\n4\n5\nGame Started.", {0, 0});
-        m_uiContext.setText("chat_input", "###", {0, 60});
+        m_uiContext.setText("chat_title", "CHAT", {0, -12});
+        m_uiContext.setText("chat_log", "Welcome!\n\n\n\n\n", {0, 0});
+        m_uiContext.setText("chat_input", "", {0, 60});
         m_uiContext.popTransform();
     }
 
@@ -69,26 +70,31 @@ namespace padi::content {
 
         {
             m_uiContext.pushTransform().translate(16, 32);
-            m_uiContext.updateTextColor("play",
-                                        Immediate::isFocused(&m_uiContext, "play") ? sf::Color::White : sf::Color(128));
-            if (Immediate::Button(&m_uiContext, "play", {-6, 0, 152, 32})) {
-                m_next = std::make_shared<padi::content::Game>(m_renderTarget);
+            if ( !(hostRole.active || clientRole.client)) {
+                m_uiContext.updateTextColor("play",Immediate::isFocused(&m_uiContext, "play") ? sf::Color::White : sf::Color(0x999999ff));
+                if (Immediate::Button(&m_uiContext, "play", {-6, 0, 152, 32})) {
+                    m_next = std::make_shared<padi::content::Game>(m_renderTarget);
+                }
             }
             { // CLIENT CONFIGURATION
                 m_uiContext.pushTransform().translate(0, 32);
                 Immediate::ScalableSprite(&m_uiContext, {-4, 0, 148, 56}, 0,
                                           m_uiContext.getApollo()->lookupAnim("scalable_border"));
-                std::string t = m_uiContext.getText("ip_input");
-                m_uiContext.updateTextColor("ip_input",
-                                            Immediate::isFocused(&m_uiContext, "ip_input") ? sf::Color::Yellow
-                                                                                           : sf::Color::White);
-                if (Immediate::TextInput(&m_uiContext, "ip_input", &t, 15)) {
-                    m_uiContext.updateTextString("ip_input", t);
-                }
-                m_uiContext.updateTextColor("connect", Immediate::isFocused(&m_uiContext, "connect") ? sf::Color::White
-                                                                                                     : sf::Color(64));
-                if (Immediate::Button(&m_uiContext, "connect", {0, 28, 140, 24})) {
-                    initializeClientSession(); // TODO prevent acting as host AND client
+                if (!(hostRole.active || clientRole.client)) {
+                    std::string t = m_uiContext.getText("ip_input");
+                    m_uiContext.updateTextColor("ip_input",
+                                                Immediate::isFocused(&m_uiContext, "ip_input") ? sf::Color::Yellow
+                                                                                               : sf::Color::White);
+                    if (Immediate::TextInput(&m_uiContext, "ip_input", &t, 15)) {
+                        m_uiContext.updateTextString("ip_input", t);
+                    }
+                    m_uiContext.updateTextColor("connect",
+                                                Immediate::isFocused(&m_uiContext, "connect") ? sf::Color::White
+                                                                                              : sf::Color(0x999999ff));
+                    if (Immediate::Button(&m_uiContext, "connect", {0, 28, 140, 24})) {
+                        initializeClientSession(); // TODO prevent acting as host AND client
+                        m_uiContext.setFocus(0);
+                    }
                 }
                 m_uiContext.popTransform();
             }
@@ -96,23 +102,26 @@ namespace padi::content {
                 m_uiContext.pushTransform().translate(0, 90);
                 Immediate::ScalableSprite(&m_uiContext, {-4, 0, 148, 72}, 0,
                                           m_uiContext.getApollo()->lookupAnim("scalable_border"));
-                m_uiContext.updateTextColor("host",
-                                            Immediate::isFocused(&m_uiContext, "host") ? sf::Color::White : sf::Color(
-                                                    64));
-                if (Immediate::Switch(&m_uiContext, "host_switch", {-4, 24, 32, 32}, &hostRole.active)) {
-                    if (hostRole.active) {
-                        initializeHostSession(); // TODO prevent acting as host AND client
-                    } else {
-                        closeHostSession();
+                m_uiContext.updateTextColor("host_play",
+                                            Immediate::isFocused(&m_uiContext, "host_play") ? sf::Color::White : sf::Color(0x999999ff));
+                if(!clientRole.client) {
+                    if (Immediate::Switch(&m_uiContext, "host_switch", {-4, 24, 32, 32}, &hostRole.active)) {
+                        if (hostRole.active) {
+                            initializeHostSession(); // TODO prevent acting as host AND client
+                        } else {
+                            closeHostSession();
+                        }
                     }
-                }
-                if (Immediate::Button(&m_uiContext, "host", {24, 28, 120, 24})) {
-                    printf("asd");
-                }
-                if (Immediate::isFocused(&m_uiContext, "host")) {
-                    m_uiContext.updateTextString("own_ip", sf::IpAddress::getLocalAddress().toString());
-                } else {
-                    m_uiContext.updateTextString("own_ip", "<IP Hidden>");
+                    if(hostRole.active) {
+                        if (Immediate::Button(&m_uiContext, "host_play", {24, 28, 120, 24})) {
+                            printf("asd");
+                        }
+                        if (Immediate::isFocused(&m_uiContext, "host_play")) {
+                            m_uiContext.updateTextString("own_ip", sf::IpAddress::getLocalAddress().toString());
+                        } else {
+                            m_uiContext.updateTextString("own_ip", "<IP Hidden>");
+                        }
+                    }
                 }
                 m_uiContext.popTransform();
             }
@@ -154,6 +163,7 @@ namespace padi::content {
             if (Immediate::isFocused(&m_uiContext, "chat_input") &&
                 padi::Controls::wasKeyReleased(sf::Keyboard::Enter)) {
                 sendChatMessage(m_uiContext.getText("nick_input") + ": " + t);
+                m_uiContext.updateTextString("chat_input", "");
             }
         }
         if (hostRole.active) {
@@ -209,11 +219,14 @@ namespace padi::content {
         if (hostRole.listener.listen(42069) != sf::Socket::Done) {
             printf("[padi::content::MainMenu] Error setting up TCP Listener.\n");
             m_uiContext.updateTextString("num_clients", "Host setup failed.");
+            hostRole.active = false;
         } else {
             hostRole.nextClient = std::make_shared<sf::TcpSocket>();
             hostRole.nextClient->setBlocking(false);
             printf("[padi::content::MainMenu] TCP Listener active.\n");
             m_uiContext.updateTextString("num_clients", "Host online!");
+            m_uiContext.updateTextString("connect", "Unavailable");
+            m_uiContext.updateTextString("host_play", "Start playing");
         }
     }
 
@@ -224,8 +237,11 @@ namespace padi::content {
             client->disconnect();
         }
         hostRole.clients.clear();
-        m_uiContext.updateTextString("num_clients", "Offline.");
+        m_uiContext.updateTextString("num_clients", "");
+        m_uiContext.updateTextString("connect", "Connect");
+        m_uiContext.updateTextString("host_play", "Offline");
         printf("[padi::content::MainMenu] TCP Listener inactive.\n");
+        sendChatMessage("Host session closed.");
     }
 
     void MainMenu::updateHost() {
@@ -238,6 +254,7 @@ namespace padi::content {
             hostRole.nextClient = std::make_shared<sf::TcpSocket>();
             hostRole.nextClient->setBlocking(false);
             m_uiContext.updateTextString("num_clients", std::to_string(hostRole.clients.size()) + " clients");
+            sendChatMessage("A player joined.");
         }
 
         sf::Packet packet;
@@ -280,6 +297,7 @@ namespace padi::content {
         if (result == sf::Socket::Disconnected) {
             clientRole.client.reset();
             printf("[padi::content::MainMenu] Client is disconnected!\n");
+            sendChatMessage("Connection closed.");
         } else if (result == sf::Socket::Done) {
             auto data = reinterpret_cast<const uint8_t *>(packet.getData());
             if (data[0] == 0) { // CHAT
@@ -293,7 +311,6 @@ namespace padi::content {
     void MainMenu::appendChatMessage(const std::string &msg) {
         auto chatlog = m_uiContext.getText("chat_log");
         chatlog = chatlog.substr(chatlog.find_first_of('\n') + 1) + '\n' + msg;
-        m_uiContext.updateTextString("chat_input", "");
         m_uiContext.updateTextString("chat_log", chatlog);
     }
 
@@ -304,7 +321,11 @@ namespace padi::content {
         } else {
             auto len = data[1];
             auto msg = std::string(reinterpret_cast<const char *>(data) + 2, len);
-            appendChatMessage(msg);
+            if(hostRole.active) {
+                sendChatMessage(msg);
+            } else {
+                appendChatMessage(msg);
+            }
         }
     }
 
@@ -321,6 +342,9 @@ namespace padi::content {
             for (auto &client: hostRole.clients) {
                 client->send(packet);
             }
+            appendChatMessage(msg);
+        } else {
+            appendChatMessage(msg);
         }
     }
 } // content
