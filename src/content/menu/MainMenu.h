@@ -19,8 +19,6 @@ namespace padi::content {
     public:
         MainMenu(sf::RenderTarget *renderTarget, std::string const &apollo, std::string const &spritesheet);
 
-        void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
-
         void draw(sf::RenderTarget* target) override;
 
         void handleResize(int width, int height) override;
@@ -60,6 +58,10 @@ namespace padi::content {
         void sendChatMessage(const std::string& msg);
 
         void handleChatPacket(sf::Packet &packet);
+
+        void hostStartGame();
+
+        void clientHandleGameStart(sf::Packet const &packet);
     };
 
 } // content

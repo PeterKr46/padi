@@ -105,6 +105,7 @@ namespace padi {
             }
         }
         level->centerView(m_targetArea / 2);
+        level->initCursor("cursor");
         return level;
     }
 

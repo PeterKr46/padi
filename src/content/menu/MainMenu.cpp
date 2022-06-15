@@ -10,6 +10,7 @@
 #include "../game/Game.h"
 #include "../../Controls.h"
 #include "SFML/Network/Packet.hpp"
+#include "../game/OnlineGame.h"
 
 namespace padi::content {
 
@@ -113,7 +114,7 @@ namespace padi::content {
                     }
                     if(hostRole.active) {
                         if (Immediate::Button(&m_uiContext, "host_play", {24, 28, 120, 24})) {
-                            printf("asd");
+                            hostStartGame();
                         }
                         if (Immediate::isFocused(&m_uiContext, "host_play")) {
                             m_uiContext.updateTextString("own_ip", sf::IpAddress::getLocalAddress().toString());
@@ -176,13 +177,6 @@ namespace padi::content {
 
         //target->setView(m_renderTarget->getDefaultView());
         target->draw(m_crt);
-    }
-
-    void MainMenu::draw(sf::RenderTarget &target, sf::RenderStates states) const {
-        m_uiContext.draw(target, states);
-        states.transform.translate(target.getView().getCenter() - target.getView().getSize() / 2.f);
-        // TODO
-        states.transform.scale(sf::Vector2f(target.getView().getSize().y / 256, target.getView().getSize().y / 256));
     }
 
     std::shared_ptr<padi::Activity> MainMenu::handoff() {
@@ -282,6 +276,8 @@ namespace padi::content {
             auto data = reinterpret_cast<const uint8_t *>(packet.getData());
             if (data[0] == 0) { // CHAT
                 handleChatPacket(packet);
+            } else if(data[0] == 1) {
+                clientHandleGameStart(packet);
             } else {
                 printf("[padi::content::MainMenu] Unknown Packet type %u!\n", data[0]);
             }
@@ -292,6 +288,7 @@ namespace padi::content {
         auto chatlog = m_uiContext.getText("chat_log");
         chatlog = chatlog.substr(chatlog.find_first_of('\n') + 1) + '\n' + msg;
         m_uiContext.updateTextString("chat_log", chatlog);
+        printf("[padi::content::MainMenu] CHAT '%s'\n", msg.c_str());
     }
 
     void MainMenu::handleChatPacket(sf::Packet &packet) {
@@ -326,5 +323,29 @@ namespace padi::content {
         } else {
             appendChatMessage(msg);
         }
+    }
+
+    void MainMenu::hostStartGame() {
+        if(hostRole.active) {
+            sf::Packet packet;
+            uint8_t type = 1;
+            packet.append(&type, 1);
+            for (auto &client: hostRole.clients) {
+                client->send(packet);
+            }
+            appendChatMessage("Starting Game...");
+            // TODO create online game
+            auto game = std::make_shared<padi::content::OnlineGame>(hostRole.clients, true, m_uiContext.getText("nick_input"));
+            m_next = game;
+        }
+    }
+
+    void MainMenu::clientHandleGameStart(const sf::Packet &packet) {
+        if(clientRole.client) {
+            appendChatMessage("Starting Game...");
+            auto game = std::make_shared<padi::content::OnlineGame>(std::vector{clientRole.client}, false, m_uiContext.getText("nick_input"));
+            m_next = game;
+        }
+
     }
 } // content

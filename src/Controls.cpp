@@ -57,8 +57,8 @@ namespace padi {
     bool Controls::textInput(std::string &out, size_t max_len) {
         for (uint32_t chr: s_text) {
             if (chr == '\b') {
-                if (!out.empty()) out.pop_back();
-            } else {
+                if (!out.empty()) out.pop_back(); // TODO filter properly
+            } else if(chr != '\n' && chr != '\r') {
                 if (out.size() < max_len)
                     out += chr;
             }

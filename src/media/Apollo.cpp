@@ -69,37 +69,37 @@ namespace padi {
 
                 if (line.substr(0, 5) == "block") {
                     block = &m_animationContext[line.substr(6)];
-                    printf("[Apollo] BLOCK '%s'\n", line.substr(6).c_str());
+                    //printf("[Apollo] BLOCK '%s'\n", line.substr(6).c_str());
                 } else if (line.substr(0, 4) == "anim") {
                     auto secondspace = line.find(' ', 5);
                     key = line.substr(5, secondspace - 5);
-                    printf("[Apollo] ANIM '%s'", key.c_str());
+                    //printf("[Apollo] ANIM '%s'", key.c_str());
                     std::istringstream ints(line.substr(secondspace));
                     auto data = std::vector<int>(std::istream_iterator<int>(ints),
                                                  std::istream_iterator<int>());
 
                     if (data.size() == 4) {
-                        printf(" static frame.\n");
+                        //printf(" static frame.\n");
                         block->insert({key,
                                        std::make_shared<StaticAnimation>(sf::Vector2i(data[0], data[1]),
                                                                          sf::Vector2f(data[2], data[3]))
                                       });
                     } else if (data.size() == 7) {
-                        printf(" %i frames.\n", data[6]);
+                        //printf(" %i frames.\n", data[6]);
                         block->insert({key,
                                        std::make_shared<SimpleAnimation>(
                                                StripAnimation(sf::Vector2i(data[0], data[1]), {data[2], data[3]},
                                                               {data[4], data[5]}, data[6]))
                                       });
                     } else if (data.size() == 8) {
-                        printf(" %i frames.\n", data[6]);
+                        //printf(" %i frames.\n", data[6]);
                         block->insert({key,
                                        std::make_shared<SimpleAnimation>(
                                                StripAnimation(sf::Vector2i(data[0], data[1]), {data[2], data[3]},
                                                               {data[4], data[5]}, data[6], data[7]))
                                       });
                     } else if (data.size() >= 9) {
-                        printf(" %i frames, x scale: %i\n", data[6], data[8]);
+                        //printf(" %i frames, x scale: %i\n", data[6], data[8]);
                         block->insert({key,
                                        std::make_shared<SimpleAnimation>(
                                                StripAnimation(sf::Vector2i(data[0], data[1]), {data[2], data[3]},
@@ -112,20 +112,21 @@ namespace padi {
                     auto secondspace = line.find(' ', 6);
                     key = line.substr(6, secondspace - 6);
                     auto soundPath = line.substr(line.find_last_of(' ') + 1);
-                    printf("[Apollo] AUDIO '%s' - '%s'\n", key.c_str(), soundPath.c_str());
+                    //printf("[Apollo] AUDIO '%s' - '%s'\n", key.c_str(), soundPath.c_str());
                     auto buf = m_generalAudio[key] = std::make_shared<sf::SoundBuffer>();
                     buf->loadFromFile(soundPath);
                 } else if (line.substr(0, 6) == "shader") {
                     auto secondspace = line.find(' ', 7);
                     key = line.substr(7, secondspace - 7);
                     auto shaderPath = line.substr(line.find_last_of(' ') + 1);
-                    printf("[Apollo] SHADER '%s' - '%s'\n", key.c_str(), shaderPath.c_str());
+                    //printf("[Apollo] SHADER '%s' - '%s'\n", key.c_str(), shaderPath.c_str());
                     if (shaderPath.substr(shaderPath.size() - 4) == "vert") {
                         loadVertexShader(key, shaderPath);
                     } else if (shaderPath.substr(shaderPath.size() - 4) == "frag") {
                         loadFragmentShader(key, shaderPath);
-                    } else
+                    } else {
                         printf("[Apollo] SHADER TYPE UNRECOGNIZED '%s' - '%s'\n", key.c_str(), shaderPath.c_str());
+                    }
                 }
 
             }

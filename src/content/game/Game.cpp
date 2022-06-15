@@ -3,9 +3,7 @@
 //
 
 #include "Game.h"
-#include <SFML/Window/Keyboard.hpp>
 #include <utility>
-#include "../../Controls.h"
 #include "../../level/LevelGenerator.h"
 #include "../../level/SpawnEvent.h"
 #include "../../map/Tile.h"
@@ -29,7 +27,6 @@ namespace padi::content {
                 .withSeed(seed)
                 .withArea({100, 100})
                 .generate();
-        m_level->initCursor("cursor"); // TODO
         m_crt.handleResize(455, 255);
         m_uiContext.init("../media/ui.apollo", "../media/ui_sheet.png");
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
@@ -104,10 +101,6 @@ namespace padi::content {
 
     std::shared_ptr<padi::Activity> Game::handoff() {
         return shared_from_this();
-    }
-
-    void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const {
-        // Immediate requires non-const draw :c
     }
 
     void Game::addCharacter(const std::shared_ptr<Character> &character) {

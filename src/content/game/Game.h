@@ -22,18 +22,15 @@ namespace padi::content {
 
         void draw(sf::RenderTarget* target) override;
 
-        void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
         void handleResize(int width, int height) override;
-
-        std::shared_ptr<Level> getLevel();
 
         std::shared_ptr<padi::Activity> handoff() override;
 
         void addCharacter(const std::shared_ptr<Character> &character);
 
     private:
-        CRTMonitor m_crt;
+        padi::content::CRTMonitor m_crt;
         padi::UIContext m_uiContext;
 
         std::shared_ptr<Level> m_level;
