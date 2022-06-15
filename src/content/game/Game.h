@@ -35,8 +35,6 @@ namespace padi::content {
 
         std::shared_ptr<padi::Activity> handoff() override;
 
-        bool defaultControls(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &character);
-
         void addCharacter(const std::shared_ptr<Character> &character);
 
     private:
@@ -49,11 +47,6 @@ namespace padi::content {
 
         std::queue<std::shared_ptr<Character>> m_characters;
         std::shared_ptr<Character> m_activeChar;
-
-
-        int activeAbility = -1;
-        bool hasCast = false;
-
 
         sf::Clock m_graphicsClock;
     };

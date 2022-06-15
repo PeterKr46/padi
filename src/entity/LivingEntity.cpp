@@ -6,7 +6,7 @@
 
 #include <utility>
 #include <iostream>
-#include "../player/Ability.h"
+#include "Ability.h"
 #include "StaticEntity.h"
 #include "../Constants.h"
 

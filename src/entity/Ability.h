@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 #include "SFML/System/Vector2.hpp"
-#include "../entity/StaticEntity.h"
+#include "StaticEntity.h"
 
 namespace padi {
     class Level;

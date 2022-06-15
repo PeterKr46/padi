@@ -5,7 +5,7 @@
 #include "Ability.h"
 
 #include <utility>
-#include "../entity/LivingEntity.h"
+#include "LivingEntity.h"
 
 namespace padi {
 

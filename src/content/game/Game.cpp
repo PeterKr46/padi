@@ -13,6 +13,7 @@
 #include "../../ui/Immediate.h"
 #include "../npc/Mob.h"
 #include "MapShaker.h"
+#include "LocalPlayerTurn.h"
 
 namespace padi::content {
 
@@ -43,8 +44,9 @@ namespace padi::content {
                 auto player = std::make_shared<Character>();
                 player->entity = std::make_shared<padi::LivingEntity>("player", apollo->lookupAnimContext("cube"),
                                                                       sf::Vector2i{0, 0});
-                player->controller = [=](const std::shared_ptr<Level> &l, const std::shared_ptr<Character> &c) {
-                    return defaultControls(l, c);
+                LocalPlayerTurn local(&m_uiContext);
+                player->controller = [=](const std::shared_ptr<Level> &l, const std::shared_ptr<Character> &c) mutable {
+                    return local(l, c);
                 };
 
                 player->entity->setColor(color);
@@ -137,100 +139,6 @@ namespace padi::content {
 
     std::shared_ptr<Level> Game::getLevel() {
         return m_level;
-    }
-
-    enum TurnState : int {
-        IDLE = 0,
-        SELECTING = 1,
-        CASTING = 2,
-        DONE = 3
-    };
-
-    bool Game::defaultControls(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &character) {
-        if (padi::Controls::isKeyDown(sf::Keyboard::Home)) {
-            m_level->moveCursor(character->entity->getPosition());
-            m_level->centerView(character->entity->getPosition());
-        }
-        TurnState state = IDLE;
-        if (activeAbility != -1) {
-            state = SELECTING;
-            if (hasCast) {
-                state = CASTING;
-                if (!character->entity->hasCastIntent()) {
-                    if (!character->entity->hasFailedCast() && character->abilities[activeAbility]->isCastComplete()) {
-                        state = DONE;
-                    }
-                }
-            }
-        }
-        if (state == IDLE) {
-            if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
-                m_level->pause();
-                activeAbility = 0;
-                m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8, 8});
-            }
-        } else if (state == SELECTING) {
-            if (!m_level->isPaused()) {
-                character->abilities[activeAbility]->castIndicator(m_level.get());
-                if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
-                    character->entity->intentCast(character->abilities[activeAbility], m_level->getCursorLocation());
-                    hasCast = true;
-                    m_level->hideCursor();
-                } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
-                    character->abilities[activeAbility]->castCancel(m_level.get());
-                    m_level->pause();
-                    m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8, 8});
-                }
-            } else {
-                if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
-                    m_level->play();
-                    m_uiContext.removeText("ability");
-                } else {
-                    if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
-                        character->abilities[activeAbility]->castCancel(m_level.get());
-                        m_level->play();
-                        m_uiContext.removeText("ability");
-                        activeAbility = -1;
-                    } else if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
-                        character->abilities[activeAbility]->castCancel(&(*m_level));
-                        activeAbility = std::max(0, activeAbility - 1);
-                        m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8, 8});
-                    } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
-                        character->abilities[activeAbility]->castCancel(&(*m_level));
-                        activeAbility = std::min(int(character->abilities.size()) - 1, activeAbility + 1);
-                        m_uiContext.setText("ability", character->abilities[activeAbility]->getDescription(), {8, 8});
-                    }
-                    m_uiContext.pushTransform().translate(228 - 64, 256 - 72);
-                    padi::Immediate::ScalableSprite(&m_uiContext, sf::FloatRect{-4, -4, 160, 40}, 0,
-                                                    m_uiContext.getApollo()->lookupAnim("scalable_window"),
-                                                    sf::Color(168, 168, 168, 255));
-                    padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{0, 0, 32, 32}, 0,
-                                            m_uiContext.getApollo()->lookupAnim("walk"));
-                    padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{40, 0, 32, 32}, 0,
-                                            m_uiContext.getApollo()->lookupAnim("teleport"));
-                    padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{80, 0, 32, 32}, 0,
-                                            m_uiContext.getApollo()->lookupAnim("strike"));
-                    padi::Immediate::Sprite(&m_uiContext, sf::FloatRect{120, 0, 32, 32}, 0,
-                                            m_uiContext.getApollo()->lookupAnim("dash"));
-                    padi::Immediate::ScalableSprite(&m_uiContext,
-                                                    sf::FloatRect{-4 + float(activeAbility * 40), -4, 40, 40},
-                                                    0,
-                                                    m_uiContext.getApollo()->lookupAnim("scalable_border"),
-                                                    character->entity->getColor());
-                    m_uiContext.popTransform();
-                }
-            }
-        } else if (state == CASTING) {
-            if(character->entity->hasFailedCast()) {
-                hasCast = false;
-            }
-        }
-
-        if (state == DONE) {
-            hasCast = false;
-            activeAbility = -1;
-        }
-        return state == DONE;
     }
 
     void Game::addCharacter(const std::shared_ptr<Character> &character) {

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../../player/Ability.h"
+#include "../../entity/Ability.h"
 #include "../../level/CycleListener.h"
 #include "../../Paths.h"
 #include "../../entity/EntityStack.h"
