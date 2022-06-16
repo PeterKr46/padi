@@ -14,7 +14,7 @@
 #include "OnlineGame.h"
 
 namespace padi::content {
-    enum TurnState : int {
+    enum LocalTurnState : int {
         IDLE = 0,
         SELECTING = 1,
         CASTING = 2,
@@ -31,7 +31,7 @@ namespace padi::content {
             level->moveCursor(character->entity->getPosition());
             level->centerView(character->entity->getPosition());
         }
-        TurnState state = IDLE;
+        LocalTurnState state = IDLE;
         if (m_activeAbility != -1) {
             state = SELECTING;
             if (m_hasCast) {
@@ -116,7 +116,8 @@ namespace padi::content {
                 }
             }
         } else if (state == CASTING) {
-            if (character->entity->hasFailedCast()) {
+            if (!character->entity->hasCastIntent() && character->entity->hasFailedCast()) {
+                printf("[LocalPlayerTurn] Miscast - retrying.\n");
                 m_hasCast = false;
             }
         }

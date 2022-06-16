@@ -11,32 +11,51 @@
 #include "../../entity/Ability.h"
 
 namespace padi::content {
+
+    enum RemoteTurnState : int {
+        IDLE = 0,
+        CASTING = 1,
+        DONE = 2
+    };
+
     RemotePlayerTurn::RemotePlayerTurn(std::shared_ptr<sf::TcpSocket> socket)
             : m_socket(std::move(socket)) {
 
     }
 
     bool RemotePlayerTurn::operator()(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &chr) {
-        // TODO add something to deal with invalid cast attempts :c
         sf::Packet packet;
         PlayerCastPayload payload;
-        if(!m_turnStarted) {
+        RemoteTurnState state = IDLE;
+        if (m_activeAbility != -1) {
+            state = CASTING;
+            if (!chr->entity->hasCastIntent()) {
+                if (!chr->entity->hasFailedCast() &&
+                        chr->abilities[m_activeAbility]->isCastComplete()) {
+                    state = DONE;
+                }
+            }
+        }
+        if(state == IDLE) {
             auto status = m_socket->receive(packet);
             if (status == sf::Socket::Done) {
                 ReconstructPayload(packet, payload);
-                m_turnStarted = true;
-                m_casting = payload.ability;
-                auto ability = chr->abilities[m_casting];
+                m_activeAbility = int8_t(payload.ability);
+                auto ability = chr->abilities[m_activeAbility];
                 ability->castIndicator(level.get());
                 chr->entity->intentCast(ability, payload.pos);
-                printf("[RemotePlayerTurn] Casting %u at (%i, %i)\n", m_casting, payload.pos.x, payload.pos.y);
-            }
-        } else {
-            if (!chr->entity->hasCastIntent() && chr->abilities[m_casting]->isCastComplete()) {
-                m_turnStarted = false;
-                return true;
+                printf("[RemotePlayerTurn] Casting %u at (%i, %i)\n", m_activeAbility, payload.pos.x, payload.pos.y);
             }
         }
-        return false;
+        else if(state == CASTING) {
+            if(!chr->entity->hasCastIntent() && chr->entity->hasFailedCast()) {
+                m_activeAbility = -1;
+                printf("[RemotePlayerTurn] Miscast - waiting.\n");
+            }
+        }
+        if (state == DONE) {
+            m_activeAbility = -1;
+        }
+        return state == DONE;
     }
 } // content

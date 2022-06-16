@@ -26,7 +26,7 @@ namespace padi::content {
         bool operator()(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &chr);
     private:
         bool m_turnStarted = false;
-        uint8_t m_casting = 0;
+        int8_t m_activeAbility = -1;
         std::shared_ptr<sf::TcpSocket> m_socket;
     };
 

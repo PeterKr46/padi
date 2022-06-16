@@ -7,8 +7,8 @@
 namespace padi {
     //const unsigned int FrameTime_uS{83333};
     const unsigned int CyclesPerMinute{60};
-    const unsigned int FrameTime_uS{60000000 / (CyclesPerMinute * 12)};
     const unsigned int CycleLength_F{12};
+    const unsigned int FrameTime_uS{60000000 / (CyclesPerMinute * CycleLength_F)};
 
     const sf::Vector2i Left{-1, 0};
     const sf::Vector2i Right{1, 0};
