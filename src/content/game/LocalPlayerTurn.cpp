@@ -6,11 +6,11 @@
 
 #include "Packets.h"
 #include "Character.h"
+#include "OnlineGame.h"
 #include "../../Controls.h"
 #include "../../entity/LivingEntity.h"
 #include "../../entity/Ability.h"
 #include "../../ui/Immediate.h"
-#include "../../ui/UIContext.h"
 #include "../../level/Level.h"
 
 
@@ -27,7 +27,9 @@ namespace padi::content {
 
     }
 
-    bool LocalPlayerTurn::operator()(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &character) {
+    bool LocalPlayerTurn::operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &character) {
+        auto level = game->getLevel();
+
         m_uiContext->setText("local_turn", "Your Turn!", {226,20}, true);
         m_uiContext->updateTextOutline("local_turn", sf::Color::Black, 1);
         m_uiContext->updateTextSize("local_turn", 2);

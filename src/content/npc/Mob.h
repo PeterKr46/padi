@@ -16,7 +16,7 @@ namespace padi::content {
         explicit Corruption(sf::Vector2i const& origin, float power = 0.8, float decay = 0.5);
 
 
-        bool expand(const std::shared_ptr<Level> &, const std::shared_ptr<Character> &);
+        bool expand(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 
     private:
         float m_power;
@@ -46,9 +46,9 @@ namespace padi::content {
     public:
         Mob(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos, std::vector<std::shared_ptr<sf::TcpSocket>> & sockets);
 
-        bool takeTurn(const std::shared_ptr<Level> &, const std::shared_ptr<Character> &);
+        bool takeTurn(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 
-        Character asCharacter();
+        Character asCharacter(uint32_t id);
 
     private:
         std::shared_ptr<padi::content::Walk> m_walk;

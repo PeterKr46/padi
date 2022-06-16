@@ -5,6 +5,7 @@
 #include "Mob.h"
 #include "../../entity/OneshotEntity.h"
 #include "../game/Packets.h"
+#include "../game/OnlineGame.h"
 #include "SFML/Network/Packet.hpp"
 
 #include <utility>
@@ -16,7 +17,8 @@ namespace padi::content {
         setColor(sf::Color(64, 64, 64));
     }
 
-    bool Mob::takeTurn(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &chr) {
+    bool Mob::takeTurn(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr) {
+        auto level = game->getLevel();
         if (!m_walk) {
             m_walk = std::make_shared<padi::content::Walk>(shared_from_this(), 5);
             m_explode = std::make_shared<padi::content::SelfDestruct>(shared_from_this());
@@ -42,7 +44,7 @@ namespace padi::content {
                     }
                 }
                 Corruption corruption{chr->entity->getPosition()};
-                chr->controller = [corruption](const std::shared_ptr<Level> &level,
+                chr->controller = [corruption](const std::shared_ptr<OnlineGame> &level,
                                                const std::shared_ptr<Character> &chr) mutable {
                     return corruption.expand(level, chr);
                 };
@@ -87,10 +89,11 @@ namespace padi::content {
         }
     }
 
-    Character Mob::asCharacter() {
-        return {shared_from_this(),
+    Character Mob::asCharacter(uint32_t id) {
+        return {id,
+                shared_from_this(),
                 {m_walk, m_explode},
-                [=](const std::shared_ptr<Level> &l, const std::shared_ptr<Character> &c) { return takeTurn(l, c); }
+                [=](const std::shared_ptr<OnlineGame> &l, const std::shared_ptr<Character> &c) { return takeTurn(l, c); }
         };
     }
 
@@ -157,7 +160,8 @@ namespace padi::content {
         }
     }
 
-    bool Corruption::expand(const std::shared_ptr<Level> &l, const std::shared_ptr<Character> &c) {
+    bool Corruption::expand(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &c) {
+        auto l = game->getLevel();
         l->centerView(m_positions.front());
         size_t numPos = m_positions.size();
         for (size_t i = 0; i < numPos; ++i) {

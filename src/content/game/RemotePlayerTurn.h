@@ -12,12 +12,12 @@ namespace sf {
 
 namespace padi {
 
-    class Level;
 
     class UIContext;
 
     namespace content {
         struct Character;
+        class OnlineGame;
     }
 }
 
@@ -26,7 +26,7 @@ namespace padi::content {
     class RemotePlayerTurn {
     public:
         explicit RemotePlayerTurn(std::shared_ptr<sf::TcpSocket>  socket);
-        bool operator()(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &chr);
+        bool operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr);
     private:
         int8_t m_activeAbility = -1;
         std::shared_ptr<sf::TcpSocket> m_socket;

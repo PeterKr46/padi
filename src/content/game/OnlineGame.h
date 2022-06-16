@@ -11,6 +11,7 @@
 #include "../../ui/UIContext.h"
 #include "../Activity.h"
 #include "../vfx/CRTMonitor.h"
+#include "Packets.h"
 
 namespace padi {
     class Level;
@@ -21,7 +22,7 @@ namespace padi {
 
 namespace padi::content {
 
-    class OnlineGame : public padi::Activity {
+    class OnlineGame : public padi::Activity, public std::enable_shared_from_this<OnlineGame> {
     public:
         OnlineGame(std::vector<std::shared_ptr<sf::TcpSocket>> sockets, bool hosting, std::string const &name,
                    uint32_t seed = 8008135);
@@ -34,13 +35,23 @@ namespace padi::content {
 
         void close() override;
 
+        std::shared_ptr<Level> getLevel() const;
+
     private:
 
-        void initializePlayerCharacters();
+        void initializePlayers();
+        void initializePlayersHost();
+        void initializePlayersClient();
+
+        void assignPlayerAbility(padi::content::PlayerAssignAbilityPayload & payload);
 
         void propagateLobby(std::string const &name);
+        void propagateLobbyHost(const std::string &basicString);
+        void propagateLobbyClient(const std::string &basicString);
 
         void propagateSeed();
+        void propagateSeedHost();
+        void propagateSeedClient();
 
     private:
         padi::content::CRTMonitor m_crt;
@@ -50,12 +61,13 @@ namespace padi::content {
         std::mt19937 m_rand;
         std::shared_ptr<Level> m_level;
         struct {
-            bool isHost{false};
+            const bool isHost{false};
             std::vector<std::shared_ptr<sf::TcpSocket>> sockets;
             std::vector<std::string> names;
         } m_lobby;
 
-        std::queue<std::shared_ptr<Character>> m_characters;
+        std::map<uint32_t, std::shared_ptr<Character>> m_characters;
+        std::queue<std::shared_ptr<Character>> m_turnQueue;
         std::shared_ptr<Character> m_activeChar;
     };
 

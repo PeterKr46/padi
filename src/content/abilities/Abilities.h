@@ -17,6 +17,16 @@ namespace padi {
 
 namespace padi::content {
 
+    namespace AbilityType {
+        enum : uint8_t {
+            Walk,
+            Lighten,
+            Darken,
+            Teleport,
+            Dash
+        };
+    }
+
     class Lighten : public padi::Ability, public padi::CycleListener, public std::enable_shared_from_this<Lighten> {
     public:
         explicit Lighten(std::shared_ptr<LivingEntity> user);

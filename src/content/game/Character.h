@@ -12,11 +12,19 @@ namespace padi {
     class Ability;
     class Level;
     class LivingEntity;
+    namespace content {
+        class OnlineGame;
+    }
 }
 
 namespace padi::content {
 
     struct Character {
+        /**
+         * Character's id
+         */
+        const uint32_t id{~0u};
+
         /**
          * A character *can* have an entity associated with it.
          * OPTIONAL: This may be null.
@@ -29,7 +37,7 @@ namespace padi::content {
         /**
          * A function to be called repeatedly until it returns true which determiens a character's move.
          */
-        std::function<bool(const std::shared_ptr<Level> &, const std::shared_ptr<Character> &)> controller;
+        std::function<bool(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &)> controller;
         /**
          * Characters not marked alive at the end of their turn will be removed from play.
          */

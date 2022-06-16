@@ -9,7 +9,7 @@
 
 namespace padi {
 
-    class Activity : public std::enable_shared_from_this<padi::Activity> {
+    class Activity {
     public:
         virtual std::shared_ptr<padi::Activity> handoff() = 0;
 

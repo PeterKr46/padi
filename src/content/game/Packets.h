@@ -25,8 +25,8 @@ namespace padi::content {
     }
 
     template<typename T>
-    sf::Packet & PackagePayload(sf::Packet & packet, T &t) {
-        if(packet.getDataSize()) {
+    sf::Packet &PackagePayload(sf::Packet &packet, T &t) {
+        if (packet.getDataSize()) {
             packet.clear();
         }
         packet.append(&t, sizeof(t));
@@ -71,6 +71,7 @@ namespace padi::content {
 
     struct alignas(64) PlayerSpawnPayload {
         const PayloadType type = PlayerSpawn;
+        uint32_t id{};
         sf::Vector2i pos;
         sf::Color color;
         bool local{};
@@ -84,7 +85,9 @@ namespace padi::content {
 
     struct alignas(64) PlayerAssignAbilityPayload {
         const PayloadType type = PlayerAbilityAssign;
+        uint8_t playerId{};
         uint8_t abilitySlot{};
-        uint8_t abilityId{};
+        uint8_t abilityType{};
+        uint8_t abilityProps[16]{};
     };
 }

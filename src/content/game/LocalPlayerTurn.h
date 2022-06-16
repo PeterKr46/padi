@@ -13,12 +13,11 @@ namespace sf {
 
 namespace padi {
 
-    class Level;
-
     class UIContext;
 
     namespace content {
         struct Character;
+        class OnlineGame;
     }
 }
 
@@ -28,7 +27,7 @@ namespace padi::content {
     public:
         explicit LocalPlayerTurn(UIContext *uiContext, std::vector<std::shared_ptr<sf::TcpSocket>> & sockets);
 
-        bool operator()(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &character);
+        bool operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr);
 
     private:
         padi::UIContext *m_uiContext;

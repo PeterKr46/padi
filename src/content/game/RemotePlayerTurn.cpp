@@ -9,6 +9,7 @@
 
 #include "Character.h"
 #include "Packets.h"
+#include "OnlineGame.h"
 #include "../../entity/LivingEntity.h"
 #include "../../entity/Ability.h"
 #include "../../level/Level.h"
@@ -27,7 +28,8 @@ namespace padi::content {
 
     }
 
-    bool RemotePlayerTurn::operator()(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &chr) {
+    bool RemotePlayerTurn::operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr) {
+        auto level = game->getLevel();
         sf::Packet packet;
         PlayerCastPayload payload;
         RemoteTurnState state = IDLE;
