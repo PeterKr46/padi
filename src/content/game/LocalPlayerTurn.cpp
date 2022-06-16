@@ -27,6 +27,9 @@ namespace padi::content {
     }
 
     bool LocalPlayerTurn::operator()(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &character) {
+        m_uiContext->setText("local_turn", "Your Turn!", {226,20}, true);
+        m_uiContext->updateTextOutline("local_turn", sf::Color::Black, 1);
+        m_uiContext->updateTextSize("local_turn", 2);
         if (padi::Controls::isKeyDown(sf::Keyboard::Home)) {
             level->moveCursor(character->entity->getPosition());
             level->centerView(character->entity->getPosition());
@@ -125,6 +128,7 @@ namespace padi::content {
         if (state == DONE) {
             m_hasCast = false;
             m_activeAbility = -1;
+            m_uiContext->removeText("local_turn");
         }
         return state == DONE;
     }

@@ -220,7 +220,7 @@ namespace padi::content {
                 ReconstructPayload(packet, namePayload);
                 namePayload.player = id;
                 m_lobby.names[id] = std::string(namePayload.name, std::min(strlen(namePayload.name),8ull));
-                printf("[OnlineGame|Server] Received name %zu: %s!\n", id, namePayload.name);
+                printf("[OnlineGame|Server] Received name %zu: %.*s!\n", id, 8, namePayload.name);
             }
             for (size_t id = 0; id < m_lobby.sockets.size(); ++id) {
                 packet.clear();
@@ -241,7 +241,7 @@ namespace padi::content {
             // propagate own name
             std::memcpy(&namePayload.name, name.c_str(), std::min(8ull, name.length()));
             namePayload.player = m_lobby.sockets.size();
-            printf("[OnlineGame|Server] Propagating own name %i: %s!\n", namePayload.player, namePayload.name);
+            printf("[OnlineGame|Server] Propagating own name %i: %.*s!\n", namePayload.player, 8, namePayload.name);
             m_lobby.names.back() = name;
             packet.append(&namePayload, sizeof(namePayload));
             for (auto & socket : m_lobby.sockets) {
@@ -274,7 +274,7 @@ namespace padi::content {
                     exit(-1);
                 }
                 ReconstructPayload(packet, namePayload);
-                printf("[OnlineGame|Client] Received name %hhu: %s!\n", namePayload.player, namePayload.name);
+                printf("[OnlineGame|Client] Received name %hhu: %.*s!\n", namePayload.player, 8, namePayload.name);
                 m_lobby.names[namePayload.player] = std::string(namePayload.name, std::min(strlen(namePayload.name),8ull));
             }
             printf("[OnlineGame|Client] Received all names!\n");

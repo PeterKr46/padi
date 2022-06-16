@@ -50,7 +50,11 @@ namespace padi::content {
 
         m_uiContext.pushTransform().translate(235, 180);
         m_uiContext.setText("chat_title", "CHAT", {0, -12});
-        m_uiContext.setText("chat_log", "\nWelcome!\n\n\n\n", {0, 0});
+        m_uiContext.setText("chat_log", "                  ,-.    \n"
+                                                "          ,      ( {o\\   \n"
+                                                "          {`\"=,___) (`~ \n"
+                                                "           \\  ,_.-   )   \n"
+                                                "~^~^~^~^~^~^`- ~^ ~^ '~^~^~^", {0, 0});
         m_uiContext.setText("chat_input", "", {0, 60});
         m_uiContext.popTransform();
     }

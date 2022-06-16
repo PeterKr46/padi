@@ -42,6 +42,7 @@ namespace padi::content {
                 ReconstructPayload(packet, payload);
                 m_activeAbility = int8_t(payload.ability);
                 auto ability = chr->abilities[m_activeAbility];
+                level->centerView(payload.pos);
                 ability->castIndicator(level.get());
                 chr->entity->intentCast(ability, payload.pos);
                 printf("[RemotePlayerTurn] Casting %u at (%i, %i)\n", m_activeAbility, payload.pos.x, payload.pos.y);
