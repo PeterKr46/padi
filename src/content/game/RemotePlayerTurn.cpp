@@ -9,6 +9,7 @@
 #include "OnlineGame.h"
 #include "../../entity/LivingEntity.h"
 #include "../../entity/Ability.h"
+#include "Packets.h"
 
 namespace padi::content {
 

@@ -14,6 +14,7 @@
 #include "../../level/SpawnEvent.h"
 #include "../abilities/Abilities.h"
 #include "RemotePlayerTurn.h"
+#include "Packets.h"
 
 namespace padi::content {
 
@@ -168,7 +169,7 @@ namespace padi::content {
 
     void OnlineGame::propagateSeed() {
         sf::Packet packet;
-        SeedPropagationPayload payload;
+        GameSeedPayload payload;
         if (m_lobby.isHost) {
             payload.seed = m_seed;
             packet.append(&payload, sizeof(payload));
@@ -195,7 +196,7 @@ namespace padi::content {
     void OnlineGame::propagateLobby(std::string const &name) {
         sf::Packet packet;
         LobbySizePayload lobbySizePayload;
-        NamePayload namePayload;
+        PlayerNamePayload namePayload;
         if (m_lobby.isHost) {
             // HOST     propagate lobby size
             // HOST     receive all names

@@ -12,6 +12,7 @@
 // TODO
 #include "Game.h"
 #include "OnlineGame.h"
+#include "Packets.h"
 
 namespace padi::content {
     enum LocalTurnState : int {

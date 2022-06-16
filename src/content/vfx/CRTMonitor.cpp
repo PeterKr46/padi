@@ -8,8 +8,8 @@
 namespace padi::content {
     CRTMonitor::CRTMonitor(std::shared_ptr<sf::Shader> crtShader)
             : m_crtShader(std::move(crtShader)) {
-        if (m_vfxBuffer.create(455, 256)) {
-            // TODO error msg
+        if (!m_vfxBuffer.create(455, 256)) {
+            printf("[CRTMonitor] ERROR: Failed to create RenderTarget.\r");
         }
     }
 

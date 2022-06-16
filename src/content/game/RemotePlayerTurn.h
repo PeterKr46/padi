@@ -25,7 +25,6 @@ namespace padi::content {
         explicit RemotePlayerTurn(std::shared_ptr<sf::TcpSocket>  socket);
         bool operator()(const std::shared_ptr<Level> &level, const std::shared_ptr<Character> &chr);
     private:
-        bool m_turnStarted = false;
         int8_t m_activeAbility = -1;
         std::shared_ptr<sf::TcpSocket> m_socket;
     };

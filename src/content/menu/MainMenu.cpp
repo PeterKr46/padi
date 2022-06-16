@@ -12,6 +12,7 @@
 #include "SFML/Network/Packet.hpp"
 #include "../game/OnlineGame.h"
 #include "../../Constants.h"
+#include "../game/Packets.h"
 
 namespace padi::content {
 
@@ -51,10 +52,10 @@ namespace padi::content {
         m_uiContext.pushTransform().translate(235, 180);
         m_uiContext.setText("chat_title", "CHAT", {0, -12});
         m_uiContext.setText("chat_log", "                  ,-.    \n"
-                                                "          ,      ( {o\\   \n"
-                                                "          {`\"=,___) (`~ \n"
-                                                "           \\  ,_.-   )   \n"
-                                                "~^~^~^~^~^~^`- ~^ ~^ '~^~^~^", {0, 0});
+                                        "          ,      ( {o\\   \n"
+                                        "          {`\"=,___) (`~ \n"
+                                        "           \\  ,_.-   )   \n"
+                                        "~^~^~^~^~^~^`- ~^ ~^ '~^~^~^", {0, 0});
         m_uiContext.setText("chat_input", "", {0, 60});
         m_uiContext.popTransform();
     }
@@ -190,7 +191,6 @@ namespace padi::content {
 
         m_crt.asTarget()->draw(m_uiContext);
 
-        //target->setView(m_renderTarget->getDefaultView());
         target->draw(m_crt);
     }
 
@@ -231,7 +231,7 @@ namespace padi::content {
         m_uiContext.updateTextString("host_play", "Offline");
         m_uiContext.updateTextString("own_ip", "");
         m_uiContext.updateTextString("play", "Play");
-        sendChatMessage("Host session closed.");
+        appendChatMessage("Host session closed.");
     }
 
     void MainMenu::updateHost() {
@@ -249,7 +249,7 @@ namespace padi::content {
             result = client->receive(packet);
             if (result == sf::Socket::Done) {
                 auto data = reinterpret_cast<const uint8_t *>(packet.getData());
-                if (data[0] == 0) { // CHAT
+                if (data[0] == PayloadType::ChatMessage) { // CHAT
                     handleChatPacket(packet);
                 } else {
                     printf("[padi::content::MainMenu] Unknown Packet type %u!\n", data[0]);
@@ -265,7 +265,7 @@ namespace padi::content {
             if (hostIp == sf::IpAddress::None) {
                 Immediate::setFocus(&m_uiContext, "ip_input");
                 printf("[padi::content::MainMenu|Client] Invalid IP address!\n");
-                sendChatMessage("Invalid Host address.");
+                appendChatMessage("Invalid Host address.");
             } else {
                 clientRole.client = std::make_shared<sf::TcpSocket>();
                 clientRole.client->setBlocking(true);
@@ -276,7 +276,7 @@ namespace padi::content {
                     clientRole.client.reset();
                     Immediate::setFocus(&m_uiContext, "ip_input");
                     printf("[padi::content::MainMenu|Client] Failed to connect.\n");
-                    sendChatMessage("Failed to connect.");
+                    appendChatMessage("Failed to connect.");
                 }
             }
         }
@@ -287,16 +287,16 @@ namespace padi::content {
         auto result = clientRole.client->receive(packet);
         if (result == sf::Socket::Disconnected) {
             clientRole.client.reset();
-            sendChatMessage("Connection closed.");
+            appendChatMessage("Connection closed.");
             m_uiContext.updateTextString("play", "Play");
         } else if (result == sf::Socket::Done) {
-            auto data = reinterpret_cast<const uint8_t *>(packet.getData());
-            if (data[0] == 0) { // CHAT
+            auto payloadType = *reinterpret_cast<const PayloadType *>(packet.getData());
+            if (payloadType == PayloadType::ChatMessage) { // CHAT
                 handleChatPacket(packet);
-            } else if (data[0] == 1) {
+            } else if (payloadType == PayloadType::GameStart) {
                 clientHandleGameStart(packet);
             } else {
-                printf("[padi::content::MainMenu] Unknown Packet type %u!\n", data[0]);
+                printf("[padi::content::MainMenu] Unknown Packet type %u!\n", payloadType);
             }
         }
     }
@@ -309,27 +309,21 @@ namespace padi::content {
     }
 
     void MainMenu::handleChatPacket(sf::Packet &packet) {
-        auto data = reinterpret_cast<const uint8_t *>(packet.getData());
-        if (packet.getDataSize() < 2) {
-            printf("[padi::content::MainMenu] Corrupted CHAT package!\n");
-        } else {
-            auto len = data[1];
-            auto msg = std::string(reinterpret_cast<const char *>(data) + 2, len);
+        ChatMessagePayload payload;
+        if (ReconstructPayload(packet, payload)) {
             if (hostRole.active) {
-                sendChatMessage(msg);
+                sendChatMessage(payload.message);
             } else {
-                appendChatMessage(msg);
+                appendChatMessage(payload.message);
             }
         }
     }
 
     void MainMenu::sendChatMessage(const std::string &msg) {
         sf::Packet packet;
-        uint8_t type = 0;
-        uint8_t len = msg.length();
-        packet.append(&type, 1);
-        packet.append(&len, 1);
-        packet.append(msg.c_str(), msg.length());
+        ChatMessagePayload payload;
+        std::memcpy(payload.message, msg.c_str(), std::min(32ull, msg.length()));
+        packet.append(&payload, sizeof(payload));
         if (clientRole.client) {
             clientRole.client->send(packet);
         } else if (hostRole.active) {

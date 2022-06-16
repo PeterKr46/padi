@@ -6,62 +6,18 @@
 
 #include <queue>
 #include <random>
+#include <SFML/Network.hpp>
 
 #include "../../ui/UIContext.h"
 #include "../Activity.h"
 #include "Character.h"
 #include "../vfx/CRTMonitor.h"
-#include <SFML/Network.hpp>
 
 namespace padi {
     class Level;
 }
 
 namespace padi::content {
-
-    template<typename T>
-    bool ReconstructPayload(sf::Packet &packet, T &t) {
-        uint8_t recvType = *reinterpret_cast<const uint8_t *>(packet.getData());
-        if (recvType != t.type) {
-            printf("[Packet] PAYLOAD ERROR - Type mismatch (expected %hhu, got %hhu).\n", t.type, recvType);
-        } else if (packet.getDataSize() != sizeof(T)) {
-            printf("[Packet] PAYLOAD ERROR - Size mismatch (expected %zu, got %zu).\n", sizeof(T),
-                   packet.getDataSize());
-        } else {
-            std::memcpy(&t, packet.getData(), packet.getDataSize());
-            return true;
-        }
-        return false;
-    }
-
-    struct alignas(64) LobbySizePayload {
-        const uint8_t type = 6;
-        uint8_t players{};
-    };
-
-    struct alignas(64) NamePayload {
-        const uint8_t type = 7;
-        uint8_t player{};
-        char name[8] = "\0";
-    };
-
-    struct alignas(64) SeedPropagationPayload {
-        const uint8_t type = 8;
-        uint32_t seed{};
-    };
-
-    struct alignas(64) PlayerSpawnPayload {
-        const uint8_t type = 9;
-        sf::Vector2i pos;
-        sf::Color color;
-        bool local{};
-    };
-
-    struct alignas(64) PlayerCastPayload {
-        const uint8_t type = 10;
-        uint8_t ability{};
-        sf::Vector2i pos;
-    };
 
     class OnlineGame : public padi::Activity {
     public:
