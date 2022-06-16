@@ -19,4 +19,9 @@ namespace padi {
 
     const sf::Vector2i TileSize{32,32};
     const size_t UIPadding_px{8};
+
+    const char AddressCharacterSet[] = "0123456789.";
+    const char AlphabeticCharacterSet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const char AlphabeticNumericCharacterSet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const char SimpleCharacterSet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.!?+-/()%$ ";
 }

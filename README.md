@@ -13,16 +13,17 @@ The goal of this project is to create a turn-based rogue-lite game, centered aro
 
 The above concept will be realized the following features, optional/extra features listed in brackets.
 
- - [ ] Turn-based movement and combat on an isometric grid-based map.
+ - [x] Turn-based movement and combat on an isometric grid-based map.
  - [ ] Support for the following input devices:
    - [x] Keyboard
    - [ ] SFML-compatible Controllers as input devices.
  - [ ] Up to three (four?) player characters
  - [ ] Cooperative gameplay
-   - [ ] Couch Co-op / Hot Seat
-   - [ ] BONUS: (Local Co-op with Keyboard + Controller)
-   - [ ] BONUS: (Network Multiplayer)
-     - [ ] BONUS: (Text-based chat)
+   - [x] Couch Co-op / Hot Seat
+   - [x] BONUS: (Local Co-op with Keyboard + Controller)
+   - [x] BONUS: (Network Multiplayer)
+      - [x] BONUS: (Text-based chat in-lobby)
+      - [ ] BONUS: (Text-based chat in-game)
  - [x] Randomly generated levels
    - [ ] of increasing difficulty
  - [ ] The option to save and load in between levels
@@ -30,12 +31,12 @@ The above concept will be realized the following features, optional/extra featur
    - [ ] Swappable abilites per character via an Inventory-like system
    - [ ] BONUS: (Color selection per character)
  - [x] Sprite-based animation
- - [ ] Custom shaders
+ - [x] Custom shaders
    - [ ] On the map itself
-   - [ ] For screenspace effects
+   - [x] For screenspace effects
  - [x] Cross-OS gameplay
  - [x] Audio
-   - [ ] Soundtrack/Music
-   - [ ] Audio Effects for Abilites
- - [ ] Basic AI for mobs
+   - [x] Soundtrack/Music
+   - [x] Audio Effects for Abilites
+ - [x] Basic AI for mobs
  - [ ] Genetic/Advanced AI for mobs

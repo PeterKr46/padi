@@ -53,7 +53,8 @@ namespace padi {
 
         void removeText(const char* id);
 
-        std::string getText(const char * id);
+        const sf::Text* getText(const char* id) const;
+        std::string getTextString(const char * id) const;
 
     private:
 

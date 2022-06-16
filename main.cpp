@@ -9,8 +9,8 @@ int main() {
     auto style = sf::Style::Fullscreen;
     auto mode = modes[0];
     if (true) {
-        mode.width = 1280;
-        mode.height = 720;
+        mode.width = 1280 * 2;
+        mode.height = 720 * 2;
         style = sf::Style::Default;
     }
     sf::RenderWindow window(mode, "PAdI", style);

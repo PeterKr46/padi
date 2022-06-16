@@ -54,15 +54,28 @@ namespace padi {
         s_text += chr;
     }
 
-    bool Controls::textInput(std::string &out, size_t max_len) {
-        for (uint32_t chr: s_text) {
-            if (chr == '\b') {
-                if (!out.empty()) out.pop_back(); // TODO filter properly
-            } else if(chr != '\n' && chr != '\r') {
-                if (out.size() < max_len)
-                    out += chr;
+    bool Controls::textInput(std::string &out, size_t max_len, const char *whitelist) {
+        if (!whitelist) {
+            for (uint32_t chr: s_text) {
+                if (chr == '\b') {
+                    if (!out.empty()) out.pop_back(); // TODO filter properly
+                } else if (chr != '\n' && chr != '\r') {
+                    if (out.size() < max_len)
+                        out += chr;
+                }
             }
+        } else {
+            for (uint32_t chr: s_text) {
+                if (chr == '\b') {
+                    if (!out.empty()) out.pop_back();
+                } else {
+                    if (std::strchr(whitelist, chr)) {
+                        if (out.size() < max_len)
+                            out += chr;
+                    }
+                }
+            }
+            return !s_text.empty();
         }
-        return !s_text.empty();
     }
 }

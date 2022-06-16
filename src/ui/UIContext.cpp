@@ -115,7 +115,17 @@ namespace padi {
         }
     }
 
-    std::string UIContext::getText(const char *id) {
+    const sf::Text *UIContext::getText(const char *id) const {
+        auto idHash = hash_c_string(id, strlen(id));
+        auto found = m_text.find(idHash);
+        std::string result;
+        if (found != m_text.end()) {
+            return &found->second.text;
+        }
+        return nullptr;
+    }
+
+    std::string UIContext::getTextString(const char *id) const {
         auto idHash = hash_c_string(id, strlen(id));
         auto found = m_text.find(idHash);
         std::string result;

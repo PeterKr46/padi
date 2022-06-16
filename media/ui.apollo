@@ -7,6 +7,7 @@ shader fpa ../src/shaders/fpa_pausable.frag
 anim scalable_button    32 32   0 0     0 32 4
 anim scalable_border    32 32   64 64   0 32 1
 anim scalable_window    32 32   64 0    0 32 1
+anim scalable_textfield 32 32   64 96   0 32 1
 anim switch             32 32   32 0    0 32 2
 
 anim entity_dock        32 32   64 32   0 32 11
