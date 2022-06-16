@@ -32,6 +32,7 @@ namespace padi::content {
     private:
         sf::RenderTexture m_vfxBuffer;
         sf::VertexArray m_screenQuad{sf::Quads, 4};
+        sf::View m_view;
         sf::Clock m_graphicsClock;
         std::shared_ptr<sf::Shader> m_crtShader;
     };
