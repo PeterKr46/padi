@@ -45,6 +45,8 @@ namespace padi {
         void setColor(sf::Color const &color);
         sf::Color getColor() const;
 
+        std::string const& getName();
+
     private:
 
         padi::AnimationSet const*  m_apolloCtx;

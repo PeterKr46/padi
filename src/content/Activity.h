@@ -13,9 +13,11 @@ namespace padi {
     public:
         virtual std::shared_ptr<padi::Activity> handoff() = 0;
 
-        virtual void handleResize(int width, int height) { };
+        virtual void handleResize(int width, int height) {};
 
-        virtual void draw(sf::RenderTarget* target) = 0;
+        virtual void draw(sf::RenderTarget *target) = 0;
+
+        virtual void close() {};
 
     };
 

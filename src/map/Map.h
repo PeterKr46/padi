@@ -84,6 +84,8 @@ namespace padi {
 
         bool moveUIObject(const std::shared_ptr<padi::GridObject> &obj, sf::Vector2i const &pos);
 
+        size_t numTiles();
+
     private:
         ManhattanMap<std::pair<std::shared_ptr<Tile>, std::vector<std::shared_ptr<Entity>>>> m_tiles;
         std::unordered_set<std::shared_ptr<Entity>> m_entities;

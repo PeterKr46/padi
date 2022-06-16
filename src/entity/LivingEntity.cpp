@@ -166,3 +166,7 @@ bool padi::LivingEntity::hasFailedCast() const {
     return m_inAction.cast_failed;
 }
 
+std::string const &padi::LivingEntity::getName() {
+    return m_name;
+}
+

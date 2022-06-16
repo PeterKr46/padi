@@ -56,8 +56,8 @@ namespace padi::content {
         m_level->populateVBO();
         m_crt.asTarget()->clear();
         auto states = sf::RenderStates::Default;
-        states.transform.scale(256.f / m_crt.asTarget()->getView().getSize().y,
-                               256.f / m_crt.asTarget()->getView().getSize().y);
+        states.transform.scale(255.f / m_crt.asTarget()->getView().getSize().y,
+                               255.f / m_crt.asTarget()->getView().getSize().y);
         m_crt.asTarget()->draw(*m_level, states);
         m_uiContext.nextFrame();
 
@@ -92,9 +92,7 @@ namespace padi::content {
                 payload.color.a = 255;
                 for (size_t sockId = 0; sockId < m_lobby.sockets.size(); ++sockId) {
                     payload.local = sockId == id;
-                    packet.clear();
-                    packet.append(&payload, sizeof(payload));
-                    m_lobby.sockets[sockId]->send(packet);
+                    m_lobby.sockets[sockId]->send(PackagePayload(packet, payload));
                 }
                 player = std::make_shared<Character>();
                 player->entity = std::make_shared<padi::LivingEntity>(
@@ -170,10 +168,10 @@ namespace padi::content {
 
     void OnlineGame::propagateSeed() {
         sf::Packet packet;
-        GameSeedPayload payload;
+        GameSeedPayload gameSeedPL;
         if (m_lobby.isHost) {
-            payload.seed = m_seed;
-            packet.append(&payload, sizeof(payload));
+            gameSeedPL.seed = m_seed;
+            PackagePayload(packet, gameSeedPL);
             printf("[OnlineGame|Server] Propagating seed!\n");
             for (auto &socket: m_lobby.sockets) {
                 socket->send(packet);
@@ -187,8 +185,8 @@ namespace padi::content {
                 printf("[OnlineGame|Client] Error occurred while receiving seed!\n");
                 exit(-1);
             }
-            ReconstructPayload(packet, payload);
-            m_seed = payload.seed;
+            ReconstructPayload(packet, gameSeedPL);
+            m_seed = gameSeedPL.seed;
             m_rand = std::mt19937(m_seed);
             printf("[OnlineGame|Client] Received seed %u!\n", m_seed);
         }
@@ -196,20 +194,19 @@ namespace padi::content {
 
     void OnlineGame::propagateLobby(std::string const &name) {
         sf::Packet packet;
-        LobbySizePayload lobbySizePayload;
-        PlayerNamePayload namePayload;
+        LobbySizePayload lobbySizePL;
+        PlayerNamePayload namePL;
         if (m_lobby.isHost) {
             // HOST     propagate lobby size
             // HOST     receive all names
             // HOST     propagate all names
             printf("[OnlineGame|Server] Propagating lobby size!\n");
-            lobbySizePayload.players = m_lobby.sockets.size() + 1;
-            m_lobby.names.resize(lobbySizePayload.players, "");
-            packet.append(&lobbySizePayload, sizeof(lobbySizePayload));
+            lobbySizePL.players = m_lobby.sockets.size() + 1;
+            m_lobby.names.resize(lobbySizePL.players, "");
+            PackagePayload(packet, lobbySizePL);
             for (auto &socket: m_lobby.sockets) {
                 socket->send(packet);
             }
-            packet.clear();
 
             printf("[OnlineGame|Server] Receiving lobby names!\n");
             for (size_t id = 0; id < m_lobby.sockets.size(); ++id) {
@@ -219,18 +216,17 @@ namespace padi::content {
                     printf("[OnlineGame|Server] Error occurred while receiving name!\n");
                     exit(-1);
                 }
-                ReconstructPayload(packet, namePayload);
-                namePayload.player = id;
-                m_lobby.names[id] = std::string(namePayload.name, std::min(strlen(namePayload.name),8ull));
-                printf("[OnlineGame|Server] Received name %zu: %.*s!\n", id, 8, namePayload.name);
+                ReconstructPayload(packet, namePL);
+                namePL.player = id;
+                m_lobby.names[id] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
+                printf("[OnlineGame|Server] Received name %zu: %.*s!\n", id, 8, namePL.name);
             }
             for (size_t id = 0; id < m_lobby.sockets.size(); ++id) {
-                packet.clear();
 
                 auto & playerName = m_lobby.names[id];
-                namePayload.player = id;
-                std::memcpy(&namePayload.name, playerName.c_str(), std::min(8ull, playerName.length()));
-                packet.append(&namePayload, sizeof(namePayload));
+                namePL.player = id;
+                std::memcpy(&namePL.name, playerName.c_str(), std::min(8ull, playerName.length()));
+                PackagePayload(packet, namePL);
 
                 for (size_t sockId = 0; sockId < m_lobby.sockets.size(); ++sockId) {
                     if (sockId != id) {
@@ -238,14 +234,13 @@ namespace padi::content {
                     }
                 }
             }
-            packet.clear();
 
             // propagate own name
-            std::memcpy(&namePayload.name, name.c_str(), std::min(8ull, name.length()));
-            namePayload.player = m_lobby.sockets.size();
-            printf("[OnlineGame|Server] Propagating own name %i: %.*s!\n", namePayload.player, 8, namePayload.name);
+            std::memcpy(&namePL.name, name.c_str(), std::min(8ull, name.length()));
+            namePL.player = m_lobby.sockets.size();
+            printf("[OnlineGame|Server] Propagating own name %i: %.*s!\n", namePL.player, 8, namePL.name);
             m_lobby.names.back() = name;
-            packet.append(&namePayload, sizeof(namePayload));
+            PackagePayload(packet, namePL);
             for (auto & socket : m_lobby.sockets) {
                 socket->send(packet);
             }
@@ -260,13 +255,12 @@ namespace padi::content {
                 printf("[OnlineGame|Client] Error occurred while receiving seed!\n");
                 exit(-1);
             }
-            ReconstructPayload(packet, lobbySizePayload);
-            printf("[OnlineGame|Client] Received lobby size: %hhu!\n", lobbySizePayload.players);
+            ReconstructPayload(packet, lobbySizePL);
+            printf("[OnlineGame|Client] Received lobby size: %hhu!\n", lobbySizePL.players);
             printf("[OnlineGame|Client] Sending own name!\n");
-            m_lobby.names.resize(lobbySizePayload.players, "");
-            packet.clear();
-            std::memcpy(&namePayload.name, name.c_str(), std::min(8ull, name.length()));
-            packet.append(&namePayload, sizeof(namePayload));
+            m_lobby.names.resize(lobbySizePL.players, "");
+            std::memcpy(&namePL.name, name.c_str(), std::min(8ull, name.length()));
+            PackagePayload(packet, namePL);
             host->send(packet);
             printf("[OnlineGame|Client] Sent own name!\n");
             for (size_t id = 0; id < m_lobby.names.size() - 1; ++id) {
@@ -275,12 +269,21 @@ namespace padi::content {
                     printf("[OnlineGame|Client] Error occurred while receiving name!\n");
                     exit(-1);
                 }
-                ReconstructPayload(packet, namePayload);
-                printf("[OnlineGame|Client] Received name %hhu: %.*s!\n", namePayload.player, 8, namePayload.name);
-                m_lobby.names[namePayload.player] = std::string(namePayload.name, std::min(strlen(namePayload.name),8ull));
+                ReconstructPayload(packet, namePL);
+                printf("[OnlineGame|Client] Received name %hhu: %.*s!\n", namePL.player, 8, namePL.name);
+                m_lobby.names[namePL.player] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
             }
             printf("[OnlineGame|Client] Received all names!\n");
         }
+    }
+
+    void OnlineGame::close() {
+        for(auto & socket : m_lobby.sockets) {
+            socket->disconnect();
+            socket.reset();
+        }
+        while(!m_characters.empty()) m_characters.pop();
+        m_activeChar.reset();
     }
 
 } // content

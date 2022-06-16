@@ -22,6 +22,9 @@ namespace padi::content {
             for (auto p: remove) {
                 level->getMap()->removeTile(p);
             }
+            if(!level->getMap()->numTiles()) {
+                return false;
+            }
             return true;
         }
 
@@ -71,7 +74,6 @@ namespace padi::content {
                     entity->intentMove(directions[dir]);
                     tile->setColor(tile->getColor() + entity->getColor());
                 }
-                //if (rand() % 3 == 0)lvl->centerView(position);
             }
             return true;
         }
@@ -81,6 +83,18 @@ namespace padi::content {
     };
 
     MenuBackground::MenuBackground() {
+        generateLevel();
+    }
+
+    void MenuBackground::draw(sf::RenderTarget &target, sf::RenderStates states) const {
+        m_level->draw(target, states);
+    }
+
+    std::shared_ptr<Level> MenuBackground::getLevel() {
+        return m_level;
+    }
+
+    void MenuBackground::generateLevel() {
         auto levelGen = padi::LevelGenerator();
         // Seed with a real random value, if available
         std::random_device r;
@@ -108,13 +122,5 @@ namespace padi::content {
             leSpawn->dispatch(m_level);
         }
         m_level->addCycleEndListener(std::make_shared<RandomizedMovement>(cubes));
-    }
-
-    void MenuBackground::draw(sf::RenderTarget &target, sf::RenderStates states) const {
-        m_level->draw(target, states);
-    }
-
-    std::shared_ptr<Level> MenuBackground::getLevel() {
-        return m_level;
     }
 }

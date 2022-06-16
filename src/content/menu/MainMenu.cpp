@@ -16,7 +16,7 @@
 namespace padi::content {
 
 
-    MainMenu::MainMenu(sf::RenderTarget *renderTarget, std::string const &apollo, std::string const &spritesheet) {
+    MainMenu::MainMenu( std::string const &apollo, std::string const &spritesheet) {
         m_uiContext.init(apollo, spritesheet);
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
 
@@ -222,6 +222,9 @@ namespace padi::content {
         hostRole.listener.close();
         for (auto &client: hostRole.clients) {
             client->disconnect();
+        }
+        if(hostRole.nextClient) {
+            hostRole.nextClient.reset();
         }
         hostRole.clients.clear();
         m_uiContext.updateTextString("num_clients", "");

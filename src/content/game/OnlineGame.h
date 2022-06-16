@@ -32,6 +32,8 @@ namespace padi::content {
 
         std::shared_ptr<padi::Activity> handoff() override;
 
+        void close() override;
+
     private:
 
         void initializePlayerCharacters();

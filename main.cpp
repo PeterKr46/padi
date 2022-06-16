@@ -5,15 +5,12 @@
 
 
 int main() {
-    std::vector<sf::VideoMode> modes = sf::VideoMode::getFullscreenModes();
-    auto style = sf::Style::Fullscreen;
-    auto mode = modes[0];
-    if (true) {
-        mode.width = 1280;
-        mode.height = 720;
-        style = sf::Style::Default;
-    }
-    sf::RenderWindow window(mode, "PAdI", style);
+    std::queue<std::pair<sf::VideoMode, uint8_t>> windowModes;
+    windowModes.push({sf::VideoMode(1280, 720), sf::Style::Default});
+    windowModes.push({sf::VideoMode::getFullscreenModes().front(), sf::Style::Fullscreen});
+    windowModes.push({sf::VideoMode(1920, 1080), sf::Style::Default});
+
+    sf::RenderWindow window(windowModes.front().first, "PAdI", windowModes.front().second);
 
     // Ambient sounds
     sf::Music ambient;
@@ -27,11 +24,11 @@ int main() {
     ambient.play();
 
     std::shared_ptr<padi::Activity> activity = std::make_shared<padi::content::MainMenu>
-            (&window,
+            (
              "../media/ui.apollo",
              "../media/ui_sheet.png"
             );
-    activity->handleResize(int(mode.width), int(mode.height));
+    activity->handleResize(int(window.getSize().x), int(window.getSize().y));
 
     sf::Clock runtime;
     size_t frames = 0;
@@ -40,6 +37,7 @@ int main() {
         padi::Controls::resetKeyStates(); // Handles key events
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
+                activity->close();
                 window.close();
             } else if (event.type == sf::Event::KeyPressed) {
                 padi::Controls::keyDown(event.key.code);
@@ -62,6 +60,14 @@ int main() {
 
         window.display();
         ++frames;
+        if(padi::Controls::wasKeyReleased(sf::Keyboard::F11)) {
+            windowModes.push(windowModes.front());
+            windowModes.pop();
+            auto & mode = windowModes.front();
+            window.create(mode.first, "Padi", mode.second);
+            window.requestFocus();
+            activity->handleResize(int(mode.first.width), int(mode.first.height));
+        }
     }
     printf("%zu frames total in %.3f seconds\n", frames, runtime.getElapsedTime().asSeconds());
     printf("%.3f fps avg", float(frames) / runtime.getElapsedTime().asSeconds());

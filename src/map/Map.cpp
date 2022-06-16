@@ -204,5 +204,9 @@ namespace padi {
         return {};
     }
 
+    size_t Map::numTiles() {
+        return m_tiles.size();
+    }
+
 
 } // padi

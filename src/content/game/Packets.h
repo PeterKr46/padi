@@ -24,6 +24,15 @@ namespace padi::content {
         return false;
     }
 
+    template<typename T>
+    sf::Packet & PackagePayload(sf::Packet & packet, T &t) {
+        if(packet.getDataSize()) {
+            packet.clear();
+        }
+        packet.append(&t, sizeof(t));
+        return packet;
+    }
+
     enum PayloadType : uint8_t {
         ChatMessage,
         GameStart,

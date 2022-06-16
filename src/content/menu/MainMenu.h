@@ -17,13 +17,15 @@ namespace padi::content {
 
     class MainMenu : public padi::Activity {
     public:
-        MainMenu(sf::RenderTarget *renderTarget, std::string const &apollo, std::string const &spritesheet);
+        MainMenu(std::string const &apollo, std::string const &spritesheet);
 
         void draw(sf::RenderTarget* target) override;
 
         void handleResize(int width, int height) override;
 
         std::shared_ptr<padi::Activity> handoff() override;
+
+        void appendChatMessage(const std::string& msg);
 
     private:
         padi::content::CRTMonitor m_crt;
@@ -53,8 +55,6 @@ namespace padi::content {
         void initializeClientSession();
 
         void updateClient();
-
-        void appendChatMessage(const std::string& msg);
         void sendChatMessage(const std::string& msg);
 
         void handleChatPacket(sf::Packet &packet);

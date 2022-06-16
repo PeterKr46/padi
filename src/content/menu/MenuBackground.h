@@ -16,6 +16,8 @@ namespace padi::content {
         std::shared_ptr<Level> getLevel();
     private:
         std::shared_ptr<Level> m_level;
+
+        void generateLevel();
     };
 
 } // content

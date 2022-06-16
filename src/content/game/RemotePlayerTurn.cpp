@@ -12,6 +12,7 @@
 #include "../../entity/LivingEntity.h"
 #include "../../entity/Ability.h"
 #include "../../level/Level.h"
+#include "../menu/MainMenu.h"
 
 namespace padi::content {
 
@@ -42,13 +43,23 @@ namespace padi::content {
         if(state == IDLE) {
             auto status = m_socket->receive(packet);
             if (status == sf::Socket::Done) {
-                ReconstructPayload(packet, payload);
-                m_activeAbility = int8_t(payload.ability);
-                auto ability = chr->abilities[m_activeAbility];
-                level->centerView(payload.pos);
-                ability->castIndicator(level.get());
-                chr->entity->intentCast(ability, payload.pos);
-                printf("[RemotePlayerTurn] Casting %u at (%i, %i)\n", m_activeAbility, payload.pos.x, payload.pos.y);
+                if(ReconstructPayload(packet, payload)) {
+                    m_activeAbility = int8_t(payload.ability);
+                    auto ability = chr->abilities[m_activeAbility];
+                    level->centerView(payload.pos);
+                    ability->castIndicator(level.get());
+                    chr->entity->intentCast(ability, payload.pos);
+                    printf("[RemotePlayerTurn] Casting %u at (%i, %i)\n", m_activeAbility, payload.pos.x,
+                           payload.pos.y);
+                }
+            } else if(status == sf::Socket::Disconnected) {
+                /*auto mainMenu = std::make_shared<MainMenu>(
+                        "../media/ui.apollo",
+                        "../media/ui_sheet.png");
+                mainMenu->appendChatMessage("Session abored!");
+                */
+                printf("[RemotePlayerTurn|%s] Connection lost.\n", chr->entity->getName().c_str());
+                return true;
             }
         }
         else if(state == CASTING) {
