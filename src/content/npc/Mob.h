@@ -6,7 +6,8 @@
 
 #include "../../entity/LivingEntity.h"
 #include "../abilities/Abilities.h"
-#include "../game/Game.h"
+#include "../game/Character.h"
+#include "SFML/Network/TcpSocket.hpp"
 
 namespace padi::content {
 
@@ -43,7 +44,7 @@ namespace padi::content {
 
     class Mob : public padi::LivingEntity {
     public:
-        Mob(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos);
+        Mob(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos, std::vector<std::shared_ptr<sf::TcpSocket>> & sockets);
 
         bool takeTurn(const std::shared_ptr<Level> &, const std::shared_ptr<Character> &);
 
@@ -53,6 +54,7 @@ namespace padi::content {
         std::shared_ptr<padi::content::Walk> m_walk;
         std::shared_ptr<padi::content::SelfDestruct> m_explode;
         bool m_turnStarted = false;
+        std::vector<std::shared_ptr<sf::TcpSocket>> m_sockets;
     };
 
 } // content

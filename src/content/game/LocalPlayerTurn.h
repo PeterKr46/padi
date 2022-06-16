@@ -6,7 +6,10 @@
 
 #include <memory>
 #include <vector>
-#include <SFML/Network.hpp>
+
+namespace sf {
+    class TcpSocket;
+}
 
 namespace padi {
 

@@ -15,6 +15,7 @@
 #include "../abilities/Abilities.h"
 #include "RemotePlayerTurn.h"
 #include "Packets.h"
+#include "Character.h"
 
 namespace padi::content {
 

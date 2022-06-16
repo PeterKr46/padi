@@ -23,6 +23,7 @@ namespace padi::content {
         void setShader(std::shared_ptr<sf::Shader> crtShader);
 
         void handleResize(int width, int height);
+        void handleResize(sf::Vector2u const& dims);
 
         sf::RenderTarget* asTarget();
 

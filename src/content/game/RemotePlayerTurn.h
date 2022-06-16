@@ -5,7 +5,10 @@
 #pragma once
 
 #include <memory>
-#include "SFML/Network/TcpSocket.hpp"
+
+namespace sf {
+    class TcpSocket;
+}
 
 namespace padi {
 

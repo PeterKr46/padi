@@ -4,13 +4,15 @@
 
 #include "Mob.h"
 #include "../../entity/OneshotEntity.h"
+#include "../game/Packets.h"
+#include "SFML/Network/Packet.hpp"
 
 #include <utility>
 
 namespace padi::content {
-    Mob::Mob(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos)
+    Mob::Mob(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos, std::vector<std::shared_ptr<sf::TcpSocket>> & sockets)
             : LivingEntity(std::move(name), moveset, pos) {
-        m_turnStarted = false;
+        m_sockets = sockets;
         setColor(sf::Color(64, 64, 64));
     }
 
@@ -28,6 +30,17 @@ namespace padi::content {
             }
             if (explode) {
                 chr->entity->intentCast(m_explode, chr->entity->getPosition());
+                {
+                    sf::Packet packet;
+                    PlayerCastPayload payload;
+                    payload.ability = uint8_t(1);
+                    payload.pos = level->getCursorLocation();
+                    printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
+                    packet.append(&payload, sizeof(payload));
+                    for (auto &socket: m_sockets) {
+                        socket->send(packet);
+                    }
+                }
                 Corruption corruption{chr->entity->getPosition()};
                 chr->controller = [corruption](const std::shared_ptr<Level> &level,
                                                const std::shared_ptr<Character> &chr) mutable {
@@ -50,6 +63,17 @@ namespace padi::content {
                     }
                 }
                 chr->entity->intentCast(m_walk, target);
+                {
+                    sf::Packet packet;
+                    PlayerCastPayload payload;
+                    payload.ability = uint8_t(0);
+                    payload.pos = level->getCursorLocation();
+                    printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
+                    packet.append(&payload, sizeof(payload));
+                    for (auto &socket: m_sockets) {
+                        socket->send(packet);
+                    }
+                }
             }
             m_turnStarted = true;
         }

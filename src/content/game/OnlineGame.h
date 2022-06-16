@@ -10,11 +10,13 @@
 
 #include "../../ui/UIContext.h"
 #include "../Activity.h"
-#include "Character.h"
 #include "../vfx/CRTMonitor.h"
 
 namespace padi {
     class Level;
+    namespace content {
+        struct Character;
+    }
 }
 
 namespace padi::content {

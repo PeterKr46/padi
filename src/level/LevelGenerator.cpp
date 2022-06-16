@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cmath>
 #include "../entity/LivingEntity.h"
+#include "../entity/StaticEntity.h"
 #include "../map/Tile.h"
 #include "../Constants.h"
 

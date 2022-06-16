@@ -3,18 +3,15 @@
 //
 #pragma once
 
-#include "../media/Animation.h"
 #include "Entity.h"
-#include "../media/Apollo.h"
-#include "../level/Level.h"
-#include "StaticEntity.h"
 #include "../level/CycleListener.h"
+#include "../media/Apollo.h"
 
 namespace padi {
 
     class Map;
-
     class Ability;
+    class StaticEntity;
 
     class LivingEntity
             : public padi::Entity

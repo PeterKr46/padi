@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "SFML/Network/Packet.hpp"
-#include "SFML/System/Vector2.hpp"
+#include <SFML/Network.hpp>
 #include "SFML/Graphics/Color.hpp"
 
 namespace padi::content {
@@ -32,7 +31,8 @@ namespace padi::content {
         PlayerName,
         GameSeed,
         PlayerSpawn,
-        PlayerAbilityCast
+        PlayerAbilityCast,
+        PlayerAbilityAssign
     };
 
     struct alignas(64) ChatMessagePayload {
@@ -71,5 +71,11 @@ namespace padi::content {
         const PayloadType type = PlayerAbilityCast;
         uint8_t ability{};
         sf::Vector2i pos;
+    };
+
+    struct alignas(64) PlayerAssignAbilityPayload {
+        const PayloadType type = PlayerAbilityAssign;
+        uint8_t abilitySlot{};
+        uint8_t abilityId{};
     };
 }

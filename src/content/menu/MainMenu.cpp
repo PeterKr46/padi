@@ -7,7 +7,6 @@
 #include "SFML/Network/IpAddress.hpp"
 #include "SFML/Network/TcpSocket.hpp"
 #include "../../ui/Immediate.h"
-#include "../game/Game.h"
 #include "../../Controls.h"
 #include "SFML/Network/Packet.hpp"
 #include "../game/OnlineGame.h"
@@ -18,7 +17,6 @@ namespace padi::content {
 
 
     MainMenu::MainMenu(sf::RenderTarget *renderTarget, std::string const &apollo, std::string const &spritesheet) {
-        m_crt.handleResize(int(float(renderTarget->getSize().x) / renderTarget->getSize().y * 256), 256);
         m_uiContext.init(apollo, spritesheet);
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
 
@@ -30,8 +28,7 @@ namespace padi::content {
 
         m_uiContext.pushTransform().translate(0, 32);
         m_uiContext.setText("join_title", "JOIN REMOTE PLAY", {72, 8}, true);
-        m_uiContext.setText("ip_label", "IP", {8, 16});
-        m_uiContext.setText("ip_input", "127.0.0.1", {24, 16});
+        m_uiContext.setText("ip_input", "127.0.0.1", {72, 20}, true);
         m_uiContext.setText("connect", "Connect", {8, 34});
         m_uiContext.popTransform();
 
@@ -81,7 +78,8 @@ namespace padi::content {
                                             Immediate::isFocused(&m_uiContext, "play") ? sf::Color::White : sf::Color(
                                                     0x999999ff));
                 if (Immediate::Button(&m_uiContext, "play", {-6, 0, 152, 32})) {
-                    m_next = std::make_shared<padi::content::Game>();
+                    std::vector<std::shared_ptr<sf::TcpSocket>> nosocks;
+                    m_next = std::make_shared<padi::content::OnlineGame>(nosocks, true, m_uiContext.getTextString("nick_input"));
                 }
             }
             { // CLIENT CONFIGURATION
@@ -138,7 +136,7 @@ namespace padi::content {
             // NICKNAME CONFIGURATION
             if (!clientRole.client && !hostRole.active) {
                 m_uiContext.pushTransform().translate(0, 170);
-                Immediate::ScalableSprite(&m_uiContext, {28, -2, 116, 12}, 0,
+                Immediate::ScalableSprite(&m_uiContext, {28, -2, 64, 12}, 0,
                                           m_uiContext.getApollo()->lookupAnim("scalable_textfield"));
                 std::string t = m_uiContext.getTextString("nick_input");
                 if (Immediate::isFocused(&m_uiContext, "nick_input")) {

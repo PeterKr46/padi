@@ -4,15 +4,15 @@
 
 #include "LocalPlayerTurn.h"
 
-#include "../../Controls.h"
-#include "../../ui/Immediate.h"
-#include "../../level/Level.h"
-#include "../../entity/Ability.h"
-
-// TODO
-#include "Game.h"
-#include "OnlineGame.h"
 #include "Packets.h"
+#include "Character.h"
+#include "../../Controls.h"
+#include "../../entity/LivingEntity.h"
+#include "../../entity/Ability.h"
+#include "../../ui/Immediate.h"
+#include "../../ui/UIContext.h"
+#include "../../level/Level.h"
+
 
 namespace padi::content {
     enum LocalTurnState : int {

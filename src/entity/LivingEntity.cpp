@@ -6,9 +6,10 @@
 
 #include <utility>
 #include <iostream>
+#include "../level/Level.h"
+#include "../Constants.h"
 #include "Ability.h"
 #include "StaticEntity.h"
-#include "../Constants.h"
 
 padi::LivingEntity::LivingEntity(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos)
         : Entity(pos),

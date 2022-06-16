@@ -57,4 +57,8 @@ namespace padi::content {
         return &m_vfxBuffer;
     }
 
+    void CRTMonitor::handleResize(sf::Vector2u const& d) {
+        handleResize(int(d.x), int(d.y));
+    }
+
 }

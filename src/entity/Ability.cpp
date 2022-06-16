@@ -6,6 +6,7 @@
 
 #include <utility>
 #include "LivingEntity.h"
+#include "../level/Level.h"
 
 namespace padi {
 

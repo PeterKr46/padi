@@ -3,13 +3,15 @@
 //
 
 #include "RemotePlayerTurn.h"
+
 #include <SFML/Network.hpp>
 #include <utility>
 
-#include "OnlineGame.h"
+#include "Character.h"
+#include "Packets.h"
 #include "../../entity/LivingEntity.h"
 #include "../../entity/Ability.h"
-#include "Packets.h"
+#include "../../level/Level.h"
 
 namespace padi::content {
 
