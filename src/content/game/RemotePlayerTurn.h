@@ -12,7 +12,6 @@ namespace sf {
 
 namespace padi {
 
-
     class UIContext;
 
     namespace content {

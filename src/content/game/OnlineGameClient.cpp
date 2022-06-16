@@ -54,13 +54,15 @@ namespace padi::content {
             );
             player->entity->setColor(playerSpawnPL.color);
 
-            status = host->receive(packet);
-            if (status != sf::Socket::Done) {
-                printf("[OnlineGame|Client] Error occurred while receiving spawn event!\n");
-                exit(-1);
+            for(int i = 0; i < 4; ++i) {
+                status = host->receive(packet);
+                if (status != sf::Socket::Done) {
+                    printf("[OnlineGame|Client] Error occurred while receiving spawn event!\n");
+                    exit(-1);
+                }
+                ReconstructPayload(packet, playerAbilityPL);
+                assignPlayerAbility(playerAbilityPL);
             }
-            ReconstructPayload(packet, playerAbilityPL);
-            assignPlayerAbility(playerAbilityPL);
 
             if (playerSpawnPL.local) {
                 player->controller = [=](const std::shared_ptr<OnlineGame> &l,

@@ -27,10 +27,11 @@ namespace padi::content {
 
     }
 
-    bool LocalPlayerTurn::operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &character) {
+    bool
+    LocalPlayerTurn::operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &character) {
         auto level = game->getLevel();
 
-        m_uiContext->setText("local_turn", "Your Turn!", {226,20}, true);
+        m_uiContext->setText("local_turn", "Your Turn!", {226, 20}, true);
         m_uiContext->updateTextOutline("local_turn", sf::Color::Black, 1);
         m_uiContext->updateTextSize("local_turn", 2);
         if (padi::Controls::isKeyDown(sf::Keyboard::Home)) {
@@ -66,7 +67,8 @@ namespace padi::content {
                         PlayerCastPayload payload;
                         payload.ability = uint8_t(m_activeAbility);
                         payload.pos = level->getCursorLocation();
-                        printf("[LocalPlayerTurn] Casting %u at (%i, %i)\n", m_activeAbility, payload.pos.x, payload.pos.y);
+                        printf("[LocalPlayerTurn] Casting %lld at (%i, %i)\n", m_activeAbility, payload.pos.x,
+                               payload.pos.y);
                         packet.append(&payload, sizeof(payload));
                         for (auto &socket: m_sockets) {
                             socket->send(packet);
@@ -90,35 +92,36 @@ namespace padi::content {
                         level->play();
                         m_uiContext->removeText("ability");
                         m_activeAbility = -1;
-                    } else if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
-                        character->abilities[m_activeAbility]->castCancel(&(*level));
-                        m_activeAbility = std::max(0, m_activeAbility - 1);
-                        m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),
-                                             {8, 8});
-                    } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
-                        character->abilities[m_activeAbility]->castCancel(&(*level));
-                        m_activeAbility = std::min(int(character->abilities.size()) - 1, m_activeAbility + 1);
-                        m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),
-                                             {8, 8});
+                    } else {
+                        if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
+                            character->abilities[m_activeAbility]->castCancel(&(*level));
+                            m_activeAbility = (int64_t(character->abilities.size()) + m_activeAbility - 1) % int64_t(character->abilities.size());
+                            m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),{8, 8});
+                        } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
+                            character->abilities[m_activeAbility]->castCancel(&(*level));
+                            m_activeAbility = (m_activeAbility + 1) % int64_t(character->abilities.size());
+                            m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),{8, 8});
+                        }
+                        auto numAbilities = character->abilities.size();
+                        sf::FloatRect bounds{223 - 20 * float(numAbilities), 256 - 72, 40 * float(numAbilities) - 8, 32};
+                        padi::Immediate::ScalableSprite(m_uiContext,
+                                                        sf::FloatRect{
+                                                                bounds.left - 4, bounds.top - 4,
+                                                                bounds.width + 8, bounds.height + 8
+                                                        },
+                                                        0,
+                                                        m_uiContext->getApollo()->lookupAnim("scalable_window"),
+                                                        sf::Color(168, 168, 168, 255));
+                        for(size_t i = 0; i < numAbilities; ++i) {
+                            padi::Immediate::Sprite(m_uiContext, sf::FloatRect{bounds.left + 40 * i, bounds.top, 32, 32}, 0,
+                                                    m_uiContext->getApollo()->lookupAnim(character->abilities[i]->getIconId()));
+                        }
+                        padi::Immediate::ScalableSprite(m_uiContext,
+                                                        sf::FloatRect{bounds.left - 4 + float(m_activeAbility * 40), bounds.top-4, 40, 40},
+                                                        0,
+                                                        m_uiContext->getApollo()->lookupAnim("scalable_border"),
+                                                        character->entity->getColor());
                     }
-                    m_uiContext->pushTransform().translate(228 - 64, 256 - 72);
-                    padi::Immediate::ScalableSprite(m_uiContext, sf::FloatRect{-4, -4, 160, 40}, 0,
-                                                    m_uiContext->getApollo()->lookupAnim("scalable_window"),
-                                                    sf::Color(168, 168, 168, 255));
-                    padi::Immediate::Sprite(m_uiContext, sf::FloatRect{0, 0, 32, 32}, 0,
-                                            m_uiContext->getApollo()->lookupAnim("walk"));
-                    padi::Immediate::Sprite(m_uiContext, sf::FloatRect{40, 0, 32, 32}, 0,
-                                            m_uiContext->getApollo()->lookupAnim("teleport"));
-                    padi::Immediate::Sprite(m_uiContext, sf::FloatRect{80, 0, 32, 32}, 0,
-                                            m_uiContext->getApollo()->lookupAnim("strike"));
-                    padi::Immediate::Sprite(m_uiContext, sf::FloatRect{120, 0, 32, 32}, 0,
-                                            m_uiContext->getApollo()->lookupAnim("dash"));
-                    padi::Immediate::ScalableSprite(m_uiContext,
-                                                    sf::FloatRect{-4 + float(m_activeAbility * 40), -4, 40, 40},
-                                                    0,
-                                                    m_uiContext->getApollo()->lookupAnim("scalable_border"),
-                                                    character->entity->getColor());
-                    m_uiContext->popTransform();
                 }
             }
         } else if (state == CASTING) {

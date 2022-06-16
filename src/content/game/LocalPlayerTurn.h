@@ -32,7 +32,7 @@ namespace padi::content {
     private:
         padi::UIContext *m_uiContext;
         std::vector<std::shared_ptr<sf::TcpSocket>> m_sockets;
-        int8_t m_activeAbility = -1;
+        int64_t m_activeAbility = -1;
         bool m_hasCast = false;
     };
 

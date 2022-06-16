@@ -10,7 +10,9 @@
 
 namespace padi {
 
-    Ability::Ability(std::shared_ptr<padi::LivingEntity> user) : m_user(std::move(user)), m_description("Peter forgot to put text here... :|") {
+    Ability::Ability(std::shared_ptr<padi::LivingEntity> user)
+            : m_user(std::move(user)),
+              m_description("Peter forgot to put text here... :|") {
 
     }
 
@@ -24,6 +26,10 @@ namespace padi {
 
     void Ability::setDescription(const std::string &description) {
         m_description = description;
+    }
+
+    std::string const &Ability::getIconId() const {
+        return m_iconId;
     }
 
     LimitedRangeAbility::LimitedRangeAbility(std::shared_ptr<padi::LivingEntity> user, size_t range)
@@ -40,7 +46,7 @@ namespace padi {
         m_rangeChanged = true;
     }
 
-    void LimitedRangeAbility::recalculateRange(Level* level) {
+    void LimitedRangeAbility::recalculateRange(Level *level) {
         m_inRange.clear();
         m_inRange.reserve((m_range * 2) * (m_range * 2));
         sf::Vector2i min = m_user->getPosition();
@@ -54,12 +60,12 @@ namespace padi {
     void LimitedRangeAbility::castIndicator(padi::Level *lvl) {
         if (m_rangeChanged) {
             recalculateRange(lvl);
-            if(m_inRange.size() < m_rangeIndicators.size()) {
+            if (m_inRange.size() < m_rangeIndicators.size()) {
                 for (size_t i = m_inRange.size(); i < m_rangeIndicators.size(); ++i) {
                     lvl->getMap()->removeUIObject(m_rangeIndicators[i]);
                 }
                 m_rangeIndicators.resize(m_inRange.size());
-            } else if(m_inRange.size() > m_rangeIndicators.size()) {
+            } else if (m_inRange.size() > m_rangeIndicators.size()) {
                 for (size_t i = m_rangeIndicators.size(); i < m_inRange.size(); ++i) {
                     m_rangeIndicators.push_back(std::make_shared<padi::StaticEntity>(m_inRange[i]));
                     lvl->getMap()->addUIObject(m_rangeIndicators[i]);
@@ -76,7 +82,7 @@ namespace padi {
 
     bool LimitedRangeAbility::cast(padi::Level *level, const sf::Vector2i &pos) {
         m_rangeChanged = true;
-        for(auto const& ind : m_rangeIndicators) {
+        for (auto const &ind: m_rangeIndicators) {
             level->getMap()->removeUIObject(ind);
         }
         return true;
@@ -84,7 +90,7 @@ namespace padi {
 
     void LimitedRangeAbility::castCancel(padi::Level *level) {
         m_rangeChanged = true;
-        for(auto const& ind : m_rangeIndicators) {
+        for (auto const &ind: m_rangeIndicators) {
             level->getMap()->removeUIObject(ind);
         }
     }

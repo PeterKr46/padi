@@ -101,8 +101,27 @@ namespace padi::content {
 
         switch (payload.abilityType) {
             case AbilityType::Walk: {
-                abilities[payload.abilitySlot] = std::make_shared<padi::content::Walk>(chr->entity,
-                                                                                       payload.abilityProps[0]);
+                abilities[payload.abilitySlot] = std::make_shared<padi::content::Walk>(
+                        chr->entity,
+                        payload.abilityProps[0]);
+                break;
+            }
+            case AbilityType::Teleport: {
+                abilities[payload.abilitySlot] = std::make_shared<padi::content::Teleport>(chr->entity);
+                break;
+            }
+            case AbilityType::Lighten: {
+                abilities[payload.abilitySlot] = std::make_shared<padi::content::Lighten>(chr->entity);
+                break;
+            }
+            case AbilityType::Darken: {
+                abilities[payload.abilitySlot] = std::make_shared<padi::content::Darken>(chr->entity);
+                break;
+            }
+            case AbilityType::Dash: {
+                abilities[payload.abilitySlot] = std::make_shared<padi::content::Dash>(
+                        chr->entity,
+                        payload.abilityProps[0]);
                 break;
             }
             default: {

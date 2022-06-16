@@ -21,9 +21,9 @@ namespace padi::content {
         enum : uint8_t {
             Walk,
             Lighten,
-            Darken,
             Teleport,
-            Dash
+            Dash,
+            Darken,
         };
     }
 

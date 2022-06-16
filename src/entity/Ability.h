@@ -30,11 +30,14 @@ namespace padi {
         [[nodiscard]] virtual std::string const& getDescription() const;
         virtual void setDescription(std::string const& description);
 
+        [[nodiscard]] virtual std::string const& getIconId() const;
+
         [[nodiscard]] std::shared_ptr<padi::LivingEntity> getUser() const;
 
     protected:
         std::shared_ptr<padi::LivingEntity> m_user;
         std::string m_description;
+        std::string m_iconId;
     };
 
     class LimitedRangeAbility : public Ability {

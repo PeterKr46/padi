@@ -177,7 +177,7 @@ namespace padi {
     }
 
     void Level::moveCursor(sf::Vector2i const &pos) {
-        m_map.moveEntity(m_cursor, pos);
+        m_map.moveEntity(m_cursor, pos, ~0u);
     }
 
     sf::Vector2i Level::getCursorLocation() const {

@@ -51,13 +51,16 @@ namespace padi::content {
 
             // Just Walk for now...
             playerAbilityPL.abilityType = AbilityType::Walk;
-            playerAbilityPL.abilityProps[0] = 3;
-            playerAbilityPL.abilitySlot = 0;
-            playerAbilityPL.playerId = id;
-            for (auto &socket: m_lobby.sockets) {
-                socket->send(PackagePayload(packet, playerAbilityPL));
+            for(int i = 0; i < 4; ++i) {
+                playerAbilityPL.abilityProps[0] = 3;
+                playerAbilityPL.abilitySlot = i;
+                playerAbilityPL.playerId = id;
+                for (auto &socket: m_lobby.sockets) {
+                    socket->send(PackagePayload(packet, playerAbilityPL));
+                }
+                assignPlayerAbility(playerAbilityPL);
+                playerAbilityPL.abilityType++;
             }
-            assignPlayerAbility(playerAbilityPL);
 
             if (id < m_lobby.sockets.size()) {
                 RemotePlayerTurn remotePlayerTurn(m_lobby.sockets[id]);

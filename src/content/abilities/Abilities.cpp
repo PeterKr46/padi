@@ -73,6 +73,7 @@ namespace padi {
         m_ghostFX = std::make_shared<EntityStack>(sf::Vector2i{0, 0});
         m_ghostFX->m_stackSize = 8;
         m_description = "TELEPORT\n\n  Instantly travel to a location of your choice!";
+        m_iconId = "teleport";
     }
 
     bool content::Teleport::isCastComplete() {
@@ -120,6 +121,7 @@ namespace padi {
 
     content::Lighten::Lighten(std::shared_ptr<LivingEntity> user) : Ability(std::move(user)) {
 
+        m_iconId = "strike";
     }
 
     bool content::Lighten::isCastComplete() {
@@ -237,7 +239,7 @@ namespace padi {
     content::Walk::Walk(std::shared_ptr<padi::LivingEntity> user, size_t range)
             : padi::LimitedRangeAbility(std::move(user), range) {
         m_description = "WALK\n\n  Travel to a location of your choice - the old-fashioned way.";
-
+        m_iconId = "walk";
     }
 
     void content::Walk::recalculateRange(Level *level) {
@@ -265,6 +267,7 @@ namespace padi {
 
     content::Dash::Dash(std::shared_ptr<padi::LivingEntity> user, size_t range)
             : padi::LimitedRangeAbility(std::move(user), range) {
+        m_iconId = "dash";
     }
 
     bool content::Dash::cast(padi::Level *lvl, const sf::Vector2i &pos) {
