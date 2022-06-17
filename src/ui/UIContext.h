@@ -30,6 +30,9 @@ namespace padi {
 
         void setFocus(size_t elemID);
 
+        bool isFocusActive() const;
+        void setFocusActive(bool active);
+
         size_t numQuads() const;
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
@@ -76,6 +79,7 @@ namespace padi {
         size_t m_pred{};
         bool m_navUsed{false};
         size_t m_focused{};
+        bool m_focusActive{true};
     };
 
 } // padi

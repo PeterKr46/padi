@@ -8,11 +8,11 @@
 #include <SFML/Graphics/RenderTexture.hpp>
 #include "MenuBackground.h"
 #include "../../ui/UIContext.h"
-#include "../Activity.h"
+#include "../../ui/Activity.h"
 #include "SFML/Network/TcpListener.hpp"
 #include "SFML/Network/Packet.hpp"
 #include "../vfx/CRTMonitor.h"
-#include "../game/Inbox.h"
+#include "../../net/Inbox.h"
 
 namespace padi::content {
 
@@ -24,7 +24,7 @@ namespace padi::content {
 
         void handleResize(int width, int height) override;
 
-        std::shared_ptr<padi::Activity> handoff() override;
+        std::weak_ptr<padi::Activity> handoff() override;
 
         void appendChatMessage(const std::string &msg);
 

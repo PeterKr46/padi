@@ -32,7 +32,7 @@ namespace padi {
 
         [[nodiscard]] virtual std::string const& getIconId() const;
 
-        [[nodiscard]] std::shared_ptr<padi::LivingEntity> getUser() const;
+        [[nodiscard]] std::weak_ptr<padi::LivingEntity> getUser() const;
 
     protected:
         std::shared_ptr<padi::LivingEntity> m_user;

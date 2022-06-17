@@ -1,27 +1,27 @@
 //
-// Created by Peter on 03/05/2022.
+// Created by Peter on 17/06/2022.
 //
 
-#include "StaticEntity.h"
-#include "../media/Animation.h"
+#include "TileDecoration.h"
+
+#include <utility>
 #include "../Constants.h"
 
 namespace padi {
 
-    padi::StaticEntity::StaticEntity(const sf::Vector2i &pos) : Entity(pos) {
+    TileDecoration::TileDecoration(const sf::Vector2i &pos, std::shared_ptr<padi::Animation> anim)
+            : padi::GridObject(pos),
+              m_animation(std::move(anim)) {
 
     }
 
-    sf::Vector2i padi::StaticEntity::getSize() const {
-        return m_animation->getResolution();
-    }
-
-    size_t padi::StaticEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
-        sf::Vector2f size{getSize()};
+    size_t TileDecoration::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset,
+                                    uint8_t frame) const {
+        sf::Vector2f size{m_animation->getResolution()};
         auto pVertex = &array[vertexOffset];
 
         sf::Vector2f anchor = padi::Map::mapTilePosToWorld(getPosition());
-        float verticalOffset = getVerticalOffset() + std::min(float(padi::TileSize.y), size.y) / 2;
+        float verticalOffset = m_verticalOffset + std::min(float(padi::TileSize.y), size.y) / 2 - 8;
 
         pVertex[0].position = anchor + sf::Vector2f(-size.x / 2, verticalOffset - size.y);
         pVertex[1].position = anchor + sf::Vector2f(size.x / 2,  verticalOffset - size.y);
@@ -34,8 +34,7 @@ namespace padi {
         pVertex[2].texCoords = texCoordAnchor + sf::Vector2f(size);
         pVertex[3].texCoords = texCoordAnchor + sf::Vector2f(0, size.y);
 
-        for (int i = 0; i < 4; ++i) pVertex[i].color = m_color;
-
         return 4;
     }
-}
+
+} // content

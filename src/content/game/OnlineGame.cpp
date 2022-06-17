@@ -5,17 +5,18 @@
 #include "OnlineGame.h"
 
 #include <utility>
-#include <SFML/Network.hpp>
 
 #include "../../level/Level.h"
 #include "../../entity/LivingEntity.h"
 #include "../../level/LevelGenerator.h"
-#include "LocalPlayerTurn.h"
 #include "../../level/SpawnEvent.h"
+#include "../../Controls.h"
 #include "../abilities/Abilities.h"
+#include "LocalPlayerTurn.h"
 #include "RemotePlayerTurn.h"
-#include "Packets.h"
 #include "Character.h"
+#include "SFML/Window/Keyboard.hpp"
+
 
 namespace padi::content {
 
@@ -23,7 +24,8 @@ namespace padi::content {
                            uint32_t seed)
             : m_lobby({hosting, std::move(sockets)}),
               m_seed(seed),
-              m_rand(seed) {
+              m_rand(seed),
+              m_chat({250,180, 200, 60}) {
         propagateLobby(name);
         propagateSeed();
         m_level = LevelGenerator().withSeed(m_seed).withArea({32, 32})
@@ -32,11 +34,27 @@ namespace padi::content {
                 .generate();
         m_level->centerView({0, 0});
         m_uiContext.init("../media/ui.apollo", "../media/ui_sheet.png");
+
+        m_chat.init(&m_uiContext);
+        m_chat.submit = [&](std::string const& msg) {
+            ChatMessagePayload msgPayload;
+            std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), 32ull));
+            sf::Packet packet = PackagePayload(msgPayload);
+
+            for(auto & client : m_lobby.remotes) {
+                client.getSocket().lock()->send(packet);
+            }
+            if(m_lobby.isHost) {
+                m_chat.write(&m_uiContext, msg);
+            }
+            m_uiContext.setFocusActive(false);
+        };
+
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
         initializePlayers();
     }
 
-    std::shared_ptr<padi::Activity> OnlineGame::handoff() {
+    std::weak_ptr<padi::Activity> OnlineGame::handoff() {
         return shared_from_this();
     }
 
@@ -68,9 +86,18 @@ namespace padi::content {
                 }
             }
         }
+        m_chat.draw(&m_uiContext);
+        if(!m_uiContext.isFocusActive() && padi::Controls::wasKeyReleased(sf::Keyboard::T)) {
+            m_uiContext.setFocusActive(true);
+        } else if(m_uiContext.isFocusActive() && padi::Controls::wasKeyReleased(sf::Keyboard::Escape)) {
+            m_uiContext.setFocusActive(false);
+        }
 
         m_crt.asTarget()->draw(m_uiContext);
         target->draw(m_crt);
+
+        if (m_lobby.isHost) updateHost();
+        else updateClient();
     }
 
     void OnlineGame::initializePlayers() {
@@ -147,8 +174,52 @@ namespace padi::content {
         m_activeChar.reset();
     }
 
-    std::shared_ptr<Level> OnlineGame::getLevel() const {
+    std::weak_ptr<Level> OnlineGame::getLevel() const {
         return m_level;
+    }
+
+    void OnlineGame::updateClient() {
+        auto &host = m_lobby.remotes.front();
+        if (host.fetch() == -1) {
+            exit(-1);
+        }
+        if (host.has(PayloadType::CharacterSpawn)) {
+            PlayerSpawnPayload payload;
+            host.check(payload);
+            if (m_characters.find(payload.id) != m_characters.end()) {
+                // TODO
+            } else {
+
+            }
+        }
+        if(host.has(PayloadType::ChatMessage)) {
+            ChatMessagePayload payload;
+            host.check(payload);
+            m_chat.write(&m_uiContext, std::string(payload.message, std::min(32ull, strlen(payload.message))));
+        }
+    }
+
+    void OnlineGame::updateHost() {
+        for (size_t cid = 0; cid < m_lobby.remotes.size(); ++cid) {
+            auto &client = m_lobby.remotes[cid];
+            if(client) {
+                if (client.fetch() == -1) {
+                    printf("[OnlineGame|Server] Client %zull (%s) lost connection.\n", cid, m_lobby.names[cid].c_str());
+                    m_lobby.remotes[cid] = Inbox(); // TODO how do i handle this?
+                } else {
+                    if(client.has(PayloadType::ChatMessage)) {
+                        ChatMessagePayload payload;
+                        client.check(payload);
+                        sf::Packet packet = PackagePayload(payload);
+                        for(auto & sock : m_lobby.remotes) {
+                            sock.getSocket().lock()->send(packet);
+                        }
+                        m_chat.write(&m_uiContext, std::string(payload.message, std::min(32ull, strlen(payload.message))));
+                    }
+                }
+            }
+        }
+
     }
 
 } // content

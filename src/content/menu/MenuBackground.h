@@ -13,7 +13,7 @@ namespace padi::content {
         MenuBackground();
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
-        std::shared_ptr<Level> getLevel();
+        std::weak_ptr<Level> getLevel();
     private:
         std::shared_ptr<Level> m_level;
 

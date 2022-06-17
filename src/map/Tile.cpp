@@ -32,7 +32,6 @@ namespace padi {
 
         size_t offset = 0;
         if(m_decoration) {
-            m_decoration->setVerticalOffset(m_verticalOffset);
             offset += m_decoration->populate(context, array, vertexOffset + 4, frame);
             quad = &array[vertexOffset + 4];
             quad[0].color = quad[1].color = quad[2].color = quad[3].color = m_color;
@@ -56,11 +55,11 @@ namespace padi {
         m_verticalOffset = vo;
     }
 
-    std::shared_ptr<padi::Entity> Tile::getDecoration() const {
+    std::shared_ptr<padi::GridObject> Tile::getDecoration() const {
         return m_decoration;
     }
 
-    void Tile::setDecoration(std::shared_ptr<padi::Entity> decor) {
+    void Tile::setDecoration(std::shared_ptr<padi::GridObject> decor) {
         m_decoration = std::move(decor);
     }
 

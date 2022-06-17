@@ -9,6 +9,7 @@
 #include "../entity/StaticEntity.h"
 #include "../map/Tile.h"
 #include "../Constants.h"
+#include "../map/TileDecoration.h"
 
 namespace padi {
 
@@ -91,14 +92,14 @@ namespace padi {
                     //t->setVerticalOffset(int(z * 4));
                     level->getMap()->addTile(t);
                     if (m > 0.12) {
-                        auto e = std::make_shared<padi::StaticEntity>(pos);
+                        auto e = std::make_shared<padi::TileDecoration>(pos);
                         e->m_animation = level->m_apollo.lookupAnim(
                                 m > 0.35 ? "peak" : (m > 0.3 ? "mountain" : (m > 0.25 ? "rocks" : "hill")));
                         t->m_walkable = m < 0.25;
                         t->setDecoration(e);
                     }
                     else {
-                        auto e = std::make_shared<padi::StaticEntity>(pos);
+                        auto e = std::make_shared<padi::TileDecoration>(pos);
                         e->m_animation = level->m_apollo.lookupAnim(int(m * 12) % 2 ? "pillars" : "houses_b");
                         t->setDecoration(e);
                     }

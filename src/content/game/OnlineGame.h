@@ -8,10 +8,11 @@
 #include <random>
 
 #include "../../ui/UIContext.h"
-#include "../Activity.h"
+#include "../../ui/Activity.h"
 #include "../vfx/CRTMonitor.h"
-#include "Packets.h"
-#include "Inbox.h"
+#include "../../net/Packets.h"
+#include "../../net/Inbox.h"
+#include "../ui/Chat.h"
 
 namespace padi {
     class Level;
@@ -31,11 +32,11 @@ namespace padi::content {
 
         void draw(sf::RenderTarget *target) override;
 
-        std::shared_ptr<padi::Activity> handoff() override;
+        std::weak_ptr<padi::Activity> handoff() override;
 
         void close() override;
 
-        std::shared_ptr<Level> getLevel() const;
+        std::weak_ptr<Level> getLevel() const;
 
     private:
 
@@ -53,9 +54,13 @@ namespace padi::content {
         void propagateSeedHost();
         void propagateSeedClient();
 
+        void updateClient();
+        void updateHost();
+
     private:
         padi::content::CRTMonitor m_crt;
         padi::UIContext m_uiContext;
+        Chat m_chat;
 
         uint32_t m_seed;
         std::mt19937 m_rand;

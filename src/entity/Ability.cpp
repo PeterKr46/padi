@@ -16,7 +16,7 @@ namespace padi {
 
     }
 
-    std::shared_ptr<padi::LivingEntity> Ability::getUser() const {
+    std::weak_ptr<padi::LivingEntity> Ability::getUser() const {
         return m_user;
     }
 

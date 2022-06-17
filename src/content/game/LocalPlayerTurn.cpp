@@ -4,7 +4,7 @@
 
 #include "LocalPlayerTurn.h"
 
-#include "Packets.h"
+#include "../../net/Packets.h"
 #include "Character.h"
 #include "OnlineGame.h"
 #include "../../Controls.h"
@@ -29,7 +29,7 @@ namespace padi::content {
 
     bool
     LocalPlayerTurn::operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &character) {
-        auto level = game->getLevel();
+        auto level = game->getLevel().lock();
 
         m_uiContext->setText("local_turn", "Your Turn!", {226, 20}, true);
         m_uiContext->updateTextOutline("local_turn", sf::Color::Black, 1);
@@ -52,7 +52,7 @@ namespace padi::content {
             }
         }
         if (state == IDLE) {
-            if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
+            if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
                 level->pause();
                 m_activeAbility = 0;
                 m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(), {8, 8});

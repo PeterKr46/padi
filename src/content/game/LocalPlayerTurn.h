@@ -6,7 +6,7 @@
 
 #include <memory>
 #include <vector>
-#include "Inbox.h"
+#include "../../net/Inbox.h"
 
 
 namespace padi {

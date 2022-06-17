@@ -52,8 +52,8 @@ int main() {
         window.clear();
 
         activity->draw(&window);
-        auto nextActivity = activity->handoff();
-        if (nextActivity != activity) {
+        auto nextActivity = activity->handoff().lock();
+         if (nextActivity != activity) {
             nextActivity->handleResize(int(window.getSize().x), int(window.getSize().y));
             activity = nextActivity;
         }

@@ -4,31 +4,22 @@
 
 #pragma once
 
-#include <SFML/Network.hpp>
+#include "SFML/Network.hpp"
 #include "SFML/Graphics/Color.hpp"
 
 namespace padi::content {
-
-    template<typename T>
-    bool ReconstructPayload(sf::Packet &packet, T &t) {
-        PayloadType recvType = *reinterpret_cast<const PayloadType *>(packet.getData());
-        if (recvType != t.type) {
-            printf("[Packet] PAYLOAD ERROR - Type mismatch (expected %hhu, got %hhu).\n", t.type, recvType);
-        } else if (packet.getDataSize() != sizeof(T)) {
-            printf("[Packet] PAYLOAD ERROR - Size mismatch (expected %zu, got %zu).\n", sizeof(T),
-                   packet.getDataSize());
-        } else {
-            std::memcpy(&t, packet.getData(), packet.getDataSize());
-            return true;
-        }
-        return false;
-    }
 
     template<typename T>
     sf::Packet &PackagePayload(sf::Packet &packet, T const& t) {
         if (packet.getDataSize()) {
             packet.clear();
         }
+        packet.append(&t, sizeof(t));
+        return packet;
+    }
+    template<typename T>
+    sf::Packet PackagePayload(T const& t) {
+        sf::Packet packet;
         packet.append(&t, sizeof(t));
         return packet;
     }
@@ -39,9 +30,10 @@ namespace padi::content {
         LobbySize,
         PlayerName,
         GameSeed,
-        PlayerSpawn,
-        PlayerAbilityCast,
-        PlayerAbilityAssign
+        CharacterSpawn,
+        CharacterAbilityCast,
+        CharacterAbilityAssign,
+        CharacterTurnBegin,
     };
 
     struct alignas(64) ChatMessagePayload {
@@ -70,7 +62,7 @@ namespace padi::content {
     };
 
     struct alignas(64) PlayerSpawnPayload {
-        const PayloadType type = PlayerSpawn;
+        const PayloadType type = CharacterSpawn;
         uint32_t id{};
         sf::Vector2i pos;
         sf::Color color;
@@ -78,16 +70,21 @@ namespace padi::content {
     };
 
     struct alignas(64) PlayerCastPayload {
-        const PayloadType type = PlayerAbilityCast;
+        const PayloadType type = CharacterAbilityCast;
         uint8_t ability{};
         sf::Vector2i pos;
     };
 
     struct alignas(64) PlayerAssignAbilityPayload {
-        const PayloadType type = PlayerAbilityAssign;
+        const PayloadType type = CharacterAbilityAssign;
         uint8_t playerId{};
         uint8_t abilitySlot{};
         uint8_t abilityType{};
         uint8_t abilityProps[16]{};
+    };
+
+    struct alignas(64) CharacterTurnBeginPayload {
+        const PayloadType type = CharacterTurnBegin;
+        uint8_t characterId{};
     };
 }

@@ -44,7 +44,7 @@ namespace padi {
     }
 
     bool UIContext::isFocused(size_t elemID) const {
-        return m_focused == elemID;
+        return m_focusActive && m_focused == elemID;
     }
 
     void UIContext::nextFrame() {
@@ -180,5 +180,16 @@ namespace padi {
             text.setCharacterSize(char(7 * size));
             text.setPosition(p - (centered ? (text.getGlobalBounds().getSize() / 2.f) : sf::Vector2f(0, 0)));
         }
+    }
+
+    void UIContext::setFocusActive(bool active) {
+        m_focusActive = active;
+        if(!m_focusActive) {
+            m_focused = 0;
+        }
+    }
+
+    bool UIContext::isFocusActive() const {
+        return m_focusActive;
     }
 } // padi

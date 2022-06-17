@@ -57,9 +57,12 @@ namespace padi::content {
     }
 
     void MainMenu::draw(sf::RenderTarget *target) {
-        m_background.getLevel()->update(m_crt.asTarget());
-        m_background.getLevel()->centerView({-3, 3});
-        m_background.getLevel()->populateVBO();
+        {
+            auto lvl = m_background.getLevel().lock();
+            lvl->update(m_crt.asTarget());
+            lvl->centerView({-3, 3});
+            lvl->populateVBO();
+        }
         m_crt.asTarget()->clear();
 
         auto states = sf::RenderStates::Default;
@@ -191,7 +194,7 @@ namespace padi::content {
         target->draw(m_crt);
     }
 
-    std::shared_ptr<padi::Activity> MainMenu::handoff() {
+    std::weak_ptr<padi::Activity> MainMenu::handoff() {
         return m_next ? m_next : shared_from_this();
     }
 

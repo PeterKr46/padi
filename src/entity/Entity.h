@@ -11,13 +11,13 @@ namespace padi {
     public:
         explicit Entity(sf::Vector2i const &pos);
 
-        size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const override;
-        [[nodiscard]] virtual size_t numQuads() const override;
+        size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const override = 0;
+        [[nodiscard]] size_t numQuads() const override;
 
         [[nodiscard]] virtual sf::Vector2i getSize() const = 0;
 
         void setVerticalOffset(float vo);
-        float getVerticalOffset() const;
+        [[nodiscard]] float getVerticalOffset() const;
     private:
         float m_verticalOffset{0};
     };

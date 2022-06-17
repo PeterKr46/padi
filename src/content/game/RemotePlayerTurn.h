@@ -5,7 +5,7 @@
 #pragma once
 
 #include <memory>
-#include "Inbox.h"
+#include "../../net/Inbox.h"
 
 namespace sf {
     class TcpSocket;

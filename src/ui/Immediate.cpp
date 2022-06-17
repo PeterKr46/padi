@@ -11,7 +11,7 @@
 namespace padi {
 
 
-    bool Immediate::checkFocusSwitch(padi::UIContext *ctx, size_t id) {
+    bool Immediate::checkFocusSwitch(padi::UIContext *ctx) {
         if (!ctx->m_navUsed) {
             if (padi::Controls::wasKeyReleased(sf::Keyboard::Down)) {
                 ctx->m_focused = 0;
@@ -36,7 +36,7 @@ namespace padi {
         size_t frame = 0;
         if (ctx->isFocused(id)) {
             // Tab to cycle... for now
-            checkFocusSwitch(ctx, id);
+            checkFocusSwitch(ctx);
 
             color = sf::Color::Yellow;
             frame = padi::Controls::pollKeyState(sf::Keyboard::Space);
@@ -61,7 +61,7 @@ namespace padi {
 
         if (ctx->isFocused(id)) {
             // Tab to cycle... for now
-            checkFocusSwitch(ctx, id);
+            checkFocusSwitch(ctx);
 
             if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
                 changed = true;
@@ -96,7 +96,7 @@ namespace padi {
 
         if (ctx->isFocused(id)) {
             // Tab to cycle... for now
-            checkFocusSwitch(ctx, id);
+            checkFocusSwitch(ctx);
             changed = Controls::textInput(*ptr, max_len, whitelist);
         } else {
             if (ctx->m_focused == 0)
@@ -222,13 +222,13 @@ namespace padi {
 
     bool Immediate::isFocused(padi::UIContext *ctx, const std::string &id) {
         static auto hash = std::hash<std::string>();
-        return hash(id) == ctx->m_focused;
+        return ctx->isFocused(hash(id));
     }
 
     bool Immediate::isAnyFocused(padi::UIContext *ctx, const std::string *ids, size_t num) {
         static auto hash = std::hash<std::string>();
         for (size_t i = 0; i < num; ++i) {
-            if (ctx->m_focused == hash(ids[i])) return true;
+            if (ctx->isFocused(hash(ids[i]))) return true;
         }
         return false;
     }

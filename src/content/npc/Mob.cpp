@@ -4,21 +4,23 @@
 
 #include "Mob.h"
 #include "../../entity/OneshotEntity.h"
-#include "../game/Packets.h"
+#include "../../net/Packets.h"
 #include "../game/OnlineGame.h"
 #include "SFML/Network/Packet.hpp"
 
 #include <utility>
 
 namespace padi::content {
-    Mob::Mob(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos, std::vector<std::shared_ptr<sf::TcpSocket>> & sockets)
+
+    Mob::Mob(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos,
+             std::vector<Inbox> &sockets)
             : LivingEntity(std::move(name), moveset, pos) {
         m_sockets = sockets;
         setColor(sf::Color(64, 64, 64));
     }
 
     bool Mob::takeTurn(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr) {
-        auto level = game->getLevel();
+        auto level = game->getLevel().lock();
         if (!m_walk) {
             m_walk = std::make_shared<padi::content::Walk>(shared_from_this(), 5);
             m_explode = std::make_shared<padi::content::SelfDestruct>(shared_from_this());
@@ -33,14 +35,13 @@ namespace padi::content {
             if (explode) {
                 chr->entity->intentCast(m_explode, chr->entity->getPosition());
                 {
-                    sf::Packet packet;
                     PlayerCastPayload payload;
                     payload.ability = uint8_t(1);
                     payload.pos = level->getCursorLocation();
+                    sf::Packet packet = PackagePayload(payload);
                     printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
-                    packet.append(&payload, sizeof(payload));
                     for (auto &socket: m_sockets) {
-                        socket->send(packet);
+                        socket.getSocket().lock()->send(packet);
                     }
                 }
                 Corruption corruption{chr->entity->getPosition()};
@@ -73,7 +74,7 @@ namespace padi::content {
                     printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
                     packet.append(&payload, sizeof(payload));
                     for (auto &socket: m_sockets) {
-                        socket->send(packet);
+                        socket.getSocket().lock()->send(packet);
                     }
                 }
             }
@@ -93,7 +94,9 @@ namespace padi::content {
         return {id,
                 shared_from_this(),
                 {m_walk, m_explode},
-                [=](const std::shared_ptr<OnlineGame> &l, const std::shared_ptr<Character> &c) { return takeTurn(l, c); }
+                [=](const std::shared_ptr<OnlineGame> &l, const std::shared_ptr<Character> &c) {
+                    return takeTurn(l, c);
+                }
         };
     }
 
@@ -161,7 +164,7 @@ namespace padi::content {
     }
 
     bool Corruption::expand(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &c) {
-        auto l = game->getLevel();
+        auto l = game->getLevel().lock();
         l->centerView(m_positions.front());
         size_t numPos = m_positions.size();
         for (size_t i = 0; i < numPos; ++i) {

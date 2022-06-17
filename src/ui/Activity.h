@@ -11,7 +11,7 @@ namespace padi {
 
     class Activity {
     public:
-        virtual std::shared_ptr<padi::Activity> handoff() = 0;
+        virtual std::weak_ptr<padi::Activity> handoff() = 0;
 
         virtual void handleResize(int width, int height) {};
 

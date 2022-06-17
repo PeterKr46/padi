@@ -90,7 +90,7 @@ namespace padi::content {
         m_level->draw(target, states);
     }
 
-    std::shared_ptr<Level> MenuBackground::getLevel() {
+    std::weak_ptr<Level> MenuBackground::getLevel() {
         return m_level;
     }
 

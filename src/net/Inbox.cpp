@@ -3,7 +3,7 @@
 //
 
 #include "Inbox.h"
-#include <SFML/Network.hpp>
+#include "SFML/Network.hpp"
 
 #include <utility>
 
