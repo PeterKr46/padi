@@ -1,0 +1,70 @@
+//
+// Created by Peter on 17/06/2022.
+//
+
+#include "Inbox.h"
+#include <SFML/Network.hpp>
+
+#include <utility>
+
+namespace padi::content {
+    Inbox::Inbox(std::shared_ptr<sf::TcpSocket> socket)
+            : m_socket(std::move(socket)),
+              m_inbox(std::make_shared<std::map<uint8_t, std::queue<std::vector<uint8_t>>>>()) {
+    }
+
+    size_t Inbox::fetch() {
+        bool blocking = m_socket->isBlocking();
+        m_socket->setBlocking(false);
+        size_t received = 0;
+        {
+            sf::Packet incoming;
+            sf::Socket::Status status = m_socket->receive(incoming);
+            while (status == sf::Socket::Done) {
+                ++received;
+                auto data = reinterpret_cast<const uint8_t *>(incoming.getData());
+                auto &queue = (*m_inbox)[data[0]];
+                queue.emplace(data, data + incoming.getDataSize());
+                status = m_socket->receive(incoming);
+            }
+        }
+        m_socket->setBlocking(blocking);
+        return received;
+    }
+
+    template<typename Payload>
+    bool Inbox::check(Payload &payload) {
+        auto queueIter = m_inbox->find(payload.type);
+        if (queueIter != m_inbox->end()) {
+            std::queue<std::vector<uint8_t>> &queue = queueIter.second;
+            auto &data = queue.front();
+            std::memcpy(&payload, data.begin(), data.size());
+            queue.pop();
+            if (queue.empty()) {
+                m_inbox->erase(queueIter);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    bool Inbox::has(PayloadType payloadType) const {
+        auto queueIter = m_inbox->find(payloadType);
+        if (queueIter != m_inbox->end()) {
+            return !queueIter->second.empty();
+        }
+        return false;
+    }
+
+    std::weak_ptr<sf::TcpSocket> Inbox::getSocket() {
+        return m_socket;
+    }
+
+    size_t Inbox::count(PayloadType payloadType) const {
+        auto queueIter = m_inbox->find(payloadType);
+        if (queueIter != m_inbox->end()) {
+            return queueIter->second.size();
+        }
+        return 0;
+    }
+} // content

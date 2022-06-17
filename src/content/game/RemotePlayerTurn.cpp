@@ -23,7 +23,7 @@ namespace padi::content {
         DONE = 2
     };
 
-    RemotePlayerTurn::RemotePlayerTurn(std::shared_ptr<sf::TcpSocket> socket)
+    RemotePlayerTurn::RemotePlayerTurn(Inbox  socket)
             : m_socket(std::move(socket)) {
 
     }
@@ -43,7 +43,8 @@ namespace padi::content {
             }
         }
         if(state == IDLE) {
-            auto status = m_socket->receive(packet);
+            // TODO use non-blocking inbox!
+            auto status = m_socket.getSocket().lock()->receive(packet);
             if (status == sf::Socket::Done) {
                 if(ReconstructPayload(packet, payload)) {
                     m_activeAbility = int8_t(payload.ability);

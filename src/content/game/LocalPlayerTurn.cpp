@@ -22,7 +22,7 @@ namespace padi::content {
         DONE = 3
     };
 
-    LocalPlayerTurn::LocalPlayerTurn(UIContext *uiContext, std::vector<std::shared_ptr<sf::TcpSocket>> &sockets)
+    LocalPlayerTurn::LocalPlayerTurn(UIContext *uiContext, std::vector<Inbox> &sockets)
             : m_uiContext(uiContext), m_sockets(sockets) {
 
     }
@@ -71,7 +71,7 @@ namespace padi::content {
                                payload.pos.y);
                         packet.append(&payload, sizeof(payload));
                         for (auto &socket: m_sockets) {
-                            socket->send(packet);
+                            socket.getSocket().lock()->send(packet);
                         }
                     }
 

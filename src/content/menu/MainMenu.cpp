@@ -78,7 +78,7 @@ namespace padi::content {
                                             Immediate::isFocused(&m_uiContext, "play") ? sf::Color::White : sf::Color(
                                                     0x999999ff));
                 if (Immediate::Button(&m_uiContext, "play", {-6, 0, 152, 32})) {
-                    std::vector<std::shared_ptr<sf::TcpSocket>> nosocks;
+                    std::vector<Inbox> nosocks;
                     m_next = std::make_shared<padi::content::OnlineGame>(nosocks, true, m_uiContext.getTextString("nick_input"));
                 }
             }
@@ -346,7 +346,12 @@ namespace padi::content {
                 client->send(packet);
             }
             appendChatMessage("Starting Game...");
-            auto game = std::make_shared<padi::content::OnlineGame>(hostRole.clients, true,
+
+            auto inboxes = std::vector<Inbox>();
+            inboxes.reserve(hostRole.clients.size());
+            for(const auto& client : hostRole.clients) inboxes.emplace_back(client);
+
+            auto game = std::make_shared<padi::content::OnlineGame>(inboxes, true,
                                                                     m_uiContext.getTextString("nick_input"));
             m_next = game;
         }
@@ -355,7 +360,7 @@ namespace padi::content {
     void MainMenu::clientHandleGameStart(const sf::Packet &packet) {
         if (clientRole.client) {
             appendChatMessage("Starting Game...");
-            auto game = std::make_shared<padi::content::OnlineGame>(std::vector{clientRole.client}, false,
+            auto game = std::make_shared<padi::content::OnlineGame>(std::vector{Inbox(clientRole.client)}, false,
                                                                     m_uiContext.getTextString("nick_input"));
             m_next = game;
         }

@@ -16,7 +16,7 @@ namespace padi::content {
         sf::Packet packet;
         GameSeedPayload gameSeedPL;
         printf("[OnlineGame|Client] Receiving seed!\n");
-        auto host = m_lobby.sockets.front();
+        auto host = m_lobby.remotes.front().getSocket().lock();
         auto status = host->receive(packet);
         if (status != sf::Socket::Done) {
             printf("[OnlineGame|Client] Error occurred while receiving seed!\n");
@@ -34,11 +34,11 @@ namespace padi::content {
         PlayerSpawnPayload playerSpawnPL;
         PlayerAssignAbilityPayload playerAbilityPL;
         std::shared_ptr<Character> player;
-        LocalPlayerTurn localPlayerTurn(&m_uiContext, m_lobby.sockets);
-        auto &host = m_lobby.sockets.front();
+        LocalPlayerTurn localPlayerTurn(&m_uiContext, m_lobby.remotes);
+        auto &host = m_lobby.remotes.front();
         RemotePlayerTurn remotePlayerTurn(host);
-        for (size_t id = 0; id < m_lobby.sockets.size() + 1; ++id) {
-            auto status = host->receive(packet);
+        for (size_t id = 0; id < m_lobby.remotes.size() + 1; ++id) {
+            auto status = host.getSocket().lock()->receive(packet);
             if (status != sf::Socket::Done) {
                 printf("[OnlineGame|Client] Error occurred while receiving spawn event!\n");
                 exit(-1);
@@ -55,7 +55,7 @@ namespace padi::content {
             player->entity->setColor(playerSpawnPL.color);
 
             for(int i = 0; i < 4; ++i) {
-                status = host->receive(packet);
+                status = host.getSocket().lock()->receive(packet);
                 if (status != sf::Socket::Done) {
                     printf("[OnlineGame|Client] Error occurred while receiving spawn event!\n");
                     exit(-1);
@@ -91,8 +91,8 @@ namespace padi::content {
         // CLIENT   send your name
         // CLIENT   receive all names
         printf("[OnlineGame|Client] Receiving lobby size!\n");
-        auto host = m_lobby.sockets.front();
-        auto status = host->receive(packet);
+        auto host = m_lobby.remotes.front();
+        auto status = host.getSocket().lock()->receive(packet);
         if (status != sf::Socket::Done) {
             printf("[OnlineGame|Client] Error occurred while receiving seed!\n");
             exit(-1);
@@ -103,10 +103,10 @@ namespace padi::content {
         m_lobby.names.resize(lobbySizePL.players, "");
         std::memcpy(&namePL.name, basicString.c_str(), std::min(8ull, basicString.length()));
         PackagePayload(packet, namePL);
-        host->send(packet);
+        host.getSocket().lock()->send(packet);
         printf("[OnlineGame|Client] Sent own name!\n");
         for (size_t id = 0; id < m_lobby.names.size() - 1; ++id) {
-            status = host->receive(packet);
+            status = host.getSocket().lock()->receive(packet);
             if (status != sf::Socket::Done) {
                 printf("[OnlineGame|Client] Error occurred while receiving name!\n");
                 exit(-1);

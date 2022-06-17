@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include "Inbox.h"
 
 namespace sf {
     class TcpSocket;
@@ -24,11 +25,11 @@ namespace padi::content {
 
     class RemotePlayerTurn {
     public:
-        explicit RemotePlayerTurn(std::shared_ptr<sf::TcpSocket>  socket);
+        explicit RemotePlayerTurn(Inbox   socket);
         bool operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr);
     private:
         int8_t m_activeAbility = -1;
-        std::shared_ptr<sf::TcpSocket> m_socket;
+        Inbox m_socket;
     };
 
 } // content

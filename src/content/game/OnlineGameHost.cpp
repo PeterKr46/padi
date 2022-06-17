@@ -17,8 +17,8 @@ namespace padi::content {
         gameSeedPL.seed = m_seed;
         PackagePayload(packet, gameSeedPL);
         printf("[OnlineGame|Server] Propagating seed!\n");
-        for (auto &socket: m_lobby.sockets) {
-            socket->send(packet);
+        for (auto &remote: m_lobby.remotes) {
+            remote.getSocket().lock()->send(packet);
         }
         printf("[OnlineGame|Server] Propagated seed %u!\n", m_seed);
     }
@@ -29,15 +29,15 @@ namespace padi::content {
         PlayerSpawnPayload playerSpawnPL;
         PlayerAssignAbilityPayload playerAbilityPL;
         std::shared_ptr<Character> player;
-        LocalPlayerTurn localPlayerTurn(&m_uiContext, m_lobby.sockets);
-        for (size_t id = 0; id < m_lobby.sockets.size() + 1; ++id) {
+        LocalPlayerTurn localPlayerTurn(&m_uiContext, m_lobby.remotes);
+        for (size_t id = 0; id < m_lobby.remotes.size() + 1; ++id) {
             playerSpawnPL.id = id;
             playerSpawnPL.pos = sf::Vector2i{int(id), 0};
             playerSpawnPL.color = sf::Color(m_rand()); // TODO rand progression!
             playerSpawnPL.color.a = 255;
-            for (size_t sockId = 0; sockId < m_lobby.sockets.size(); ++sockId) {
+            for (size_t sockId = 0; sockId < m_lobby.remotes.size(); ++sockId) {
                 playerSpawnPL.local = sockId == id;
-                m_lobby.sockets[sockId]->send(PackagePayload(packet, playerSpawnPL));
+                m_lobby.remotes[sockId].getSocket().lock()->send(PackagePayload(packet, playerSpawnPL));
             }
             player = std::make_shared<Character>(Character{uint32_t(id)});
             m_characters[id] = player;
@@ -55,15 +55,15 @@ namespace padi::content {
                 playerAbilityPL.abilityProps[0] = 3;
                 playerAbilityPL.abilitySlot = i;
                 playerAbilityPL.playerId = id;
-                for (auto &socket: m_lobby.sockets) {
-                    socket->send(PackagePayload(packet, playerAbilityPL));
+                for (auto &remote: m_lobby.remotes) {
+                    remote.getSocket().lock()->send(PackagePayload(packet, playerAbilityPL));
                 }
                 assignPlayerAbility(playerAbilityPL);
                 playerAbilityPL.abilityType++;
             }
 
-            if (id < m_lobby.sockets.size()) {
-                RemotePlayerTurn remotePlayerTurn(m_lobby.sockets[id]);
+            if (id < m_lobby.remotes.size()) {
+                RemotePlayerTurn remotePlayerTurn(m_lobby.remotes[id]);
                 player->controller = [=](const std::shared_ptr<OnlineGame> &l,
                                          const std::shared_ptr<Character> &c) mutable {
                     return remotePlayerTurn(l, c);
@@ -88,17 +88,17 @@ namespace padi::content {
         // HOST     receive all names
         // HOST     propagate all names
         printf("[OnlineGame|Server] Propagating lobby size!\n");
-        lobbySizePL.players = m_lobby.sockets.size() + 1;
+        lobbySizePL.players = m_lobby.remotes.size() + 1;
         m_lobby.names.resize(lobbySizePL.players, "");
         PackagePayload(packet, lobbySizePL);
-        for (auto &socket: m_lobby.sockets) {
-            socket->send(packet);
+        for (auto &remote: m_lobby.remotes) {
+            remote.getSocket().lock()->send(packet);
         }
 
         printf("[OnlineGame|Server] Receiving lobby names!\n");
-        for (size_t id = 0; id < m_lobby.sockets.size(); ++id) {
-            auto &socket = m_lobby.sockets[id];
-            auto status = socket->receive(packet);
+        for (size_t id = 0; id < m_lobby.remotes.size(); ++id) {
+            auto &remote = m_lobby.remotes[id];
+            auto status = remote.getSocket().lock()->receive(packet);
             if (status != sf::Socket::Done) {
                 printf("[OnlineGame|Server] Error occurred while receiving name!\n");
                 exit(-1);
@@ -108,26 +108,26 @@ namespace padi::content {
             m_lobby.names[id] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
             printf("[OnlineGame|Server] Received name %zu: %.*s!\n", id, 8, namePL.name);
         }
-        for (size_t id = 0; id < m_lobby.sockets.size(); ++id) {
+        for (size_t id = 0; id < m_lobby.remotes.size(); ++id) {
 
             auto &playerName = m_lobby.names[id];
             namePL.player = id;
             std::memcpy(&namePL.name, playerName.c_str(), std::min(8ull, playerName.length()));
             PackagePayload(packet, namePL);
 
-            for (size_t sockId = 0; sockId < m_lobby.sockets.size(); ++sockId) {
+            for (size_t sockId = 0; sockId < m_lobby.remotes.size(); ++sockId) {
                 if (sockId != id) {
-                    m_lobby.sockets[sockId]->send(packet);
+                    m_lobby.remotes[sockId].getSocket().lock()->send(packet);
                 }
             }
         }
         std::memcpy(&namePL.name, basicString.c_str(), std::min(8ull, basicString.length()));
-        namePL.player = m_lobby.sockets.size();
+        namePL.player = m_lobby.remotes.size();
         printf("[OnlineGame|Server] Propagating own name %i: %.*s!\n", namePL.player, 8, namePL.name);
         m_lobby.names.back() = basicString;
         PackagePayload(packet, namePL);
-        for (auto &socket: m_lobby.sockets) {
-            socket->send(packet);
+        for (auto &socket: m_lobby.remotes) {
+            socket.getSocket().lock()->send(packet);
         }
     }
 }

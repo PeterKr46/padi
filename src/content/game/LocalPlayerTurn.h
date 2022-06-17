@@ -6,10 +6,8 @@
 
 #include <memory>
 #include <vector>
+#include "Inbox.h"
 
-namespace sf {
-    class TcpSocket;
-}
 
 namespace padi {
 
@@ -25,13 +23,13 @@ namespace padi::content {
 
     class LocalPlayerTurn {
     public:
-        explicit LocalPlayerTurn(UIContext *uiContext, std::vector<std::shared_ptr<sf::TcpSocket>> & sockets);
+        explicit LocalPlayerTurn(UIContext *uiContext, std::vector<Inbox> & sockets);
 
         bool operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr);
 
     private:
         padi::UIContext *m_uiContext;
-        std::vector<std::shared_ptr<sf::TcpSocket>> m_sockets;
+        std::vector<Inbox> m_sockets;
         int64_t m_activeAbility = -1;
         bool m_hasCast = false;
     };

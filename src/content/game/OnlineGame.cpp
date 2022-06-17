@@ -19,14 +19,14 @@
 
 namespace padi::content {
 
-    OnlineGame::OnlineGame(std::vector<std::shared_ptr<sf::TcpSocket>> sockets, bool hosting, std::string const &name,
+    OnlineGame::OnlineGame(std::vector<Inbox> sockets, bool hosting, std::string const &name,
                            uint32_t seed)
             : m_lobby({hosting, std::move(sockets)}),
               m_seed(seed),
               m_rand(seed) {
         // Initialization is blocking.
-        for (auto &socket: m_lobby.sockets) {
-            socket->setBlocking(true);
+        for (auto &socket: m_lobby.remotes) {
+            socket.getSocket().lock()->setBlocking(true);
         }
         propagateLobby(name);
         propagateSeed();
@@ -39,8 +39,8 @@ namespace padi::content {
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
         initializePlayers();
         // Everything at runtime is non-blocking.
-        for (auto &socket: m_lobby.sockets) {
-            socket->setBlocking(false);
+        for (auto &socket: m_lobby.remotes) {
+            socket.getSocket().lock()->setBlocking(false);
         }
     }
 
@@ -148,9 +148,8 @@ namespace padi::content {
     }
 
     void OnlineGame::close() {
-        for (auto &socket: m_lobby.sockets) {
-            socket->disconnect();
-            socket.reset();
+        for (auto &socket: m_lobby.remotes) {
+            socket.getSocket().lock()->disconnect();
         }
         while (!m_turnQueue.empty()) m_turnQueue.pop();
         m_activeChar.reset();
