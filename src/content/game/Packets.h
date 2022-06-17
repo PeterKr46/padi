@@ -25,7 +25,7 @@ namespace padi::content {
     }
 
     template<typename T>
-    sf::Packet &PackagePayload(sf::Packet &packet, T &t) {
+    sf::Packet &PackagePayload(sf::Packet &packet, T const& t) {
         if (packet.getDataSize()) {
             packet.clear();
         }

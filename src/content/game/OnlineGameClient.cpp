@@ -13,16 +13,15 @@ namespace padi::content {
 
 
     void OnlineGame::propagateSeedClient() {
-        sf::Packet packet;
         GameSeedPayload gameSeedPL;
         printf("[OnlineGame|Client] Receiving seed!\n");
-        auto host = m_lobby.remotes.front().getSocket().lock();
-        auto status = host->receive(packet);
-        if (status != sf::Socket::Done) {
-            printf("[OnlineGame|Client] Error occurred while receiving seed!\n");
-            exit(-1);
+        auto host = m_lobby.remotes.front();
+        while(!host.check(gameSeedPL)) {
+            if(host.fetch() == -1) {
+                printf("[OnlineGame|Client] Lost connection!\n");
+                exit(-1);
+            }
         }
-        ReconstructPayload(packet, gameSeedPL);
         m_seed = gameSeedPL.seed;
         m_rand = std::mt19937(m_seed);
         printf("[OnlineGame|Client] Received seed %u!\n", m_seed);
@@ -30,7 +29,6 @@ namespace padi::content {
 
     void OnlineGame::initializePlayersClient() {
         auto apollo = m_level->getApollo();
-        sf::Packet packet;
         PlayerSpawnPayload playerSpawnPL;
         PlayerAssignAbilityPayload playerAbilityPL;
         std::shared_ptr<Character> player;
@@ -38,12 +36,12 @@ namespace padi::content {
         auto &host = m_lobby.remotes.front();
         RemotePlayerTurn remotePlayerTurn(host);
         for (size_t id = 0; id < m_lobby.remotes.size() + 1; ++id) {
-            auto status = host.getSocket().lock()->receive(packet);
-            if (status != sf::Socket::Done) {
-                printf("[OnlineGame|Client] Error occurred while receiving spawn event!\n");
-                exit(-1);
+            while(!host.check(playerSpawnPL)) {
+                if(host.fetch() == -1) {
+                    printf("[OnlineGame|Client] Lost connection!\n");
+                    exit(-1);
+                }
             }
-            ReconstructPayload(packet, playerSpawnPL);
             player = std::make_shared<Character>(Character{uint32_t(playerSpawnPL.id)});
             m_characters[id] = player;
 
@@ -55,12 +53,12 @@ namespace padi::content {
             player->entity->setColor(playerSpawnPL.color);
 
             for(int i = 0; i < 4; ++i) {
-                status = host.getSocket().lock()->receive(packet);
-                if (status != sf::Socket::Done) {
-                    printf("[OnlineGame|Client] Error occurred while receiving spawn event!\n");
-                    exit(-1);
+                while(!host.check(playerAbilityPL)) {
+                    if(host.fetch() == -1) {
+                        printf("[OnlineGame|Client] Lost connection!\n");
+                        exit(-1);
+                    }
                 }
-                ReconstructPayload(packet, playerAbilityPL);
                 assignPlayerAbility(playerAbilityPL);
             }
 
@@ -84,20 +82,20 @@ namespace padi::content {
     }
 
     void OnlineGame::propagateLobbyClient(const std::string &basicString) {
-        sf::Packet packet;
         LobbySizePayload lobbySizePL;
         PlayerNamePayload namePL;
+        sf::Packet packet;
         // CLIENT   receive lobby size
         // CLIENT   send your name
         // CLIENT   receive all names
         printf("[OnlineGame|Client] Receiving lobby size!\n");
         auto host = m_lobby.remotes.front();
-        auto status = host.getSocket().lock()->receive(packet);
-        if (status != sf::Socket::Done) {
-            printf("[OnlineGame|Client] Error occurred while receiving seed!\n");
-            exit(-1);
+        while(!host.check(lobbySizePL)) {
+            if(host.fetch() == -1) {
+                printf("[OnlineGame|Client] Lost connection!\n");
+                exit(-1);
+            }
         }
-        ReconstructPayload(packet, lobbySizePL);
         printf("[OnlineGame|Client] Received lobby size: %hhu!\n", lobbySizePL.players);
         printf("[OnlineGame|Client] Sending own name!\n");
         m_lobby.names.resize(lobbySizePL.players, "");
@@ -106,12 +104,12 @@ namespace padi::content {
         host.getSocket().lock()->send(packet);
         printf("[OnlineGame|Client] Sent own name!\n");
         for (size_t id = 0; id < m_lobby.names.size() - 1; ++id) {
-            status = host.getSocket().lock()->receive(packet);
-            if (status != sf::Socket::Done) {
-                printf("[OnlineGame|Client] Error occurred while receiving name!\n");
-                exit(-1);
+            while(!host.check(namePL)) {
+                if(host.fetch() == -1) {
+                    printf("[OnlineGame|Client] Lost connection!\n");
+                    exit(-1);
+                }
             }
-            ReconstructPayload(packet, namePL);
             printf("[OnlineGame|Client] Received name %hhu: %.*s!\n", namePL.player, 8, namePL.name);
             m_lobby.names[namePL.player] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
         }

@@ -98,12 +98,12 @@ namespace padi::content {
         printf("[OnlineGame|Server] Receiving lobby names!\n");
         for (size_t id = 0; id < m_lobby.remotes.size(); ++id) {
             auto &remote = m_lobby.remotes[id];
-            auto status = remote.getSocket().lock()->receive(packet);
-            if (status != sf::Socket::Done) {
-                printf("[OnlineGame|Server] Error occurred while receiving name!\n");
-                exit(-1);
+            while(!remote.check(namePL)) {
+                if(remote.fetch() == -1) {
+                    printf("[OnlineGame|Server] Lost connection!\n");
+                    exit(-1);
+                }
             }
-            ReconstructPayload(packet, namePL);
             namePL.player = id;
             m_lobby.names[id] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
             printf("[OnlineGame|Server] Received name %zu: %.*s!\n", id, 8, namePL.name);

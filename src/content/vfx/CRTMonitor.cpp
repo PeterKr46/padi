@@ -39,12 +39,12 @@ namespace padi::content {
         m_screenQuad[0].texCoords = {0, CRT_HEIGHT};
 
         m_screenQuad[1].position = {0, monitorSize.y};
-        m_screenQuad[1].texCoords = {0, 0};
+        m_screenQuad[1].texCoords = {0, 1};
 
         m_screenQuad[2].position = monitorSize;
         m_screenQuad[2].texCoords = {CRT_WIDTH + 1, 0};
 
-        m_screenQuad[3].position = {monitorSize.x, 0};
+        m_screenQuad[3].position = {monitorSize.x, 1};
         m_screenQuad[3].texCoords = {CRT_WIDTH + 1, CRT_HEIGHT};
 
         m_view.setSize(float(width), float(height));

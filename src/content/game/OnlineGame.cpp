@@ -24,10 +24,6 @@ namespace padi::content {
             : m_lobby({hosting, std::move(sockets)}),
               m_seed(seed),
               m_rand(seed) {
-        // Initialization is blocking.
-        for (auto &socket: m_lobby.remotes) {
-            socket.getSocket().lock()->setBlocking(true);
-        }
         propagateLobby(name);
         propagateSeed();
         m_level = LevelGenerator().withSeed(m_seed).withArea({32, 32})
@@ -38,10 +34,6 @@ namespace padi::content {
         m_uiContext.init("../media/ui.apollo", "../media/ui_sheet.png");
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
         initializePlayers();
-        // Everything at runtime is non-blocking.
-        for (auto &socket: m_lobby.remotes) {
-            socket.getSocket().lock()->setBlocking(false);
-        }
     }
 
     std::shared_ptr<padi::Activity> OnlineGame::handoff() {

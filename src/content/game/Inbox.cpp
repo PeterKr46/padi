@@ -14,8 +14,10 @@ namespace padi::content {
     }
 
     size_t Inbox::fetch() {
-        bool blocking = m_socket->isBlocking();
-        m_socket->setBlocking(false);
+        if(!m_socket) return -1;
+
+        if(m_socket->isBlocking())
+            m_socket->setBlocking(false);
         size_t received = 0;
         {
             sf::Packet incoming;
@@ -27,28 +29,17 @@ namespace padi::content {
                 queue.emplace(data, data + incoming.getDataSize());
                 status = m_socket->receive(incoming);
             }
+            if (status == sf::Socket::Disconnected) {
+                printf("[Inbox] Connection lost.\n");
+                return -1;
+            }
         }
-        m_socket->setBlocking(blocking);
         return received;
     }
 
-    template<typename Payload>
-    bool Inbox::check(Payload &payload) {
-        auto queueIter = m_inbox->find(payload.type);
-        if (queueIter != m_inbox->end()) {
-            std::queue<std::vector<uint8_t>> &queue = queueIter.second;
-            auto &data = queue.front();
-            std::memcpy(&payload, data.begin(), data.size());
-            queue.pop();
-            if (queue.empty()) {
-                m_inbox->erase(queueIter);
-            }
-            return true;
-        }
-        return false;
-    }
-
     bool Inbox::has(PayloadType payloadType) const {
+        if(!m_inbox) return false;
+
         auto queueIter = m_inbox->find(payloadType);
         if (queueIter != m_inbox->end()) {
             return !queueIter->second.empty();
@@ -61,10 +52,17 @@ namespace padi::content {
     }
 
     size_t Inbox::count(PayloadType payloadType) const {
+        if(!m_inbox) return -1;
+
         auto queueIter = m_inbox->find(payloadType);
         if (queueIter != m_inbox->end()) {
             return queueIter->second.size();
         }
         return 0;
     }
+
+    Inbox::operator bool() {
+        return bool(m_socket);
+    }
+
 } // content

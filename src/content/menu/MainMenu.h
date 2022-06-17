@@ -12,6 +12,7 @@
 #include "SFML/Network/TcpListener.hpp"
 #include "SFML/Network/Packet.hpp"
 #include "../vfx/CRTMonitor.h"
+#include "../game/Inbox.h"
 
 namespace padi::content {
 
@@ -37,13 +38,13 @@ namespace padi::content {
         struct {
             bool active{false};
             sf::TcpListener listener;
-            std::vector<std::shared_ptr<sf::TcpSocket>> clients;
+            std::vector<Inbox> clients;
             // The next client to accept on
             std::shared_ptr<sf::TcpSocket> nextClient;
         } hostRole;
 
         struct {
-            std::shared_ptr<sf::TcpSocket> client;
+            Inbox client;
         } clientRole;
 
         void initializeHostSession();
@@ -58,11 +59,11 @@ namespace padi::content {
 
         void sendChatMessage(const std::string &msg);
 
-        void handleChatPacket(sf::Packet &packet);
+        void handleChatPacket(ChatMessagePayload &packet);
 
         void hostStartGame();
 
-        void clientHandleGameStart(sf::Packet const &packet);
+        void clientHandleGameStart(GameStartPayload const& payload);
     };
 
 } // content
