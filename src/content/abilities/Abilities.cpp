@@ -352,4 +352,25 @@ namespace padi {
         m_complete = true;
         return false;
     }
+
+    bool content::Peep::isCastComplete() {
+        return false;
+    }
+
+    void content::Peep::castCancel(padi::Level *level) {
+        level->hideCursor();
+    }
+
+    void content::Peep::castIndicator(padi::Level *level) {
+        level->showCursor();
+    }
+
+    bool content::Peep::cast(padi::Level *level, const sf::Vector2i &pos) {
+        return false;
+    }
+
+    content::Peep::Peep(std::shared_ptr<LivingEntity> user) : Ability(std::move(user)) {
+        m_iconId = "view";
+        m_description = "LOOK AROUND\n\n  Just look around - cannot be cast.";
+    }
 }

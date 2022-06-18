@@ -11,15 +11,17 @@
 
 namespace padi::content {
 
-    class Inbox {
+    class InOutBox {
     public:
-        Inbox() = default;
-        explicit Inbox(std::shared_ptr<sf::TcpSocket> socket);
+        InOutBox() = default;
+        explicit InOutBox(std::shared_ptr<sf::TcpSocket> socket);
 
-        size_t fetch();
+        size_t receive();
+
+        void send(sf::Packet& packet);
 
         template<typename Payload>
-        bool check(Payload &payload) {
+        bool fetch(Payload &payload) {
             auto queueIter = m_inbox->find(payload.type);
             if (queueIter != m_inbox->end()) {
                 std::queue<std::vector<uint8_t>> &queue = queueIter->second;

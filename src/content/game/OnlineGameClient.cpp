@@ -16,8 +16,8 @@ namespace padi::content {
         GameSeedPayload gameSeedPL;
         printf("[OnlineGame|Client] Receiving seed!\n");
         auto host = m_lobby.remotes.front();
-        while(!host.check(gameSeedPL)) {
-            if(host.fetch() == -1) {
+        while(!host.fetch(gameSeedPL)) {
+            if(host.receive() == -1) {
                 printf("[OnlineGame|Client] Lost connection!\n");
                 exit(-1);
             }
@@ -36,8 +36,8 @@ namespace padi::content {
         auto &host = m_lobby.remotes.front();
         RemotePlayerTurn remotePlayerTurn(host);
         for (size_t id = 0; id < m_lobby.remotes.size() + 1; ++id) {
-            while(!host.check(playerSpawnPL)) {
-                if(host.fetch() == -1) {
+            while(!host.fetch(playerSpawnPL)) {
+                if(host.receive() == -1) {
                     printf("[OnlineGame|Client] Lost connection!\n");
                     exit(-1);
                 }
@@ -53,8 +53,8 @@ namespace padi::content {
             player->entity->setColor(playerSpawnPL.color);
 
             for(int i = 0; i < 4; ++i) {
-                while(!host.check(playerAbilityPL)) {
-                    if(host.fetch() == -1) {
+                while(!host.fetch(playerAbilityPL)) {
+                    if(host.receive() == -1) {
                         printf("[OnlineGame|Client] Lost connection!\n");
                         exit(-1);
                     }
@@ -76,7 +76,6 @@ namespace padi::content {
 
             auto spawnEvent = std::make_shared<padi::SpawnEvent>(player->entity);
             spawnEvent->dispatch(m_level);
-            m_turnQueue.push(player);
         }
 
     }
@@ -90,8 +89,8 @@ namespace padi::content {
         // CLIENT   receive all names
         printf("[OnlineGame|Client] Receiving lobby size!\n");
         auto host = m_lobby.remotes.front();
-        while(!host.check(lobbySizePL)) {
-            if(host.fetch() == -1) {
+        while(!host.fetch(lobbySizePL)) {
+            if(host.receive() == -1) {
                 printf("[OnlineGame|Client] Lost connection!\n");
                 exit(-1);
             }
@@ -101,11 +100,11 @@ namespace padi::content {
         m_lobby.names.resize(lobbySizePL.players, "");
         std::memcpy(&namePL.name, basicString.c_str(), std::min(8ull, basicString.length()));
         PackagePayload(packet, namePL);
-        host.getSocket().lock()->send(packet);
+        host.send(packet);
         printf("[OnlineGame|Client] Sent own name!\n");
         for (size_t id = 0; id < m_lobby.names.size() - 1; ++id) {
-            while(!host.check(namePL)) {
-                if(host.fetch() == -1) {
+            while(!host.fetch(namePL)) {
+                if(host.receive() == -1) {
                     printf("[OnlineGame|Client] Lost connection!\n");
                     exit(-1);
                 }

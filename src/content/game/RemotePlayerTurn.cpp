@@ -23,7 +23,7 @@ namespace padi::content {
         DONE = 2
     };
 
-    RemotePlayerTurn::RemotePlayerTurn(Inbox socket)
+    RemotePlayerTurn::RemotePlayerTurn(InOutBox socket)
             : m_socket(std::move(socket)) {
 
     }
@@ -43,8 +43,8 @@ namespace padi::content {
         }
         if (state == IDLE) {
             // TODO use non-blocking inbox!
-            m_socket.fetch();
-            if (m_socket.check(payload)) {
+            m_socket.receive();
+            if (m_socket.fetch(payload)) {
                 m_activeAbility = int8_t(payload.ability);
                 auto ability = chr->abilities[m_activeAbility];
                 level->centerView(payload.pos);

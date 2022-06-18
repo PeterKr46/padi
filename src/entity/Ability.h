@@ -28,9 +28,9 @@ namespace padi {
         virtual bool isCastComplete() = 0;
 
         [[nodiscard]] virtual std::string const& getDescription() const;
-        virtual void setDescription(std::string const& description);
+        void setDescription(std::string const& description);
 
-        [[nodiscard]] virtual std::string const& getIconId() const;
+        [[nodiscard]] std::string const& getIconId() const;
 
         [[nodiscard]] std::weak_ptr<padi::LivingEntity> getUser() const;
 

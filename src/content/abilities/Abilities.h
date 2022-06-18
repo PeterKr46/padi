@@ -19,6 +19,7 @@ namespace padi::content {
 
     namespace AbilityType {
         enum : uint8_t {
+            Peep,
             Walk,
             Lighten,
             Teleport,
@@ -26,6 +27,15 @@ namespace padi::content {
             Darken,
         };
     }
+
+    class Peep : public padi::Ability {
+    public:
+        explicit Peep(std::shared_ptr<LivingEntity> user);
+        bool isCastComplete() override;
+        void castCancel(padi::Level *level) override;
+        void castIndicator(padi::Level *level) override;
+        bool cast(padi::Level *level, const sf::Vector2i &pos) override;
+    };
 
     class Lighten : public padi::Ability, public padi::CycleListener, public std::enable_shared_from_this<Lighten> {
     public:
@@ -130,7 +140,9 @@ namespace padi::content {
         void castIndicator(padi::Level *level) override;
 
         void recalculateRange(Level *level) override;
+
         bool isCastComplete() override;
+
         bool onCycleEnd(padi::Level *) override;
 
     private:

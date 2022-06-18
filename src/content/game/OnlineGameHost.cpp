@@ -18,7 +18,7 @@ namespace padi::content {
         PackagePayload(packet, gameSeedPL);
         printf("[OnlineGame|Server] Propagating seed!\n");
         for (auto &remote: m_lobby.remotes) {
-            remote.getSocket().lock()->send(packet);
+            remote.send(packet);
         }
         printf("[OnlineGame|Server] Propagated seed %u!\n", m_seed);
     }
@@ -37,7 +37,7 @@ namespace padi::content {
             playerSpawnPL.color.a = 255;
             for (size_t sockId = 0; sockId < m_lobby.remotes.size(); ++sockId) {
                 playerSpawnPL.local = sockId == id;
-                m_lobby.remotes[sockId].getSocket().lock()->send(PackagePayload(packet, playerSpawnPL));
+                m_lobby.remotes[sockId].send(PackagePayload(packet, playerSpawnPL));
             }
             player = std::make_shared<Character>(Character{uint32_t(id)});
             m_characters[id] = player;
@@ -50,13 +50,13 @@ namespace padi::content {
             player->entity->setColor(playerSpawnPL.color);
 
             // Just Walk for now...
-            playerAbilityPL.abilityType = AbilityType::Walk;
+            playerAbilityPL.abilityType = 0;
             for(int i = 0; i < 4; ++i) {
                 playerAbilityPL.abilityProps[0] = 3;
                 playerAbilityPL.abilitySlot = i;
                 playerAbilityPL.playerId = id;
                 for (auto &remote: m_lobby.remotes) {
-                    remote.getSocket().lock()->send(PackagePayload(packet, playerAbilityPL));
+                    remote.send(PackagePayload(packet, playerAbilityPL));
                 }
                 assignPlayerAbility(playerAbilityPL);
                 playerAbilityPL.abilityType++;
@@ -72,9 +72,9 @@ namespace padi::content {
 
             auto spawnEvent = std::make_shared<padi::SpawnEvent>(player->entity);
             spawnEvent->dispatch(m_level);
-            m_turnQueue.push(player);
+            m_turnQueue.push(id);
         }
-        m_turnQueue.back()->controller = [=](const std::shared_ptr<OnlineGame> &l,
+        m_characters.at(m_lobby.remotes.size())->controller = [=](const std::shared_ptr<OnlineGame> &l,
                                              const std::shared_ptr<Character> &c) mutable {
             return localPlayerTurn(l, c);
         };
@@ -92,14 +92,14 @@ namespace padi::content {
         m_lobby.names.resize(lobbySizePL.players, "");
         PackagePayload(packet, lobbySizePL);
         for (auto &remote: m_lobby.remotes) {
-            remote.getSocket().lock()->send(packet);
+            remote.send(packet);
         }
 
         printf("[OnlineGame|Server] Receiving lobby names!\n");
         for (size_t id = 0; id < m_lobby.remotes.size(); ++id) {
             auto &remote = m_lobby.remotes[id];
-            while(!remote.check(namePL)) {
-                if(remote.fetch() == -1) {
+            while(!remote.fetch(namePL)) {
+                if(remote.receive() == -1) {
                     printf("[OnlineGame|Server] Lost connection!\n");
                     exit(-1);
                 }
@@ -115,9 +115,9 @@ namespace padi::content {
             std::memcpy(&namePL.name, playerName.c_str(), std::min(8ull, playerName.length()));
             PackagePayload(packet, namePL);
 
-            for (size_t sockId = 0; sockId < m_lobby.remotes.size(); ++sockId) {
-                if (sockId != id) {
-                    m_lobby.remotes[sockId].getSocket().lock()->send(packet);
+            for (size_t clientId = 0; clientId < m_lobby.remotes.size(); ++clientId) {
+                if (clientId != id) {
+                    m_lobby.remotes[clientId].send(packet);
                 }
             }
         }
@@ -126,8 +126,8 @@ namespace padi::content {
         printf("[OnlineGame|Server] Propagating own name %i: %.*s!\n", namePL.player, 8, namePL.name);
         m_lobby.names.back() = basicString;
         PackagePayload(packet, namePL);
-        for (auto &socket: m_lobby.remotes) {
-            socket.getSocket().lock()->send(packet);
+        for (auto &remote: m_lobby.remotes) {
+            remote.send(packet);
         }
     }
 }

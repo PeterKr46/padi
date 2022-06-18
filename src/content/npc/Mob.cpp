@@ -13,7 +13,7 @@
 namespace padi::content {
 
     Mob::Mob(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos,
-             std::vector<Inbox> &sockets)
+             std::vector<InOutBox> &sockets)
             : LivingEntity(std::move(name), moveset, pos) {
         m_sockets = sockets;
         setColor(sf::Color(64, 64, 64));
@@ -41,7 +41,7 @@ namespace padi::content {
                     sf::Packet packet = PackagePayload(payload);
                     printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
                     for (auto &socket: m_sockets) {
-                        socket.getSocket().lock()->send(packet);
+                        socket.send(packet);
                     }
                 }
                 Corruption corruption{chr->entity->getPosition()};
@@ -74,7 +74,7 @@ namespace padi::content {
                     printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
                     packet.append(&payload, sizeof(payload));
                     for (auto &socket: m_sockets) {
-                        socket.getSocket().lock()->send(packet);
+                        socket.send(packet);
                     }
                 }
             }

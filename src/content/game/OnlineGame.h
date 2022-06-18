@@ -11,7 +11,7 @@
 #include "../../ui/Activity.h"
 #include "../vfx/CRTMonitor.h"
 #include "../../net/Packets.h"
-#include "../../net/Inbox.h"
+#include "../../net/InOutBox.h"
 #include "../ui/Chat.h"
 
 namespace padi {
@@ -25,7 +25,7 @@ namespace padi::content {
 
     class OnlineGame : public padi::Activity, public std::enable_shared_from_this<OnlineGame> {
     public:
-        OnlineGame(std::vector<Inbox> sockets, bool hosting, std::string const &name,
+        OnlineGame(std::vector<InOutBox> sockets, bool hosting, std::string const &name,
                    uint32_t seed = 8008135);
 
         void handleResize(int width, int height) override;
@@ -67,13 +67,17 @@ namespace padi::content {
         std::shared_ptr<Level> m_level;
         struct {
             const bool isHost{false};
-            std::vector<Inbox> remotes;
+            std::vector<InOutBox> remotes;
             std::vector<std::string> names;
         } m_lobby;
 
         std::map<uint32_t, std::shared_ptr<Character>> m_characters;
-        std::queue<std::shared_ptr<Character>> m_turnQueue;
+        std::queue<uint32_t> m_turnQueue;
         std::shared_ptr<Character> m_activeChar;
+
+        void takeTurn();
+
+        void advanceTurnHost();
     };
 
 } // content

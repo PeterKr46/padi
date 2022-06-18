@@ -69,7 +69,10 @@ namespace padi {
             if(deltaMag > float(TileSize.x * 8)) {
                 m_view.setCenter(m_viewTarget.getCenter());
             } else if(deltaMag > float(TileSize.x * 3)){
-                m_view.setCenter(m_view.getCenter() + delta * 0.8f * (1 - float(TileSize.x * 3) / deltaMag));
+                sf::Vector2f target = m_view.getCenter() + delta * 0.8f * (1 - float(TileSize.x * 3) / deltaMag);
+                target.x = round(target.x);
+                target.y = round(target.y);
+                m_view.setCenter(target);
             }
 
             m_cycle.carried_uS -= padi::FrameTime_uS;

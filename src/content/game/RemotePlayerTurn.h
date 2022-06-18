@@ -5,7 +5,7 @@
 #pragma once
 
 #include <memory>
-#include "../../net/Inbox.h"
+#include "../../net/InOutBox.h"
 
 namespace sf {
     class TcpSocket;
@@ -25,11 +25,11 @@ namespace padi::content {
 
     class RemotePlayerTurn {
     public:
-        explicit RemotePlayerTurn(Inbox   socket);
+        explicit RemotePlayerTurn(InOutBox   socket);
         bool operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr);
     private:
         int8_t m_activeAbility = -1;
-        Inbox m_socket;
+        InOutBox m_socket;
     };
 
 } // content

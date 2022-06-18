@@ -12,7 +12,7 @@
 #include "SFML/Network/TcpListener.hpp"
 #include "SFML/Network/Packet.hpp"
 #include "../vfx/CRTMonitor.h"
-#include "../../net/Inbox.h"
+#include "../../net/InOutBox.h"
 #include "../ui/Chat.h"
 
 namespace padi::content {
@@ -40,13 +40,13 @@ namespace padi::content {
         struct {
             bool active{false};
             sf::TcpListener listener;
-            std::vector<Inbox> clients;
+            std::vector<InOutBox> clients;
             // The next client to accept on
             std::shared_ptr<sf::TcpSocket> nextClient;
         } hostRole;
 
         struct {
-            Inbox client;
+            InOutBox client;
         } clientRole;
 
         void initializeHostSession();

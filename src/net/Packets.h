@@ -84,7 +84,8 @@ namespace padi::content {
     };
 
     struct alignas(64) CharacterTurnBeginPayload {
+        explicit CharacterTurnBeginPayload(uint32_t id) : characterId(id) {}
         const PayloadType type = CharacterTurnBegin;
-        uint8_t characterId{};
+        uint32_t characterId{};
     };
 }

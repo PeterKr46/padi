@@ -20,12 +20,12 @@
 
 namespace padi::content {
 
-    OnlineGame::OnlineGame(std::vector<Inbox> sockets, bool hosting, std::string const &name,
+    OnlineGame::OnlineGame(std::vector<InOutBox> sockets, bool hosting, std::string const &name,
                            uint32_t seed)
             : m_lobby({hosting, std::move(sockets)}),
               m_seed(seed),
               m_rand(seed),
-              m_chat({250,180, 200, 60}) {
+              m_chat({250, 194, 200, 60}) {
         propagateLobby(name);
         propagateSeed();
         m_level = LevelGenerator().withSeed(m_seed).withArea({32, 32})
@@ -34,17 +34,18 @@ namespace padi::content {
                 .generate();
         m_level->centerView({0, 0});
         m_uiContext.init("../media/ui.apollo", "../media/ui_sheet.png");
-
+        m_uiContext.setFocusActive(false);
         m_chat.init(&m_uiContext);
-        m_chat.submit = [&](std::string const& msg) {
+        m_chat.write(&m_uiContext, "Press T to chat.");
+        m_chat.submit = [&](std::string const &msg) {
             ChatMessagePayload msgPayload;
             std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), 32ull));
             sf::Packet packet = PackagePayload(msgPayload);
 
             for(auto & client : m_lobby.remotes) {
-                client.getSocket().lock()->send(packet);
+                client.send(packet);
             }
-            if(m_lobby.isHost) {
+            if (m_lobby.isHost) {
                 m_chat.write(&m_uiContext, msg);
             }
             m_uiContext.setFocusActive(false);
@@ -73,23 +74,12 @@ namespace padi::content {
         m_crt.asTarget()->draw(*m_level, states);
         m_uiContext.nextFrame();
 
-        if (m_activeChar) {
-            if (m_activeChar->controller(shared_from_this(), m_activeChar)) {
-                if (m_activeChar->alive) {
-                    m_turnQueue.push(m_activeChar);
-                }
-                m_activeChar = m_turnQueue.front();
-                m_turnQueue.pop();
-                if (m_activeChar->entity) {
-                    m_level->centerView(m_activeChar->entity->getPosition());
-                    m_level->moveCursor(m_activeChar->entity->getPosition());
-                }
-            }
-        }
+        takeTurn();
+
         m_chat.draw(&m_uiContext);
-        if(!m_uiContext.isFocusActive() && padi::Controls::wasKeyReleased(sf::Keyboard::T)) {
+        if (!m_uiContext.isFocusActive() && padi::Controls::wasKeyReleased(sf::Keyboard::T)) {
             m_uiContext.setFocusActive(true);
-        } else if(m_uiContext.isFocusActive() && padi::Controls::wasKeyReleased(sf::Keyboard::Escape)) {
+        } else if (m_uiContext.isFocusActive() && padi::Controls::wasKeyReleased(sf::Keyboard::Escape)) {
             m_uiContext.setFocusActive(false);
         }
 
@@ -106,8 +96,6 @@ namespace padi::content {
         } else {
             initializePlayersClient();
         }
-        m_activeChar = m_turnQueue.front();
-        m_turnQueue.pop();
     }
 
     void OnlineGame::assignPlayerAbility(PlayerAssignAbilityPayload &payload) {
@@ -143,6 +131,10 @@ namespace padi::content {
                         payload.abilityProps[0]);
                 break;
             }
+            case AbilityType::Peep: {
+                abilities[payload.abilitySlot] = std::make_shared<padi::content::Peep>(chr->entity);
+                break;
+            }
             default: {
                 printf("[OnlineGame] Attempted to assign unknown ability type.\n");
             }
@@ -167,8 +159,9 @@ namespace padi::content {
     }
 
     void OnlineGame::close() {
-        for (auto &socket: m_lobby.remotes) {
-            socket.getSocket().lock()->disconnect();
+        for (auto &remote: m_lobby.remotes) {
+            auto socket = remote.getSocket().lock();
+            if(socket) socket->disconnect();
         }
         while (!m_turnQueue.empty()) m_turnQueue.pop();
         m_activeChar.reset();
@@ -180,21 +173,21 @@ namespace padi::content {
 
     void OnlineGame::updateClient() {
         auto &host = m_lobby.remotes.front();
-        if (host.fetch() == -1) {
+        if (host.receive() == -1) {
             exit(-1);
         }
         if (host.has(PayloadType::CharacterSpawn)) {
             PlayerSpawnPayload payload;
-            host.check(payload);
+            host.fetch(payload);
             if (m_characters.find(payload.id) != m_characters.end()) {
                 // TODO
             } else {
 
             }
         }
-        if(host.has(PayloadType::ChatMessage)) {
+        if (host.has(PayloadType::ChatMessage)) {
             ChatMessagePayload payload;
-            host.check(payload);
+            host.fetch(payload);
             m_chat.write(&m_uiContext, std::string(payload.message, std::min(32ull, strlen(payload.message))));
         }
     }
@@ -202,24 +195,75 @@ namespace padi::content {
     void OnlineGame::updateHost() {
         for (size_t cid = 0; cid < m_lobby.remotes.size(); ++cid) {
             auto &client = m_lobby.remotes[cid];
-            if(client) {
-                if (client.fetch() == -1) {
+            if (client) {
+                if (client.receive() == -1) {
                     printf("[OnlineGame|Server] Client %zull (%s) lost connection.\n", cid, m_lobby.names[cid].c_str());
-                    m_lobby.remotes[cid] = Inbox(); // TODO how do i handle this?
+                    m_lobby.remotes[cid] = InOutBox(); // TODO how do i handle this?
+                    m_level->getMap()->removeEntity(m_characters[cid]->entity);
+                    m_chat.submit(m_characters[cid]->entity->getName() + " lost connection.");
                 } else {
-                    if(client.has(PayloadType::ChatMessage)) {
+                    if (client.has(PayloadType::ChatMessage)) {
                         ChatMessagePayload payload;
-                        client.check(payload);
+                        client.fetch(payload);
                         sf::Packet packet = PackagePayload(payload);
-                        for(auto & sock : m_lobby.remotes) {
-                            sock.getSocket().lock()->send(packet);
+                        for (auto &remote: m_lobby.remotes) {
+                            remote.send(packet);
                         }
-                        m_chat.write(&m_uiContext, std::string(payload.message, std::min(32ull, strlen(payload.message))));
+                        m_chat.write(&m_uiContext,
+                                     std::string(payload.message, std::min(32ull, strlen(payload.message))));
                     }
                 }
             }
         }
 
+    }
+
+    void OnlineGame::takeTurn() {
+        if (m_activeChar) {
+            if (m_activeChar->controller(shared_from_this(), m_activeChar)) {
+                // Turn complete.
+                if(m_lobby.isHost) advanceTurnHost();
+                else m_activeChar.reset();
+            }
+        } else if (m_lobby.isHost) {
+            advanceTurnHost();
+        } else {
+            auto &host = m_lobby.remotes.front();
+            CharacterTurnBeginPayload nextTurn(0);
+            if (host.fetch(nextTurn)) {
+                printf("[OnlineGame|Client] Character %u is starting their turn.\n", nextTurn.characterId);
+                m_activeChar = m_characters.at(nextTurn.characterId);
+                if (m_activeChar->entity) {
+                    m_level->centerView(m_activeChar->entity->getPosition());
+                    m_level->moveCursor(m_activeChar->entity->getPosition());
+                }
+            }
+        }
+    }
+
+    void OnlineGame::advanceTurnHost() {
+        if (m_lobby.isHost && !m_turnQueue.empty()) {
+            if (m_activeChar && m_activeChar->alive) {
+                m_turnQueue.push(m_activeChar->id);
+            }
+            printf("[OnlineGame|Server] Character %u is starting their turn.\n", m_turnQueue.front());
+            m_activeChar = m_characters.at(m_turnQueue.front());
+            m_turnQueue.pop();
+            if (m_activeChar->entity) {
+                m_level->centerView(m_activeChar->entity->getPosition());
+                m_level->moveCursor(m_activeChar->entity->getPosition());
+            }
+            if(m_activeChar->id < m_lobby.remotes.size()) {
+                auto packet = PackagePayload(ChatMessagePayload{ChatMessage, "Your turn.\0"});
+                m_lobby.remotes[m_activeChar->id].send(packet);
+            } else if(m_activeChar->id == m_lobby.remotes.size() || (m_activeChar->id == 0 && m_lobby.remotes.empty())) {
+                m_chat.write(&m_uiContext, "Your turn.");
+            }
+            auto packet = PackagePayload(CharacterTurnBeginPayload(m_activeChar->id));
+            for (auto &remote: m_lobby.remotes) {
+                remote.send(packet);
+            }
+        }
     }
 
 } // content

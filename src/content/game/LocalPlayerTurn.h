@@ -6,7 +6,7 @@
 
 #include <memory>
 #include <vector>
-#include "../../net/Inbox.h"
+#include "../../net/InOutBox.h"
 
 
 namespace padi {
@@ -23,13 +23,13 @@ namespace padi::content {
 
     class LocalPlayerTurn {
     public:
-        explicit LocalPlayerTurn(UIContext *uiContext, std::vector<Inbox> & sockets);
+        explicit LocalPlayerTurn(UIContext *uiContext, std::vector<InOutBox> & sockets);
 
         bool operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr);
 
     private:
         padi::UIContext *m_uiContext;
-        std::vector<Inbox> m_sockets;
+        std::vector<InOutBox> m_remotes;
         int64_t m_activeAbility = -1;
         bool m_hasCast = false;
     };

@@ -8,7 +8,7 @@
 #include "../abilities/Abilities.h"
 #include "../game/Character.h"
 #include "SFML/Network/TcpSocket.hpp"
-#include "../../net/Inbox.h"
+#include "../../net/InOutBox.h"
 
 namespace padi::content {
 
@@ -45,7 +45,7 @@ namespace padi::content {
 
     class Mob : public padi::LivingEntity {
     public:
-        Mob(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos, std::vector<Inbox> & sockets);
+        Mob(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos, std::vector<InOutBox> & sockets);
 
         bool takeTurn(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 
@@ -55,7 +55,7 @@ namespace padi::content {
         std::shared_ptr<padi::content::Walk> m_walk;
         std::shared_ptr<padi::content::SelfDestruct> m_explode;
         bool m_turnStarted = false;
-        std::vector<Inbox> m_sockets;
+        std::vector<InOutBox> m_sockets;
     };
 
 } // content
