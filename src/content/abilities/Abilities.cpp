@@ -57,7 +57,10 @@ namespace padi {
         m_ghost->m_color = m_user->getColor();
         m_ghost->m_color.a = 128;
         m_ghostFX->m_color = m_ghost->m_color;
-        if (!m_ghostFX->m_animation) m_ghostFX->m_animation = level->getApollo()->lookupAnim("lightning_hold");
+        if (!m_ghostFX->m_animation) {
+            m_ghostFX->m_animation = level->getApollo()->lookupAnim("lightning_hold_end");
+            m_ghostFX->m_stackAnimation = level->getApollo()->lookupAnim("lightning_hold");
+        }
     }
 
     void content::Teleport::castCancel(padi::Level *level) {
@@ -70,7 +73,7 @@ namespace padi {
     content::Teleport::Teleport(std::shared_ptr<padi::LivingEntity> user) : Ability(std::move(user)) {
         m_ghost = std::make_shared<StaticEntity>(sf::Vector2i{0, 0});
         m_ghost->m_animation = m_user->getAnimationSet()->at("idle");
-        m_ghostFX = std::make_shared<EntityStack>(sf::Vector2i{0, 0});
+        m_ghostFX = std::make_shared<EntityColumn>(sf::Vector2i{0, 0});
         m_ghostFX->m_stackSize = 8;
         m_description = "TELEPORT\n\n  Instantly travel to a location of your choice!";
         m_iconId = "teleport";
@@ -248,7 +251,6 @@ namespace padi {
         for (auto &m_shortestPath: m_shortestPaths) {
             m_inRange.emplace_back(m_shortestPath.first);
         }
-        std::cout << m_shortestPaths.size() << std::endl;
         m_rangeChanged = false;
     }
 
@@ -273,10 +275,10 @@ namespace padi {
     bool content::Dash::cast(padi::Level *lvl, const sf::Vector2i &pos) {
         auto delta = pos - m_user->getPosition();
 
-        if(delta.x < 0) m_direction = Left;
-        else if(delta.x > 0) m_direction = Right;
-        else if(delta.y > 0) m_direction = Down;
-        else if(delta.y < 0) m_direction = Up;
+        if (delta.x < 0) m_direction = Left;
+        else if (delta.x > 0) m_direction = Right;
+        else if (delta.y > 0) m_direction = Down;
+        else if (delta.y < 0) m_direction = Up;
 
         if ((m_direction.x == 0 && m_direction.y == 0) || !lvl->getMap()->getTile(pos)->m_walkable) {
             castCancel(lvl);

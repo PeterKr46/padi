@@ -14,15 +14,6 @@ namespace padi {
 
     SpawnEvent::SpawnEvent(const std::shared_ptr<LivingEntity>& entity)
             : SpawnEvent(entity, entity->getPosition()) {}
-            /*m_entity(std::move(entity)) {
-        m_entity->trySetAnimation("spawn");
-        auto apolloCtx = m_entity->getAnimationSet();
-        if (apolloCtx->find("spawn_ray") != apolloCtx->end()) {
-            m_ray = std::make_shared<OneshotEntityStack>(m_entity->getPosition());
-            m_ray->m_animation = apolloCtx->at("spawn_ray");
-            m_ray->m_verticalStep = padi::TileSize.y;
-        }
-    }*/
 
     SpawnEvent::SpawnEvent(std::shared_ptr<LivingEntity> entity, sf::Vector2i const &pos)
             : m_entity(std::move(entity)) {
@@ -33,7 +24,7 @@ namespace padi {
             m_ray->m_color = m_entity->getColor();
             m_ray->m_animation = apolloCtx->at("spawn_ray");
             m_ray->m_stackSize = 16;
-            m_ray->m_verticalStep = -padi::TileSize.y;
+            m_ray->m_verticalStep = -float(padi::TileSize.y);
         }
     }
 

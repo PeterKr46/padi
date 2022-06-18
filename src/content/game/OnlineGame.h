@@ -78,6 +78,8 @@ namespace padi::content {
         void takeTurn();
 
         void advanceTurnHost();
+
+        std::shared_ptr<padi::Activity> m_next;
     };
 
 } // content

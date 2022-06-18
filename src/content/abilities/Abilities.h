@@ -95,7 +95,7 @@ namespace padi::content {
     private:
         bool m_complete{true};
         std::shared_ptr<padi::StaticEntity> m_ghost;
-        std::shared_ptr<padi::EntityStack> m_ghostFX;
+        std::shared_ptr<padi::EntityColumn> m_ghostFX;
     };
 
     class Walk

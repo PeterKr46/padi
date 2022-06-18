@@ -17,13 +17,13 @@ The above concept will be realized the following features, optional/extra featur
  - [ ] Support for the following input devices:
    - [x] Keyboard
    - [ ] SFML-compatible Controllers as input devices.
- - [ ] Up to three (four?) player characters
- - [ ] Cooperative gameplay
+ - [x] Up to three (four?) player characters
+ - [x] Cooperative gameplay
    - [x] Couch Co-op / Hot Seat
    - [x] BONUS: (Local Co-op with Keyboard + Controller)
    - [x] BONUS: (Network Multiplayer)
       - [x] BONUS: (Text-based chat in-lobby)
-      - [ ] BONUS: (Text-based chat in-game)
+      - [x] BONUS: (Text-based chat in-game)
  - [x] Randomly generated levels
    - [ ] of increasing difficulty
  - [ ] The option to save and load in between levels
@@ -32,7 +32,7 @@ The above concept will be realized the following features, optional/extra featur
    - [ ] BONUS: (Color selection per character)
  - [x] Sprite-based animation
  - [x] Custom shaders
-   - [ ] On the map itself
+   - [x] On the map itself
    - [x] For screenspace effects
  - [x] Cross-OS gameplay
  - [x] Audio

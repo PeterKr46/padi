@@ -16,6 +16,7 @@
 #include "RemotePlayerTurn.h"
 #include "Character.h"
 #include "SFML/Window/Keyboard.hpp"
+#include "../menu/MainMenu.h"
 
 
 namespace padi::content {
@@ -42,7 +43,7 @@ namespace padi::content {
             std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), 32ull));
             sf::Packet packet = PackagePayload(msgPayload);
 
-            for(auto & client : m_lobby.remotes) {
+            for (auto &client: m_lobby.remotes) {
                 client.send(packet);
             }
             if (m_lobby.isHost) {
@@ -56,7 +57,8 @@ namespace padi::content {
     }
 
     std::weak_ptr<padi::Activity> OnlineGame::handoff() {
-        return shared_from_this();
+        if (!m_next) m_next = shared_from_this();
+        return m_next;
     }
 
     void OnlineGame::handleResize(int width, int height) {
@@ -101,7 +103,6 @@ namespace padi::content {
     void OnlineGame::assignPlayerAbility(PlayerAssignAbilityPayload &payload) {
         auto &chr = m_characters.at(payload.playerId);
         auto &abilities = chr->abilities;
-        // TODO robust pls
         if (abilities.size() <= payload.abilitySlot) {
             abilities.resize(payload.abilitySlot + 1, {nullptr});
         }
@@ -161,7 +162,7 @@ namespace padi::content {
     void OnlineGame::close() {
         for (auto &remote: m_lobby.remotes) {
             auto socket = remote.getSocket().lock();
-            if(socket) socket->disconnect();
+            if (socket) socket->disconnect();
         }
         while (!m_turnQueue.empty()) m_turnQueue.pop();
         m_activeChar.reset();
@@ -174,7 +175,10 @@ namespace padi::content {
     void OnlineGame::updateClient() {
         auto &host = m_lobby.remotes.front();
         if (host.receive() == -1) {
-            exit(-1);
+            m_next = std::make_shared<padi::content::MainMenu>(
+                    "../media/ui.apollo",
+                    "../media/ui_sheet.png"
+            );
         }
         if (host.has(PayloadType::CharacterSpawn)) {
             PlayerSpawnPayload payload;
@@ -201,6 +205,9 @@ namespace padi::content {
                     m_lobby.remotes[cid] = InOutBox(); // TODO how do i handle this?
                     m_level->getMap()->removeEntity(m_characters[cid]->entity);
                     m_chat.submit(m_characters[cid]->entity->getName() + " lost connection.");
+                    if (m_activeChar == m_characters[cid]) {
+                        m_activeChar.reset();
+                    }
                 } else {
                     if (client.has(PayloadType::ChatMessage)) {
                         ChatMessagePayload payload;
@@ -222,7 +229,7 @@ namespace padi::content {
         if (m_activeChar) {
             if (m_activeChar->controller(shared_from_this(), m_activeChar)) {
                 // Turn complete.
-                if(m_lobby.isHost) advanceTurnHost();
+                if (m_lobby.isHost) advanceTurnHost();
                 else m_activeChar.reset();
             }
         } else if (m_lobby.isHost) {
@@ -253,10 +260,11 @@ namespace padi::content {
                 m_level->centerView(m_activeChar->entity->getPosition());
                 m_level->moveCursor(m_activeChar->entity->getPosition());
             }
-            if(m_activeChar->id < m_lobby.remotes.size()) {
+            if (m_activeChar->id < m_lobby.remotes.size()) {
                 auto packet = PackagePayload(ChatMessagePayload{ChatMessage, "Your turn.\0"});
                 m_lobby.remotes[m_activeChar->id].send(packet);
-            } else if(m_activeChar->id == m_lobby.remotes.size() || (m_activeChar->id == 0 && m_lobby.remotes.empty())) {
+            } else if (m_activeChar->id == m_lobby.remotes.size() ||
+                       (m_activeChar->id == 0 && m_lobby.remotes.empty())) {
                 m_chat.write(&m_uiContext, "Your turn.");
             }
             auto packet = PackagePayload(CharacterTurnBeginPayload(m_activeChar->id));

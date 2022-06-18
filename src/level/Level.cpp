@@ -97,8 +97,7 @@ namespace padi {
     }
 
     void Level::draw(sf::RenderTarget &target, sf::RenderStates states) const {
-        //states.transform.translate(target.getView().getCenter());
-        // TODO
+        states.shader = m_apollo.lookupShader("base_shader").get();
 
         // apply the tileset texture
         states.texture = &m_sprites;
