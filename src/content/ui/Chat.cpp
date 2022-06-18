@@ -68,8 +68,9 @@ namespace padi::content {
         }
     }
 
-#define CHAR_W 7.f
-#define CHAR_H 13.f
+    // Used to approximate the number of characters that fit into the Chat log
+    #define CHAR_W 7.f
+    #define CHAR_H 13.f
 
     void Chat::init(padi::UIContext *context) {
         if (!m_hidden) {

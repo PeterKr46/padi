@@ -13,6 +13,7 @@
 #include "SFML/Network/Packet.hpp"
 #include "../vfx/CRTMonitor.h"
 #include "../../net/Inbox.h"
+#include "../ui/Chat.h"
 
 namespace padi::content {
 
@@ -31,6 +32,7 @@ namespace padi::content {
     private:
         padi::content::CRTMonitor m_crt;
         padi::UIContext m_uiContext;
+        Chat m_chat;
 
         padi::content::MenuBackground m_background;
         std::shared_ptr<padi::Activity> m_next{nullptr};
@@ -64,6 +66,8 @@ namespace padi::content {
         void hostStartGame();
 
         void clientHandleGameStart(GameStartPayload const& payload);
+
+        void closeClientSession();
     };
 
 } // content

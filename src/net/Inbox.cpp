@@ -30,7 +30,7 @@ namespace padi::content {
                 status = m_socket->receive(incoming);
             }
             if (status == sf::Socket::Disconnected) {
-                printf("[Inbox] Connection lost.\n");
+                printf("[Inbox] Connection to %s lost.\n", m_socket->getRemoteAddress().toString().c_str());
                 return -1;
             }
         }
