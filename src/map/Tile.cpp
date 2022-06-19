@@ -15,7 +15,7 @@ namespace padi {
 
     size_t Tile::populate(const padi::Map *context, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
         sf::Vertex* quad = &array[vertexOffset];
-        sf::Vector2f anchor = context->mapTilePosToWorld(getPosition());
+        sf::Vector2f anchor = padi::Map::mapTilePosToWorld(getPosition());
         anchor.y += m_verticalOffset;
         sf::Vector2f tileSize(padi::TileSize);
         quad[0].position = anchor + sf::Vector2f(-tileSize.x / 2, -tileSize.y / 2);
@@ -32,6 +32,7 @@ namespace padi {
 
         size_t offset = 0;
         if(m_decoration) {
+            m_decoration->m_verticalOffset = m_verticalOffset;
             offset += m_decoration->populate(context, array, vertexOffset + 4, frame);
             quad = &array[vertexOffset + 4];
             quad[0].color = quad[1].color = quad[2].color = quad[3].color = m_color;
@@ -55,11 +56,11 @@ namespace padi {
         m_verticalOffset = vo;
     }
 
-    std::shared_ptr<padi::GridObject> Tile::getDecoration() const {
+    std::shared_ptr<padi::TileDecoration> Tile::getDecoration() const {
         return m_decoration;
     }
 
-    void Tile::setDecoration(std::shared_ptr<padi::GridObject> decor) {
+    void Tile::setDecoration(std::shared_ptr<padi::TileDecoration> decor) {
         m_decoration = std::move(decor);
     }
 

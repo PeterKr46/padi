@@ -17,6 +17,7 @@
 #include "Character.h"
 #include "SFML/Window/Keyboard.hpp"
 #include "../menu/MainMenu.h"
+#include "../vfx/MapShaker.h"
 
 
 namespace padi::content {
@@ -51,9 +52,9 @@ namespace padi::content {
             }
             m_uiContext.setFocusActive(false);
         };
-
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
         initializePlayers();
+        m_level->addFrameBeginListener(std::make_shared<MapShaker>());
     }
 
     std::weak_ptr<padi::Activity> OnlineGame::handoff() {
@@ -192,7 +193,7 @@ namespace padi::content {
         if (host.has(PayloadType::ChatMessage)) {
             ChatMessagePayload payload;
             host.fetch(payload);
-            m_chat.write(&m_uiContext, std::string(payload.message, std::min(32ull, strlen(payload.message))));
+            printChatMessage(std::string(payload.message, std::min(32ull, strlen(payload.message))));
         }
     }
 
@@ -216,8 +217,7 @@ namespace padi::content {
                         for (auto &remote: m_lobby.remotes) {
                             remote.send(packet);
                         }
-                        m_chat.write(&m_uiContext,
-                                     std::string(payload.message, std::min(32ull, strlen(payload.message))));
+                        printChatMessage(std::string(payload.message, std::min(32ull, strlen(payload.message))));
                     }
                 }
             }
@@ -265,13 +265,19 @@ namespace padi::content {
                 m_lobby.remotes[m_activeChar->id].send(packet);
             } else if (m_activeChar->id == m_lobby.remotes.size() ||
                        (m_activeChar->id == 0 && m_lobby.remotes.empty())) {
-                m_chat.write(&m_uiContext, "Your turn.");
+                printChatMessage("Your turn.");
             }
             auto packet = PackagePayload(CharacterTurnBeginPayload(m_activeChar->id));
             for (auto &remote: m_lobby.remotes) {
                 remote.send(packet);
             }
         }
+    }
+
+    void OnlineGame::printChatMessage(const std::string &msg) {
+        auto ap = std::make_shared<padi::AudioPlayback>(m_uiContext.getApollo()->lookupAudio("chat_msg"));
+        m_level->addCycleEndListener(ap);
+        m_chat.write(&m_uiContext, msg);
     }
 
 } // content

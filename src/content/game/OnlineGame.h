@@ -56,6 +56,7 @@ namespace padi::content {
 
         void updateClient();
         void updateHost();
+        void printChatMessage(std::string const& msg);
 
     private:
         padi::content::CRTMonitor m_crt;

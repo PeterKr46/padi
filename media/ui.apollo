@@ -16,6 +16,8 @@ audio high_clack        ../media/audio/the_sample_workshop/high_clack.ogg
 audio switch_on         ../media/audio/greatsoundstube/switch_on.ogg
 audio switch_off        ../media/audio/greatsoundstube/switch_off.ogg
 
+audio chat_msg          ../media/audio/the_sample_workshop/high_clack.ogg
+
 
 anim walk               32 32   96 0    0 0 1
 anim teleport           32 32   96 32   0 0 1

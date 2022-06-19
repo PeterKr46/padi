@@ -53,7 +53,6 @@ namespace padi {
         bool addTile(const std::shared_ptr<padi::Tile> &tile);
 
         size_t getEntities(sf::Vector2i const &pos, std::vector<std::shared_ptr<Entity>> &entities) const;
-        [[nodiscard]] const std::vector<std::shared_ptr<Entity>> & getEntities(sf::Vector2i const &pos) const;
 
         void addEntity(const std::shared_ptr<Entity> &entity, size_t lower_by = 0);
 

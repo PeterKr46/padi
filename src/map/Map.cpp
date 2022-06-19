@@ -196,14 +196,6 @@ namespace padi {
         return m_entities;
     }
 
-    const std::vector<std::shared_ptr<Entity>> &Map::getEntities(const sf::Vector2i &pos) const {
-        auto iter = m_tiles.find(pos);
-        if (iter != m_tiles.end()) {
-            return iter->second.second;
-        }
-        return {};
-    }
-
     size_t Map::numTiles() {
         return m_tiles.size();
     }

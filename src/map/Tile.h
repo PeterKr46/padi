@@ -7,6 +7,7 @@
 #include <SFML/Graphics/Color.hpp>
 #include "GridObject.h"
 #include "../entity/Entity.h"
+#include "TileDecoration.h"
 
 namespace padi {
 
@@ -27,8 +28,8 @@ namespace padi {
 
         [[nodiscard]] float getVerticalOffset() const;
 
-        [[nodiscard]] std::shared_ptr<padi::GridObject> getDecoration() const;
-        void setDecoration(std::shared_ptr<padi::GridObject> decor);
+        [[nodiscard]] std::shared_ptr<padi::TileDecoration> getDecoration() const;
+        void setDecoration(std::shared_ptr<padi::TileDecoration> decor);
 
         [[nodiscard]] size_t numQuads() const override;
 
@@ -38,7 +39,7 @@ namespace padi {
         size_t m_detail{0};
         float m_verticalOffset{0};
         sf::Color m_color;
-        std::shared_ptr<padi::GridObject> m_decoration;
+        std::shared_ptr<padi::TileDecoration> m_decoration;
     };
 
 } // padi
