@@ -14,7 +14,7 @@ namespace padi {
         explicit EntityStack(const sf::Vector2i &pos);
 
         size_t
-        populate(padi::Map const *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const override;
+        populate(padi::Map const *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const override;
 
         [[nodiscard]] size_t numQuads() const override;
 
@@ -27,7 +27,7 @@ namespace padi {
     public:
         explicit EntityColumn(const sf::Vector2i & pos);
 
-        size_t populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const override;
+        size_t populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const override;
 
         float   m_verticalStep{0};
         size_t  m_stackSize{3};

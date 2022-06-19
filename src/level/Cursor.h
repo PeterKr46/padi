@@ -17,6 +17,8 @@ namespace padi {
 
         void update(padi::Level *level);
 
+        bool onFrameBegin(padi::Level *, uint8_t frame) override;
+
         void lock();
         void unlock();
 

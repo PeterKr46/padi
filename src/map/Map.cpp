@@ -116,17 +116,19 @@ namespace padi {
         size_t idx = 0;
         auto tileIter = m_tiles.begin();
         while (tileIter != m_tiles.end()) {
+            float vOff = 0;
             if (tileIter->second.first) {
-                idx += tileIter->second.first->populate(this, array, vertexOffset + idx, frame);
+                idx += tileIter->second.first->populate(this, array, vertexOffset + idx, frame, 0);
+                vOff = tileIter->second.first->getVerticalOffset();
             }
             for (auto &entity: tileIter->second.second) {
-                idx += entity->populate(this, array, vertexOffset + idx, frame);
+                idx += entity->populate(this, array, vertexOffset + idx, frame, vOff);
             }
             ++tileIter;
         }
 
         for (auto const &[loc, obj]: m_ui) {
-            idx += obj->populate(this, array, vertexOffset + idx, frame);
+            idx += obj->populate(this, array, vertexOffset + idx, frame, 0); // TODO vertical offset
         }
 
         return idx;

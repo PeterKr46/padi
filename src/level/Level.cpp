@@ -2,13 +2,15 @@
 // Created by Peter on 01/05/2022.
 //
 
-#include <iostream>
 #include "Level.h"
+
+#include <iostream>
+#include <SFML/Audio.hpp>
+#include "../map/Tile.h"
 #include "../Constants.h"
 #include "../Controls.h"
 #include "Cursor.h"
 #include "CycleListener.h"
-#include "SFML/Audio/Listener.hpp"
 
 namespace padi {
 
@@ -179,6 +181,7 @@ namespace padi {
     }
 
     void Level::moveCursor(sf::Vector2i const &pos) {
+        m_map.getTile(m_cursor->getPosition())->setVerticalOffset(0);
         m_map.moveEntity(m_cursor, pos, ~0u);
     }
 
@@ -200,6 +203,7 @@ namespace padi {
     void Level::initCursor(std::string const &key) {
         m_cursor = std::make_shared<padi::Cursor>(m_apollo.lookupAnim(key));
         m_cursor->lock();
+        addFrameBeginListener(m_cursor);
     }
 
     std::shared_ptr<padi::Cursor> Level::getCursor() const {

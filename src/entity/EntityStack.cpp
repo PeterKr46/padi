@@ -12,7 +12,7 @@ namespace padi {
     }
 
     size_t
-    EntityStack::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
+    EntityStack::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const {
         sf::Vector2f size{getSize()};
 
         sf::Vector2f anchor = padi::Map::mapTilePosToWorld(getPosition());
@@ -45,7 +45,7 @@ namespace padi {
     }
 
     size_t
-    EntityColumn::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
+    EntityColumn::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const {
 
         sf::Vector2f size{getSize()};
 

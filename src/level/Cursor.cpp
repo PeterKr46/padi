@@ -6,6 +6,7 @@
 #include <utility>
 #include "../Controls.h"
 #include "../Constants.h"
+#include "../map/Tile.h"
 
 namespace padi {
 
@@ -18,15 +19,15 @@ namespace padi {
     void padi::Cursor::update(padi::Level *level) {
         if (!m_locked) {
             if (padi::Controls::wasKeyPressed(sf::Keyboard::Left)) {
-                level->getMap()->moveEntity(shared_from_this(), getPosition() + padi::Left + padi::Down);
+                level->moveCursor(getPosition() + padi::Left + padi::Down);
             } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Right)) {
-                level->getMap()->moveEntity(shared_from_this(), getPosition() + padi::Right + padi::Up);
+                level->moveCursor(getPosition() + padi::Right + padi::Up);
             } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Up)) {
                 auto up = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 0 ? padi::Left : padi::Up;
-                level->getMap()->moveEntity(shared_from_this(), getPosition() + up);
+                level->moveCursor(getPosition() + up);
             } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Down)) {
                 auto down = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 1 ? padi::Right : padi::Down;
-                level->getMap()->moveEntity(shared_from_this(), getPosition() + down);
+                level->moveCursor(getPosition() + down);
             }
             if (padi::Controls::isAnyKeyPressed<sf::Keyboard::Key *>(&arrows[0], &arrows[4])) {
                 m_color = sf::Color::Yellow;
@@ -37,7 +38,7 @@ namespace padi {
         }
     }
 
-    Cursor::Cursor(std::shared_ptr<padi::Animation> anim) : padi::StaticEntity({0,0}) {
+    Cursor::Cursor(std::shared_ptr<padi::Animation> anim) : padi::StaticEntity({0, 0}) {
         m_animation = std::move(anim);
     }
 
@@ -47,5 +48,11 @@ namespace padi {
 
     void Cursor::unlock() {
         m_locked = false;
+    }
+
+    bool Cursor::onFrameBegin(padi::Level *level, uint8_t frame) {
+        auto tile = level->getMap()->getTile(getPosition());
+        tile->setVerticalOffset((0.5f + 0.5f * sin(float(frame) * (2 * 3.141f / CycleLength_F)) * 1.2f));
+        return true;
     }
 }

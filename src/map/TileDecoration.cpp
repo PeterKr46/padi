@@ -16,12 +16,12 @@ namespace padi {
     }
 
     size_t TileDecoration::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset,
-                                    uint8_t frame) const {
+                                    uint8_t frame, float tileVerticalOffset) const {
         sf::Vector2f size{m_animation->getResolution()};
         auto pVertex = &array[vertexOffset];
 
         sf::Vector2f anchor = padi::Map::mapTilePosToWorld(getPosition());
-        float verticalOffset = m_verticalOffset + std::min(float(padi::TileSize.y), size.y) / 2 - 8;
+        float verticalOffset = tileVerticalOffset + std::min(float(padi::TileSize.y), size.y) / 2 - 8;
 
         pVertex[0].position = anchor + sf::Vector2f(-size.x / 2, verticalOffset - size.y);
         pVertex[1].position = anchor + sf::Vector2f(size.x / 2,  verticalOffset - size.y);

@@ -23,7 +23,7 @@ namespace padi {
 
         [[nodiscard]] sf::Vector2i getSize() const override;
 
-        size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame) const override;
+        size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const override;
 
         bool intentMove(sf::Vector2i const &dir);
         void intentStay();

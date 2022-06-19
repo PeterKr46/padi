@@ -18,7 +18,7 @@ namespace padi {
     public:
         explicit Tile(sf::Vector2i const &pos);
 
-        size_t populate(padi::Map const *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const override;
+        size_t populate(padi::Map const *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const override;
 
         void setColor(sf::Color const &c);
 

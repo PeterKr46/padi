@@ -20,7 +20,7 @@ namespace padi {
 
         [[nodiscard]] virtual size_t numQuads() const { return 1; };
 
-        virtual size_t populate(padi::Map const *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const = 0;
+        virtual size_t populate(padi::Map const *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const = 0;
 
         [[nodiscard]] sf::Vector2i getPosition() const { return m_position; }
 

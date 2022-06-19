@@ -14,10 +14,9 @@ namespace padi {
     public:
         explicit TileDecoration(sf::Vector2i const &pos, std::shared_ptr<padi::Animation> anim = {nullptr});
 
-        size_t populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const override;
+        size_t populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const override;
 
         std::shared_ptr<padi::Animation> m_animation;
-        float m_verticalOffset{0};
     };
 
 } // content

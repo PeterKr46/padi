@@ -54,12 +54,12 @@ sf::Color padi::LivingEntity::getColor() const {
 }
 
 size_t
-padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame) const {
+padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const {
     sf::Vector2f size{getSize()};
     auto pVertex = &array[vertexOffset];
 
-    sf::Vector2f anchor = map->mapTilePosToWorld(getPosition());
-    float verticalOffset = getVerticalOffset() + std::min(float(padi::TileSize.y), size.y) / 2;
+    sf::Vector2f anchor = padi::Map::mapTilePosToWorld(getPosition());
+    float verticalOffset = tileVerticalOffset + getVerticalOffset() + std::min(float(padi::TileSize.y), size.y) / 2;
     pVertex[0].position = anchor + sf::Vector2f(-size.x / 2, verticalOffset - size.y);
     pVertex[1].position = anchor + sf::Vector2f(size.x / 2, verticalOffset - size.y);
     pVertex[2].position = anchor + sf::Vector2f(size.x / 2, verticalOffset);
