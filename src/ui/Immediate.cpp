@@ -7,6 +7,7 @@
 #include "../Constants.h"
 #include "../Controls.h"
 #include "../entity/OneshotEntity.h"
+#include "../media/AudioPlayback.h"
 
 namespace padi {
 

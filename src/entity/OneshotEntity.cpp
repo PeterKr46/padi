@@ -3,6 +3,7 @@
 //
 
 #include "OneshotEntity.h"
+#include "../media/AudioPlayback.h"
 
 namespace padi {
 
@@ -10,13 +11,13 @@ namespace padi {
 
     }
 
-    bool OneshotEntity::onCycleBegin(Level * level) {
+    bool OneshotEntity::onCycleBegin(Level *level) {
         level->addCycleEndListener(shared_from_this());
         level->getMap()->addEntity(shared_from_this());
         return false;
     }
 
-    bool OneshotEntity::onCycleEnd(Level * level) {
+    bool OneshotEntity::onCycleEnd(Level *level) {
         level->getMap()->removeEntity(shared_from_this());
         return false;
     }
@@ -29,10 +30,12 @@ namespace padi {
 
         level->addCycleEndListener(shared_from_this());
         level->getMap()->addEntity(shared_from_this());
-        return false;    }
+        return false;
+    }
 
     bool OneshotEntityStack::onCycleEnd(Level *level) {
 
         level->getMap()->removeEntity(shared_from_this());
-        return false;    }
+        return false;
+    }
 } // padi

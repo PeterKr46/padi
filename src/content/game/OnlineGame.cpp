@@ -6,10 +6,8 @@
 
 #include <utility>
 
-#include "../../level/Level.h"
 #include "../../entity/LivingEntity.h"
 #include "../../level/LevelGenerator.h"
-#include "../../level/SpawnEvent.h"
 #include "../../Controls.h"
 #include "../abilities/Abilities.h"
 #include "LocalPlayerTurn.h"
@@ -18,6 +16,7 @@
 #include "SFML/Window/Keyboard.hpp"
 #include "../menu/MainMenu.h"
 #include "../vfx/MapShaker.h"
+#include "../../media/AudioPlayback.h"
 
 
 namespace padi::content {
@@ -26,8 +25,7 @@ namespace padi::content {
                            uint32_t seed)
             : m_lobby({hosting, std::move(sockets)}),
               m_seed(seed),
-              m_rand(seed),
-              m_chat({250, 194, 200, 60}) {
+              m_rand(seed) {
         propagateLobby(name);
         propagateSeed();
         m_level = LevelGenerator().withSeed(m_seed).withArea({32, 32})
@@ -37,20 +35,10 @@ namespace padi::content {
         m_level->centerView({0, 0});
         m_uiContext.init("../media/ui.apollo", "../media/ui_sheet.png");
         m_uiContext.setFocusActive(false);
-        m_chat.init(&m_uiContext);
-        m_chat.write(&m_uiContext, "Press T to chat.");
-        m_chat.submit = [&](std::string const &msg) {
-            ChatMessagePayload msgPayload;
-            std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), 32ull));
-            sf::Packet packet = PackagePayload(msgPayload);
-
-            for (auto &client: m_lobby.remotes) {
-                client.send(packet);
-            }
-            if (m_lobby.isHost) {
-                m_chat.write(&m_uiContext, msg);
-            }
-            m_uiContext.setFocusActive(false);
+        m_chat.ui.init(&m_uiContext);
+        m_chat.ui.write(&m_uiContext, "Press T to window.");
+        m_chat.ui.submit = [&](std::string const &msg) {
+            sendChatMessage(msg);
         };
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
         initializePlayers();
@@ -79,7 +67,7 @@ namespace padi::content {
 
         takeTurn();
 
-        m_chat.draw(&m_uiContext);
+        m_chat.ui.draw(&m_uiContext);
         if (!m_uiContext.isFocusActive() && padi::Controls::wasKeyReleased(sf::Keyboard::T)) {
             m_uiContext.setFocusActive(true);
         } else if (m_uiContext.isFocusActive() && padi::Controls::wasKeyReleased(sf::Keyboard::Escape)) {
@@ -205,7 +193,7 @@ namespace padi::content {
                     printf("[OnlineGame|Server] Client %zull (%s) lost connection.\n", cid, m_lobby.names[cid].c_str());
                     m_lobby.remotes[cid] = InOutBox(); // TODO how do i handle this?
                     m_level->getMap()->removeEntity(m_characters[cid]->entity);
-                    m_chat.submit(m_characters[cid]->entity->getName() + " lost connection.");
+                    m_chat.ui.submit(m_characters[cid]->entity->getName() + " lost connection.");
                     if (m_activeChar == m_characters[cid]) {
                         m_activeChar.reset();
                     }
@@ -275,9 +263,25 @@ namespace padi::content {
     }
 
     void OnlineGame::printChatMessage(const std::string &msg) {
-        auto ap = std::make_shared<padi::AudioPlayback>(m_uiContext.getApollo()->lookupAudio("chat_msg"));
-        m_level->addCycleEndListener(ap);
-        m_chat.write(&m_uiContext, msg);
+        if(!m_chat.notification) {
+            m_chat.notification = std::make_shared<padi::AudioPlayback>(m_uiContext.getApollo()->lookupAudio("chat_msg"));
+        }
+        m_chat.notification->restart(m_level.get());
+        m_chat.ui.write(&m_uiContext, msg);
+    }
+
+    void OnlineGame::sendChatMessage(const std::string &msg) {
+        ChatMessagePayload msgPayload;
+        std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), 32ull));
+        sf::Packet packet = PackagePayload(msgPayload);
+
+        for (auto &client: m_lobby.remotes) {
+            client.send(packet);
+        }
+        if (m_lobby.isHost) {
+            printChatMessage(msg);
+        }
+        m_uiContext.setFocusActive(false);
     }
 
 } // content

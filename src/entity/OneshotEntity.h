@@ -18,10 +18,13 @@ namespace padi {
      *
      * Instantiate at chosen location and add CycleBegin listener
      */
-    class OneshotEntity : public padi::StaticEntity, public CycleListener, public std::enable_shared_from_this<OneshotEntity> {
+    class OneshotEntity
+            : public padi::StaticEntity, public CycleListener, public std::enable_shared_from_this<OneshotEntity> {
     public:
-        explicit OneshotEntity(sf::Vector2i const& pos);
+        explicit OneshotEntity(sf::Vector2i const &pos);
+
         bool onCycleBegin(Level *) override;
+
         bool onCycleEnd(Level *) override;
     };
 
@@ -30,29 +33,14 @@ namespace padi {
      *
      * Instantiate at chosen location and add CycleBegin listener
      */
-    class OneshotEntityStack : public padi::EntityStack, public CycleListener, public std::enable_shared_from_this<OneshotEntityStack> {
+    class OneshotEntityStack
+            : public padi::EntityStack, public CycleListener, public std::enable_shared_from_this<OneshotEntityStack> {
     public:
-        explicit OneshotEntityStack(sf::Vector2i const& pos);
-        bool onCycleBegin(Level *) override;
-        bool onCycleEnd(Level *) override;
-    };
+        explicit OneshotEntityStack(sf::Vector2i const &pos);
 
-    class AudioPlayback : public padi::CycleListener {
-    public:
-        explicit AudioPlayback(std::shared_ptr<sf::SoundBuffer>  s) : m_buffer(std::move(s)) {
-            sound.setBuffer(*m_buffer);
-            sound.play();
-            m_cycles = 1 + (m_buffer->getDuration().asMicroseconds() / (padi::CycleLength_F * padi::FrameTime_uS));
-        }
-        std::shared_ptr<sf::SoundBuffer> m_buffer;
-        sf::Sound sound;
-        size_t m_cycles;
-        bool onCycleEnd(padi::Level * ) override {
-            if(m_cycles-- == 0) {
-                return false;
-            }
-            return true;
-        }
+        bool onCycleBegin(Level *) override;
+
+        bool onCycleEnd(Level *) override;
     };
 
 } // padi

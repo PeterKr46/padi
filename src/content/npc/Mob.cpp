@@ -7,6 +7,7 @@
 #include "../../net/Packets.h"
 #include "../game/OnlineGame.h"
 #include "SFML/Network/Packet.hpp"
+#include "../../media/AudioPlayback.h"
 
 #include <utility>
 

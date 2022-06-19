@@ -9,6 +9,7 @@
 #include "../../Controls.h"
 #include "../../entity/OneshotEntity.h"
 #include "../../level/SpawnEvent.h"
+#include "../../media/AudioPlayback.h"
 
 namespace padi {
 

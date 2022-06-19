@@ -22,8 +22,8 @@ The above concept will be realized the following features, optional/extra featur
    - [x] Couch Co-op / Hot Seat
    - [x] BONUS: (Local Co-op with Keyboard + Controller)
    - [x] BONUS: (Network Multiplayer)
-      - [x] BONUS: (Text-based chat in-lobby)
-      - [x] BONUS: (Text-based chat in-game)
+      - [x] BONUS: (Text-based window in-lobby)
+      - [x] BONUS: (Text-based window in-game)
  - [x] Randomly generated levels
    - [ ] of increasing difficulty
  - [ ] The option to save and load in between levels

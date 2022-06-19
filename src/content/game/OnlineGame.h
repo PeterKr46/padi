@@ -13,9 +13,11 @@
 #include "../../net/Packets.h"
 #include "../../net/InOutBox.h"
 #include "../ui/Chat.h"
+#include "../../entity/OneshotEntity.h"
 
 namespace padi {
     class Level;
+    class AudioPlayback;
     namespace content {
         struct Character;
     }
@@ -56,12 +58,20 @@ namespace padi::content {
 
         void updateClient();
         void updateHost();
+
+        void takeTurn();
+        void advanceTurnHost();
+
         void printChatMessage(std::string const& msg);
+        void sendChatMessage(const std::string &msg);
 
     private:
         padi::content::CRTMonitor m_crt;
         padi::UIContext m_uiContext;
-        Chat m_chat;
+        struct {
+            Chat ui{{250, 194, 200, 60}};
+            std::shared_ptr<padi::AudioPlayback> notification{nullptr};
+        } m_chat;
 
         uint32_t m_seed;
         std::mt19937 m_rand;
@@ -75,10 +85,6 @@ namespace padi::content {
         std::map<uint32_t, std::shared_ptr<Character>> m_characters;
         std::queue<uint32_t> m_turnQueue;
         std::shared_ptr<Character> m_activeChar;
-
-        void takeTurn();
-
-        void advanceTurnHost();
 
         std::shared_ptr<padi::Activity> m_next;
     };
