@@ -76,8 +76,7 @@ namespace padi::content {
                                                     0x999999ff));
                 if (Immediate::Button(&m_uiContext, "play", {-6, 0, 152, 32})) {
                     std::vector<InOutBox> nosocks;
-                    m_next = std::make_shared<padi::content::OnlineGame>(nosocks, true,
-                                                                         m_uiContext.getTextString("nick_input"));
+                    m_next = std::make_shared<padi::content::HostGame>(nosocks, m_uiContext.getTextString("nick_input"));
                 }
             }
             { // CLIENT CONFIGURATION
@@ -340,8 +339,7 @@ namespace padi::content {
             inboxes.reserve(hostRole.clients.size());
             for (const auto &client: hostRole.clients) inboxes.emplace_back(client);
 
-            auto game = std::make_shared<padi::content::OnlineGame>(inboxes, true,
-                                                                    m_uiContext.getTextString("nick_input"));
+            auto game = std::make_shared<padi::content::HostGame>(inboxes, m_uiContext.getTextString("nick_input"));
             m_next = game;
         }
     }
@@ -349,10 +347,8 @@ namespace padi::content {
     void MainMenu::clientHandleGameStart(GameStartPayload const &payload) {
         if (clientRole.client) {
             appendChatMessage("Starting Game...");
-            auto game = std::make_shared<padi::content::OnlineGame>(std::vector{InOutBox(clientRole.client)}, false,
-                                                                    m_uiContext.getTextString("nick_input"));
+            auto game = std::make_shared<padi::content::ClientGame>(clientRole.client, m_uiContext.getTextString("nick_input"));
             m_next = game;
         }
-
     }
 } // content

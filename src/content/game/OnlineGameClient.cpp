@@ -8,16 +8,16 @@
 #include "RemotePlayerTurn.h"
 #include "../../entity/LivingEntity.h"
 #include "../../level/SpawnEvent.h"
+#include "../menu/MainMenu.h"
 
 namespace padi::content {
 
 
-    void OnlineGame::propagateSeedClient() {
+    void ClientGame::synchronizeSeed() {
         GameSeedPayload gameSeedPL;
         printf("[OnlineGame|Client] Receiving seed!\n");
-        auto host = m_lobby.remotes.front();
-        while(!host.fetch(gameSeedPL)) {
-            if(host.receive() == -1) {
+        while (!m_lobby.host.fetch(gameSeedPL)) {
+            if (m_lobby.host.receive() == -1) {
                 printf("[OnlineGame|Client] Lost connection!\n");
                 exit(-1);
             }
@@ -27,17 +27,17 @@ namespace padi::content {
         printf("[OnlineGame|Client] Received seed %u!\n", m_seed);
     }
 
-    void OnlineGame::initializePlayersClient() {
+    void ClientGame::initializeCharacters() {
         auto apollo = m_level->getApollo();
         PlayerSpawnPayload playerSpawnPL;
         PlayerAssignAbilityPayload playerAbilityPL;
         std::shared_ptr<Character> player;
-        LocalPlayerTurn localPlayerTurn(&m_uiContext, m_lobby.remotes);
-        auto &host = m_lobby.remotes.front();
-        RemotePlayerTurn remotePlayerTurn(host);
-        for (size_t id = 0; id < m_lobby.remotes.size() + 1; ++id) {
-            while(!host.fetch(playerSpawnPL)) {
-                if(host.receive() == -1) {
+        std::vector<InOutBox> remotes = {m_lobby.host};
+        LocalPlayerTurn localPlayerTurn(&m_uiContext, remotes);
+        RemotePlayerTurn remotePlayerTurn(m_lobby.host);
+        for (size_t id = 0; id < m_lobby.names.size(); ++id) {
+            while (!m_lobby.host.fetch(playerSpawnPL)) {
+                if (m_lobby.host.receive() == -1) {
                     printf("[OnlineGame|Client] Lost connection!\n");
                     exit(-1);
                 }
@@ -52,9 +52,9 @@ namespace padi::content {
             );
             player->entity->setColor(playerSpawnPL.color);
 
-            for(int i = 0; i < 4; ++i) {
-                while(!host.fetch(playerAbilityPL)) {
-                    if(host.receive() == -1) {
+            for (int i = 0; i < 4; ++i) {
+                while (!m_lobby.host.fetch(playerAbilityPL)) {
+                    if (m_lobby.host.receive() == -1) {
                         printf("[OnlineGame|Client] Lost connection!\n");
                         exit(-1);
                     }
@@ -80,31 +80,31 @@ namespace padi::content {
 
     }
 
-    void OnlineGame::propagateLobbyClient(const std::string &basicString) {
+    void ClientGame::synchronizeLobby(const std::string &ownName) {
+        sf::Packet packet;
         LobbySizePayload lobbySizePL;
         PlayerNamePayload namePL;
-        sf::Packet packet;
         // CLIENT   receive lobby size
         // CLIENT   send your name
         // CLIENT   receive all names
         printf("[OnlineGame|Client] Receiving lobby size!\n");
-        auto host = m_lobby.remotes.front();
-        while(!host.fetch(lobbySizePL)) {
-            if(host.receive() == -1) {
+        while (!m_lobby.host.fetch(lobbySizePL)) {
+            if (m_lobby.host.receive() == -1) {
                 printf("[OnlineGame|Client] Lost connection!\n");
                 exit(-1);
             }
         }
         printf("[OnlineGame|Client] Received lobby size: %hhu!\n", lobbySizePL.players);
+        m_lobby.size = lobbySizePL.players;
+        m_lobby.names.resize(m_lobby.size, "");
         printf("[OnlineGame|Client] Sending own name!\n");
-        m_lobby.names.resize(lobbySizePL.players, "");
-        std::memcpy(&namePL.name, basicString.c_str(), std::min(8ull, basicString.length()));
+        std::memcpy(&namePL.name, ownName.c_str(), std::min(8ull, ownName.length()));
         PackagePayload(packet, namePL);
-        host.send(packet);
+        m_lobby.host.send(packet);
         printf("[OnlineGame|Client] Sent own name!\n");
         for (size_t id = 0; id < m_lobby.names.size() - 1; ++id) {
-            while(!host.fetch(namePL)) {
-                if(host.receive() == -1) {
+            while (!m_lobby.host.fetch(namePL)) {
+                if (m_lobby.host.receive() == -1) {
                     printf("[OnlineGame|Client] Lost connection!\n");
                     exit(-1);
                 }
@@ -114,4 +114,69 @@ namespace padi::content {
         }
         printf("[OnlineGame|Client] Received all names!\n");
     }
+
+    void ClientGame::close() {
+        if (m_lobby.host) {
+            m_lobby.host.getSocket().lock()->disconnect();
+        }
+        m_activeChar.reset();
+    }
+
+    void ClientGame::update() {
+        auto &host = m_lobby.host;
+        if (host.receive() == -1) {
+            m_next = std::make_shared<padi::content::MainMenu>(
+                    "../media/ui.apollo",
+                    "../media/ui_sheet.png"
+            );
+            return;
+        }
+        if (host.has(PayloadType::CharacterSpawn)) {
+            PlayerSpawnPayload payload;
+            host.fetch(payload);
+            if (m_characters.find(payload.id) != m_characters.end()) {
+                // TODO
+            } else {
+
+            }
+        }
+        if (host.has(PayloadType::ChatMessage)) {
+            ChatMessagePayload payload;
+            host.fetch(payload);
+            printChatMessage(std::string(payload.message, std::min(32ull, strlen(payload.message))));
+        }
+        takeTurn();
+    }
+
+    void ClientGame::takeTurn() {
+        if (m_activeChar) {
+            if (m_activeChar->controller(shared_from_this(), m_activeChar)) {
+                m_activeChar.reset();
+            }
+        } else {
+            CharacterTurnBeginPayload nextTurn(0);
+            if (m_lobby.host.fetch(nextTurn)) {
+                printf("[OnlineGame|Client] Character %u is starting their turn.\n", nextTurn.characterId);
+                m_activeChar = m_characters.at(nextTurn.characterId);
+                if (m_activeChar->entity) {
+                    m_level->centerView(m_activeChar->entity->getPosition());
+                    m_level->moveCursor(m_activeChar->entity->getPosition());
+                }
+            }
+        }
+    }
+
+    void ClientGame::sendChatMessage(const std::string &msg) {
+        ChatMessagePayload msgPayload;
+        std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), 32ull));
+        sf::Packet packet = PackagePayload(msgPayload);
+        m_lobby.host.send(packet);
+        m_uiContext.setFocusActive(false);
+    }
+
+    ClientGame::ClientGame(InOutBox &host, const std::string &name)
+            : m_lobby({host}) {
+        synchronize(name);
+    }
+
 }
