@@ -16,6 +16,7 @@ namespace padi {
     const sf::Vector2i Down{0, 1};
 
     const sf::Vector2i AllDirections[4]{Left, Right, Up, Down};
+    const sf::Vector2i Neighborhood[5]{sf::Vector2i{0,0}, Left, Right, Up, Down};
 
     const sf::Vector2i TileSize{32,32};
     const size_t UIPadding_px{8};

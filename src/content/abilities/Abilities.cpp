@@ -89,6 +89,10 @@ namespace padi {
         return false;
     }
 
+    uint32_t content::Teleport::getAbilityType() const {
+        return AbilityType::Teleport;
+    }
+
     bool content::Lighten::cast(padi::Level *lvl, const sf::Vector2i &pos) {
         lvl->hideCursor();
         strikePos = pos;
@@ -130,6 +134,10 @@ namespace padi {
 
     bool content::Lighten::isCastComplete() {
         return m_complete;
+    }
+
+    uint32_t content::Lighten::getAbilityType() const {
+        return AbilityType::Lighten;
     }
 
     bool content::Darken::cast(padi::Level *lvl, const sf::Vector2i &pos) {
@@ -181,6 +189,10 @@ namespace padi {
 
     bool content::Darken::isCastComplete() {
         return m_complete;
+    }
+
+    uint32_t content::Darken::getAbilityType() const {
+        return AbilityType::Darken;
     }
 
     bool content::Walk::cast(padi::Level *lvl, const sf::Vector2i &pos) {
@@ -265,6 +277,16 @@ namespace padi {
 
     bool content::Walk::isCastComplete() {
         return m_complete;
+    }
+
+    uint32_t content::Walk::getAbilityType() const {
+        return AbilityType::Walk;
+    }
+
+    void content::Walk::writeProperties(uint8_t *data, uint32_t maxSize) {
+        if(maxSize > 0) {
+            data[0] = uint8_t(getRange());
+        }
     }
 
 
@@ -356,6 +378,10 @@ namespace padi {
         return false;
     }
 
+    uint32_t content::Dash::getAbilityType() const {
+        return AbilityType::Dash;
+    }
+
     bool content::Peep::isCastComplete() {
         return false;
     }
@@ -369,11 +395,19 @@ namespace padi {
     }
 
     bool content::Peep::cast(padi::Level *level, const sf::Vector2i &pos) {
+        auto blob = std::make_shared<OneshotEntity>(pos);
+        blob->m_animation = level->getApollo()->lookupAnim("air_strike");
+        level->getMap()->addEntity(blob);
+        level->addCycleEndListener(blob);
         return false;
     }
 
     content::Peep::Peep(std::shared_ptr<LivingEntity> user) : Ability(std::move(user)) {
         m_iconId = "view";
         m_description = "LOOK AROUND\n\n  Just look around - cannot be cast.";
+    }
+
+    uint32_t content::Peep::getAbilityType() const {
+        return -1; // welp
     }
 }

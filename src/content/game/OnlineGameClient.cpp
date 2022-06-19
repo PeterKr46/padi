@@ -32,8 +32,7 @@ namespace padi::content {
         PlayerSpawnPayload playerSpawnPL;
         PlayerAssignAbilityPayload playerAbilityPL;
         std::shared_ptr<Character> player;
-        std::vector<InOutBox> remotes = {m_lobby.host};
-        LocalPlayerTurn localPlayerTurn(&m_uiContext, remotes);
+        LocalPlayerTurn localPlayerTurn(&m_uiContext);
         RemotePlayerTurn remotePlayerTurn(m_lobby.host);
         for (size_t id = 0; id < m_lobby.names.size(); ++id) {
             while (!m_lobby.host.fetch(playerSpawnPL)) {
@@ -42,7 +41,7 @@ namespace padi::content {
                     exit(-1);
                 }
             }
-            player = std::make_shared<Character>(Character{uint32_t(playerSpawnPL.id)});
+            player = std::make_shared<Character>(Character{uint32_t(playerSpawnPL.character)});
             m_characters[id] = player;
 
             player->entity = std::make_shared<padi::LivingEntity>(
@@ -63,15 +62,9 @@ namespace padi::content {
             }
 
             if (playerSpawnPL.local) {
-                player->controller = [=](const std::shared_ptr<OnlineGame> &l,
-                                         const std::shared_ptr<Character> &c) mutable {
-                    return localPlayerTurn(l, c);
-                };
+                player->controller = localPlayerTurn;
             } else {
-                player->controller = [=](const std::shared_ptr<OnlineGame> &l,
-                                         const std::shared_ptr<Character> &c) mutable {
-                    return remotePlayerTurn(l, c);
-                };
+                player->controller = remotePlayerTurn;
             }
 
             auto spawnEvent = std::make_shared<padi::SpawnEvent>(player->entity);
@@ -109,8 +102,8 @@ namespace padi::content {
                     exit(-1);
                 }
             }
-            printf("[OnlineGame|Client] Received name %hhu: %.*s!\n", namePL.player, 8, namePL.name);
-            m_lobby.names[namePL.player] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
+            printf("[OnlineGame|Client] Received name %hhu: %.*s!\n", namePL.character, 8, namePL.name);
+            m_lobby.names[namePL.character] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
         }
         printf("[OnlineGame|Client] Received all names!\n");
     }
@@ -132,13 +125,30 @@ namespace padi::content {
             return;
         }
         if (host.has(PayloadType::CharacterSpawn)) {
-            PlayerSpawnPayload payload;
-            host.fetch(payload);
-            if (m_characters.find(payload.id) != m_characters.end()) {
+            PlayerSpawnPayload playerSpawnPayload;
+            host.fetch(playerSpawnPayload);
+            if (m_characters.find(playerSpawnPayload.character) != m_characters.end()) {
                 // TODO
             } else {
-
+                auto & newChar = m_characters[playerSpawnPayload.character];
+                newChar = std::make_shared<Character>(Character{playerSpawnPayload.character});
+                newChar->entity = std::make_shared<padi::LivingEntity>(
+                        "TODO",
+                        m_level->getApollo()->lookupAnimContext("cube"),
+                        playerSpawnPayload.pos);
+                if(playerSpawnPayload.local) {
+                    newChar->controller = LocalPlayerTurn(&m_uiContext);
+                } else {
+                    newChar->controller = RemotePlayerTurn(host);
+                }
+                auto spawnEvent = std::make_shared<SpawnEvent>(newChar->entity);
+                spawnEvent->dispatch(m_level);
             }
+        }
+        if(host.has(PayloadType::CharacterAbilityAssign)) {
+            PlayerAssignAbilityPayload abilityPayload;
+            host.fetch(abilityPayload);
+            assignPlayerAbility(abilityPayload);
         }
         if (host.has(PayloadType::ChatMessage)) {
             ChatMessagePayload payload;
@@ -177,6 +187,10 @@ namespace padi::content {
     ClientGame::ClientGame(InOutBox &host, const std::string &name)
             : m_lobby({host}) {
         synchronize(name);
+    }
+
+    void ClientGame::broadcast(sf::Packet &packet) {
+        m_lobby.host.send(packet);
     }
 
 }

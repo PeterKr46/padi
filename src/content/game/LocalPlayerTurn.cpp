@@ -22,8 +22,8 @@ namespace padi::content {
         DONE = 3
     };
 
-    LocalPlayerTurn::LocalPlayerTurn(UIContext *uiContext, std::vector<InOutBox> &sockets)
-            : m_uiContext(uiContext), m_remotes(sockets) {
+    LocalPlayerTurn::LocalPlayerTurn(UIContext *uiContext)
+            : m_uiContext(uiContext) {
 
     }
 
@@ -70,9 +70,7 @@ namespace padi::content {
                         printf("[LocalPlayerTurn] Casting %lld at (%i, %i)\n", m_activeAbility, payload.pos.x,
                                payload.pos.y);
                         packet.append(&payload, sizeof(payload));
-                        for (auto &remote: m_remotes) {
-                            remote.send(packet);
-                        }
+                        game->broadcast(packet);
                     }
 
                     m_hasCast = true;

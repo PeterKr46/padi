@@ -38,13 +38,17 @@ namespace padi::content {
 
         std::weak_ptr<Level> getLevel() const;
 
+        virtual void broadcast(sf::Packet &packet) = 0;
+
     protected:
 
         void synchronize(std::string const &ownName);
 
-        virtual void initializeCharacters() = 0;
-
         void assignPlayerAbility(padi::content::PlayerAssignAbilityPayload &payload);
+
+        void printChatMessage(std::string const &msg);
+
+        virtual void initializeCharacters() = 0;
 
         virtual void synchronizeLobby(std::string const &ownName) = 0;
 
@@ -53,8 +57,6 @@ namespace padi::content {
         virtual void update() = 0;
 
         virtual void sendChatMessage(const std::string &msg) = 0;
-
-        void printChatMessage(std::string const &msg);
 
     protected:
         padi::content::CRTMonitor m_crt;
@@ -68,7 +70,7 @@ namespace padi::content {
         std::mt19937 m_rand;
         std::shared_ptr<Level> m_level;
 
-        std::map<uint32_t, std::shared_ptr<Character>> m_characters;
+        std::map<uint32_t, std::shared_ptr<Character>, std::less<>> m_characters;
         std::shared_ptr<Character> m_activeChar;
 
         std::shared_ptr<padi::Activity> m_next;
@@ -76,15 +78,27 @@ namespace padi::content {
 
     class HostGame : public OnlineGame {
     public:
-        HostGame(std::vector<InOutBox> const & clients, std::string const &name, size_t seed = 8008135);
+        HostGame(std::vector<InOutBox> const &clients, std::string const &name, size_t seed = 8008135);
+
         void initializeCharacters() override;
+
         void synchronizeLobby(const std::string &name) override;
+
         void synchronizeSeed() override;
+
         void close() override;
+
         void update() override;
+
         void takeTurn();
+
         void advanceTurn();
+
         void sendChatMessage(const std::string &msg) override;
+
+        void broadcast(sf::Packet &packet) override;
+    protected:
+        uint32_t spawnCharacter(Character &c);
     private:
         std::queue<uint32_t> m_turnQueue;
         struct {
@@ -96,15 +110,24 @@ namespace padi::content {
 
     class ClientGame : public OnlineGame {
     public:
-        ClientGame(InOutBox & host, std::string const &name);
+        ClientGame(InOutBox &host, std::string const &name);
+
         void initializeCharacters() override;
+
         void synchronizeLobby(const std::string &name) override;
+
         void synchronizeSeed() override;
+
         void close() override;
+
         void update() override;
+
         void takeTurn();
 
+        void broadcast(sf::Packet &packet) override;
+
         void sendChatMessage(const std::string &msg) override;
+
     private:
         struct {
             InOutBox host;

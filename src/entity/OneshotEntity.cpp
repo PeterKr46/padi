@@ -22,6 +22,10 @@ namespace padi {
         return false;
     }
 
+    void OneshotEntity::dispatch(Level * l) {
+        l->addCycleBeginListener(shared_from_this());
+    }
+
     OneshotEntityStack::OneshotEntityStack(const sf::Vector2i &pos) : EntityStack(pos) {
 
     }
@@ -37,5 +41,9 @@ namespace padi {
 
         level->getMap()->removeEntity(shared_from_this());
         return false;
+    }
+
+    void OneshotEntityStack::dispatch(Level * l) {
+        l->addCycleBeginListener(shared_from_this());
     }
 } // padi

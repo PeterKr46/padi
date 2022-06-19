@@ -9,6 +9,7 @@
 #include "RemotePlayerTurn.h"
 #include "../../level/SpawnEvent.h"
 #include "Character.h"
+#include "../npc/Mob.h"
 
 namespace padi::content {
     void HostGame::synchronizeSeed() {
@@ -29,9 +30,9 @@ namespace padi::content {
         PlayerSpawnPayload playerSpawnPL;
         PlayerAssignAbilityPayload playerAbilityPL;
         std::shared_ptr<Character> player;
-        LocalPlayerTurn localPlayerTurn(&m_uiContext, m_lobby.remotes);
+        LocalPlayerTurn localPlayerTurn(&m_uiContext);
         for (size_t id = 0; id < m_lobby.remotes.size() + 1; ++id) {
-            playerSpawnPL.id = id;
+            playerSpawnPL.character = id;
             playerSpawnPL.pos = sf::Vector2i{int(id), 0};
             playerSpawnPL.color = sf::Color(m_rand()); // TODO rand progression!
             playerSpawnPL.color.a = 255;
@@ -54,7 +55,7 @@ namespace padi::content {
             for (int i = 0; i < 4; ++i) {
                 playerAbilityPL.abilityProps[0] = 3;
                 playerAbilityPL.abilitySlot = i;
-                playerAbilityPL.playerId = id;
+                playerAbilityPL.character = id;
                 for (auto &remote: m_lobby.remotes) {
                     remote.send(PackagePayload(packet, playerAbilityPL));
                 }
@@ -63,21 +64,18 @@ namespace padi::content {
             }
 
             if (id < m_lobby.remotes.size()) {
-                RemotePlayerTurn remotePlayerTurn(m_lobby.remotes[id]);
-                player->controller = [=](const std::shared_ptr<OnlineGame> &l,
-                                         const std::shared_ptr<Character> &c) mutable {
-                    return remotePlayerTurn(l, c);
-                };
+                player->controller = RemotePlayerTurn(m_lobby.remotes[id]);
             }
 
             auto spawnEvent = std::make_shared<padi::SpawnEvent>(player->entity);
             spawnEvent->dispatch(m_level);
             m_turnQueue.push(id);
         }
-        m_characters.at(m_lobby.remotes.size())->controller = [=](const std::shared_ptr<OnlineGame> &l,
-                                                                  const std::shared_ptr<Character> &c) mutable {
-            return localPlayerTurn(l, c);
-        };
+        m_characters.at(m_lobby.remotes.size())->controller = LocalPlayerTurn(&m_uiContext);
+
+        auto mob = std::make_shared<Mob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"), sf::Vector2i{3,3});
+        auto cr = mob->asCharacter(0);
+        spawnCharacter(cr);
     }
 
     void HostGame::synchronizeLobby(const std::string &name) {
@@ -107,14 +105,14 @@ namespace padi::content {
                     exit(-1);
                 }
             }
-            namePL.player = id;
+            namePL.character = id;
             m_lobby.names[id] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
             printf("[OnlineGame|Server] Received name %zu: %.*s!\n", id, 8, namePL.name);
         }
         for (size_t id = 0; id < m_lobby.remotes.size(); ++id) {
 
             auto &playerName = m_lobby.names[id];
-            namePL.player = id;
+            namePL.character = id;
             std::memcpy(&namePL.name, playerName.c_str(), std::min(8ull, playerName.length()));
             PackagePayload(packet, namePL);
 
@@ -125,13 +123,11 @@ namespace padi::content {
             }
         }
         std::memcpy(&namePL.name, name.c_str(), std::min(8ull, name.length()));
-        namePL.player = m_lobby.remotes.size();
-        printf("[OnlineGame|Server] Propagating own name %i: %.*s!\n", namePL.player, 8, namePL.name);
+        namePL.character = m_lobby.remotes.size();
+        printf("[OnlineGame|Server] Propagating own name %i: %.*s!\n", namePL.character, 8, namePL.name);
         m_lobby.names.back() = name;
         PackagePayload(packet, namePL);
-        for (auto &remote: m_lobby.remotes) {
-            remote.send(packet);
-        }
+        broadcast(packet);
     }
 
     void HostGame::close() {
@@ -159,10 +155,8 @@ namespace padi::content {
                     if (client.has(PayloadType::ChatMessage)) {
                         ChatMessagePayload payload;
                         client.fetch(payload);
-                        sf::Packet packet = PackagePayload(payload);
-                        for (auto &remote: m_lobby.remotes) {
-                            remote.send(packet);
-                        }
+                        sf::Packet chatPacket = PackagePayload(payload);
+                        broadcast(chatPacket);
                         printChatMessage(std::string(payload.message, std::min(32ull, strlen(payload.message))));
                     }
                 }
@@ -190,10 +184,8 @@ namespace padi::content {
                        (m_activeChar->id == 0 && m_lobby.remotes.empty())) {
                 printChatMessage("Your turn.");
             }
-            auto packet = PackagePayload(CharacterTurnBeginPayload(m_activeChar->id));
-            for (auto &remote: m_lobby.remotes) {
-                remote.send(packet);
-            }
+            auto nextTurn = PackagePayload(CharacterTurnBeginPayload(m_activeChar->id));
+            broadcast(nextTurn);
         }
 
     }
@@ -212,10 +204,7 @@ namespace padi::content {
         ChatMessagePayload msgPayload;
         std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), 32ull));
         sf::Packet packet = PackagePayload(msgPayload);
-
-        for (auto &client: m_lobby.remotes) {
-            client.send(packet);
-        }
+        broadcast(packet);
         printChatMessage(msg);
     }
 
@@ -224,5 +213,32 @@ namespace padi::content {
         m_seed = seed;
         m_rand = std::mt19937(seed);
         synchronize(name);
+    }
+
+    void HostGame::broadcast(sf::Packet &packet) {
+        for (auto &client: m_lobby.remotes) {
+            if(client) client.send(packet);
+        }
+    }
+
+    uint32_t HostGame::spawnCharacter(Character & c) {
+        uint32_t cid = m_characters.rbegin()->first + 1;
+        auto & newChar = m_characters[cid];
+        newChar = std::make_shared<Character>(Character{cid, c.entity, c.abilities, c.controller, c.alive});
+        if(newChar->entity) {
+            auto spawnEvent = std::make_shared<SpawnEvent>(c.entity);
+            spawnEvent->dispatch(m_level);
+            auto package = PackagePayload(PlayerSpawnPayload{PayloadType::CharacterSpawn, cid, c.entity->getPosition(), c.entity->getColor(),false});
+            broadcast(package);
+        }
+        sf::Packet packet;
+        for(size_t aid = 0; aid < c.abilities.size(); ++aid) {
+            PlayerAssignAbilityPayload p {PayloadType::CharacterAbilityAssign, cid, uint8_t(aid),c.abilities[aid]->getAbilityType() };
+            c.abilities[aid]->writeProperties(p.abilityProps, 16);
+            PackagePayload(packet, p);
+            broadcast(packet);
+        }
+        m_turnQueue.push(cid);
+        return cid;
     }
 }

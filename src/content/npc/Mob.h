@@ -12,18 +12,6 @@
 
 namespace padi::content {
 
-    class Corruption {
-    public:
-        explicit Corruption(sf::Vector2i const& origin, float power = 0.8, float decay = 0.5);
-
-
-        bool expand(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
-
-    private:
-        float m_power;
-        float m_decay;
-        std::vector<sf::Vector2i> m_positions;
-    };
 
     class SelfDestruct : public padi::Ability, public CycleListener, public std::enable_shared_from_this<SelfDestruct> {
     public:
@@ -39,23 +27,21 @@ namespace padi::content {
 
         bool onFrameBegin(padi::Level *, uint8_t frame) override;
 
+        uint32_t getAbilityType() const override;
+
     private:
         bool m_complete = false;
     };
 
     class Mob : public padi::LivingEntity {
     public:
-        Mob(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos, std::vector<InOutBox> & sockets);
-
+        Mob(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos);
         bool takeTurn(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 
         Character asCharacter(uint32_t id);
 
     private:
-        std::shared_ptr<padi::content::Walk> m_walk;
-        std::shared_ptr<padi::content::SelfDestruct> m_explode;
         bool m_turnStarted = false;
-        std::vector<InOutBox> m_sockets;
     };
 
 } // content

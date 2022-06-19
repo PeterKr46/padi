@@ -52,7 +52,7 @@ namespace padi::content {
 
     struct alignas(64) PlayerNamePayload {
         const PayloadType type = PlayerName;
-        uint8_t player{};
+        uint8_t character{};
         char name[8] = "\0";
     };
 
@@ -63,7 +63,7 @@ namespace padi::content {
 
     struct alignas(64) PlayerSpawnPayload {
         const PayloadType type = CharacterSpawn;
-        uint32_t id{};
+        uint32_t character{};
         sf::Vector2i pos;
         sf::Color color;
         bool local{};
@@ -77,9 +77,9 @@ namespace padi::content {
 
     struct alignas(64) PlayerAssignAbilityPayload {
         const PayloadType type = CharacterAbilityAssign;
-        uint8_t playerId{};
+        uint32_t character{};
         uint8_t abilitySlot{};
-        uint8_t abilityType{};
+        uint32_t abilityType{};
         uint8_t abilityProps[16]{};
     };
 

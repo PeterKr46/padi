@@ -30,6 +30,10 @@ namespace padi {
         [[nodiscard]] virtual std::string const& getDescription() const;
         void setDescription(std::string const& description);
 
+        [[nodiscard]] virtual uint32_t getAbilityType() const = 0;
+
+        virtual void writeProperties(uint8_t* data, uint32_t maxSize) { };
+
         [[nodiscard]] std::string const& getIconId() const;
 
         [[nodiscard]] std::weak_ptr<padi::LivingEntity> getUser() const;
@@ -55,6 +59,10 @@ namespace padi {
         void setRange(size_t range);
 
         bool isCastComplete() override = 0;
+
+        [[nodiscard]] uint32_t getAbilityType() const override = 0;
+
+        void writeProperties(uint8_t* data, uint32_t maxSize) override { };
 
     protected:
         virtual void recalculateRange(Level* level);

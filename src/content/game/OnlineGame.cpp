@@ -17,6 +17,7 @@
 #include "../menu/MainMenu.h"
 #include "../vfx/MapShaker.h"
 #include "../../media/AudioPlayback.h"
+#include "../npc/Mob.h"
 
 
 namespace padi::content {
@@ -55,7 +56,7 @@ namespace padi::content {
     }
 
     void OnlineGame::assignPlayerAbility(PlayerAssignAbilityPayload &payload) {
-        auto &chr = m_characters.at(payload.playerId);
+        auto &chr = m_characters.at(payload.character);
         auto &abilities = chr->abilities;
         if (abilities.size() <= payload.abilitySlot) {
             abilities.resize(payload.abilitySlot + 1, {nullptr});
@@ -88,6 +89,10 @@ namespace padi::content {
             }
             case AbilityType::Peep: {
                 abilities[payload.abilitySlot] = std::make_shared<padi::content::Peep>(chr->entity);
+                break;
+            }
+            case AbilityType::SelfDestruct: {
+                abilities[payload.abilitySlot] = std::make_shared<padi::content::SelfDestruct>(chr->entity);
                 break;
             }
             default: {

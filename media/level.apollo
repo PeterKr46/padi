@@ -6,7 +6,8 @@
 shader base_shader ../src/shaders/crt.vert
 shader base_shader ../src/shaders/base_shader.frag
 
-anim air_strike         32 32   288 0   0 32    12
+anim floor_flicker      32 32   288 0   0 32    12
+anim air_strike         32 32   320 0   0 32    12
 anim air_strike_large   32 48   384 0   0 48    12
 anim fire               32 40   352 0   0 40    12
 

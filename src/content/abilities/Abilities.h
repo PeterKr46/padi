@@ -25,6 +25,7 @@ namespace padi::content {
             Teleport,
             Dash,
             Darken,
+            SelfDestruct,
         };
     }
 
@@ -35,6 +36,7 @@ namespace padi::content {
         void castCancel(padi::Level *level) override;
         void castIndicator(padi::Level *level) override;
         bool cast(padi::Level *level, const sf::Vector2i &pos) override;
+        uint32_t getAbilityType() const override;
     };
 
     class Lighten : public padi::Ability, public padi::CycleListener, public std::enable_shared_from_this<Lighten> {
@@ -52,6 +54,8 @@ namespace padi::content {
         bool onFrameBegin(padi::Level *, uint8_t frame) override;
 
         bool isCastComplete() override;
+
+        uint32_t getAbilityType() const override;
 
     private:
         bool m_complete{true};
@@ -74,6 +78,8 @@ namespace padi::content {
 
         bool isCastComplete() override;
 
+        uint32_t getAbilityType() const override;
+
     private:
         bool m_complete{true};
     };
@@ -91,6 +97,8 @@ namespace padi::content {
         bool isCastComplete() override;
 
         bool onCycleEnd(padi::Level *) override;
+
+        uint32_t getAbilityType() const override;
 
     private:
         bool m_complete{true};
@@ -121,6 +129,10 @@ namespace padi::content {
 
         std::vector<sf::Vector2i> const &getPossibleTargets() const;
 
+        uint32_t getAbilityType() const override;
+
+        void writeProperties(uint8_t *data, uint32_t maxSize) override;
+
     private:
         bool m_complete{true};
         std::vector<sf::Vector2i> m_path;
@@ -144,6 +156,8 @@ namespace padi::content {
         bool isCastComplete() override;
 
         bool onCycleEnd(padi::Level *) override;
+
+        uint32_t getAbilityType() const override;
 
     private:
         bool m_complete{true};

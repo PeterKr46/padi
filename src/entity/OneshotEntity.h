@@ -26,6 +26,8 @@ namespace padi {
         bool onCycleBegin(Level *) override;
 
         bool onCycleEnd(Level *) override;
+
+        void dispatch(Level *);
     };
 
     /**
@@ -41,6 +43,8 @@ namespace padi {
         bool onCycleBegin(Level *) override;
 
         bool onCycleEnd(Level *) override;
+
+        void dispatch(Level *);
     };
 
 } // padi
