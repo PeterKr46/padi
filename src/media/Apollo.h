@@ -13,7 +13,25 @@
 
 namespace padi {
 
-    typedef std::map<std::string, std::shared_ptr<padi::Animation>> AnimationSet;
+    class Apollo;
+
+    class AnimationSet {
+    public:
+        AnimationSet() = default;
+        explicit AnimationSet(std::string  name);
+
+        bool has(const std::string& name) const;
+
+        [[nodiscard]] std::shared_ptr<padi::Animation> const& at(const std::string& name) const;
+
+        [[nodiscard]] std::string const& getName() const;
+
+    private:
+        friend class Apollo;
+        std::map<std::string, std::shared_ptr<padi::Animation>> m_map;
+        std::string m_name;
+    };
+
     typedef std::map<std::string, std::shared_ptr<sf::SoundBuffer>> AudioSet;
 
     class Apollo {
@@ -33,14 +51,18 @@ namespace padi {
 
         [[nodiscard]] std::shared_ptr<padi::Animation> lookupAnim(std::string const &animName) const;
 
-        [[nodiscard]] std::shared_ptr<padi::Animation> lookupAnim(std::string const &ctxName, std::string const &animName) const;
+        [[nodiscard]] std::shared_ptr<padi::Animation>
+        lookupAnim(std::string const &ctxName, std::string const &animName) const;
 
         [[nodiscard]] const padi::AnimationSet *lookupAnimContext(std::string const &charName) const;
 
-        bool loadShader(std::string const& name, std::string const& vert, std::string const& frag);
-        bool loadVertexShader(std::string const& name, std::string const& vert);
-        bool loadFragmentShader(std::string const& name, std::string const& vert);
-        [[nodiscard]] std::shared_ptr<sf::Shader> lookupShader(std::string const& name) const;
+        bool loadShader(std::string const &name, std::string const &vert, std::string const &frag);
+
+        bool loadVertexShader(std::string const &name, std::string const &vert);
+
+        bool loadFragmentShader(std::string const &name, std::string const &vert);
+
+        [[nodiscard]] std::shared_ptr<sf::Shader> lookupShader(std::string const &name) const;
 
         void addSoundBuffer(std::string const &name, std::shared_ptr<sf::SoundBuffer> sound);
 

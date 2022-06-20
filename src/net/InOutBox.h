@@ -36,6 +36,17 @@ namespace padi::content {
             return false;
         }
 
+        template<typename Payload>
+        bool fetchBlocking(Payload & payload) {
+            while(!fetch(payload)) {
+                if(receive() == -1) {
+                    printf("[InOutBox] Lost connection.\n");
+                    return false;
+                }
+            }
+            return true;
+        }
+
         [[nodiscard]] bool has(PayloadType payloadType) const;
 
         [[nodiscard]] size_t count(PayloadType payloadType) const;

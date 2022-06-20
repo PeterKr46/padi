@@ -19,7 +19,7 @@ namespace padi::content {
 
     namespace AbilityType {
         enum : uint8_t {
-            Peep,
+            Peep = 0,
             Walk,
             Lighten,
             Teleport,

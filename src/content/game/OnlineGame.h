@@ -44,7 +44,7 @@ namespace padi::content {
 
         void synchronize(std::string const &ownName);
 
-        void assignPlayerAbility(padi::content::PlayerAssignAbilityPayload &payload);
+        void assignPlayerAbility(padi::content::CharacterAbilityAssignPayload &payload);
 
         void printChatMessage(std::string const &msg);
 
@@ -98,7 +98,7 @@ namespace padi::content {
 
         void broadcast(sf::Packet &packet) override;
     protected:
-        uint32_t spawnCharacter(Character &c);
+        uint32_t spawnCharacter(Character const& c, uint32_t owner = 0);
     private:
         std::queue<uint32_t> m_turnQueue;
         struct {
@@ -134,5 +134,8 @@ namespace padi::content {
             std::vector<std::string> names;
             uint8_t size;
         } m_lobby;
+
+        void spawnNewCharacter(CharacterSpawnPayload payload);
+        void spawnNewEntity(EntitySpawnPayload payload);
     };
 } // content

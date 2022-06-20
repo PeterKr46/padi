@@ -19,7 +19,7 @@ namespace padi {
             : m_entity(std::move(entity)) {
         m_entity->trySetAnimation("spawn");
         auto apolloCtx = m_entity->getAnimationSet();
-        if (apolloCtx->find("spawn_ray") != apolloCtx->end()) {
+        if(apolloCtx->has("spawn_ray")) {
             m_ray = std::make_shared<OneshotEntityStack>(pos);
             m_ray->m_color = m_entity->getColor();
             m_ray->m_animation = apolloCtx->at("spawn_ray");

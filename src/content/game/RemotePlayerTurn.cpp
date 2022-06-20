@@ -30,7 +30,7 @@ namespace padi::content {
 
     bool RemotePlayerTurn::operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr) {
         auto level = game->getLevel().lock();
-        PlayerCastPayload payload;
+        CharacterCastPayload payload;
         RemoteTurnState state = IDLE;
         if (m_activeAbility != -1) {
             state = CASTING;
@@ -42,7 +42,6 @@ namespace padi::content {
             }
         }
         if (state == IDLE) {
-            // TODO use non-blocking inbox!
             if (m_socket.fetch(payload)) {
                 m_activeAbility = int8_t(payload.ability);
                 auto ability = chr->abilities[m_activeAbility];

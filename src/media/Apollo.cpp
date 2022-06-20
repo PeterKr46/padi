@@ -11,8 +11,8 @@
 
 namespace padi {
     std::shared_ptr<padi::Animation> Apollo::lookupAnim(const std::string &animName) const {
-        auto iter = m_generalAnimations.find(animName);
-        if (iter == m_generalAnimations.end()) return nullptr;
+        auto iter = m_generalAnimations.m_map.find(animName);
+        if (iter == m_generalAnimations.m_map.end()) return nullptr;
         return iter->second;
     }
 
@@ -23,14 +23,14 @@ namespace padi {
     }
 
     void Apollo::addAnimation(std::string const &name, std::shared_ptr<padi::Animation> anim) {
-        m_generalAnimations[name] = std::move(anim);
+        m_generalAnimations.m_map[name] = std::move(anim);
     }
 
     bool Apollo::initializeContext(std::string const &name) {
         if (m_animationContext.find(name) != m_animationContext.end()) {
             return false;
         } else {
-            m_animationContext[name] = {};
+            m_animationContext[name] = AnimationSet(name);
             return true;
         }
     }
@@ -39,7 +39,7 @@ namespace padi {
                               const std::shared_ptr<padi::Animation> &anim) {
         auto ctx = m_animationContext.find(name);
         if (ctx != m_animationContext.end()) {
-            ctx->second[animName] = anim;
+            ctx->second.m_map[animName] = anim;
             return true;
         } else {
             return false;
@@ -49,8 +49,8 @@ namespace padi {
     std::shared_ptr<padi::Animation> Apollo::lookupAnim(const std::string &ctxName, const std::string &animName) const {
         auto ctx = m_animationContext.find(ctxName);
         if (ctx != m_animationContext.end()) {
-            auto anim = ctx->second.find(animName);
-            if (anim != ctx->second.end()) {
+            auto anim = ctx->second.m_map.find(animName);
+            if (anim != ctx->second.m_map.end()) {
                 return anim->second;
             }
         }
@@ -69,6 +69,7 @@ namespace padi {
 
                 if (line.substr(0, 5) == "block") {
                     block = &m_animationContext[line.substr(6)];
+                    block->m_name = line.substr(6);
                     //printf("[Apollo] BLOCK '%s'\n", line.substr(6).c_str());
                 } else if (line.substr(0, 4) == "anim") {
                     auto secondspace = line.find(' ', 5);
@@ -80,28 +81,28 @@ namespace padi {
 
                     if (data.size() == 4) {
                         //printf(" static frame.\n");
-                        block->insert({key,
-                                       std::make_shared<StaticAnimation>(sf::Vector2i(data[0], data[1]),
+                        block->m_map.insert({key,
+                                             std::make_shared<StaticAnimation>(sf::Vector2i(data[0], data[1]),
                                                                          sf::Vector2f(data[2], data[3]))
                                       });
                     } else if (data.size() == 7) {
                         //printf(" %i frames.\n", data[6]);
-                        block->insert({key,
-                                       std::make_shared<SimpleAnimation>(
+                        block->m_map.insert({key,
+                                             std::make_shared<SimpleAnimation>(
                                                StripAnimation(sf::Vector2i(data[0], data[1]), {data[2], data[3]},
                                                               {data[4], data[5]}, data[6]))
                                       });
                     } else if (data.size() == 8) {
                         //printf(" %i frames.\n", data[6]);
-                        block->insert({key,
-                                       std::make_shared<SimpleAnimation>(
+                        block->m_map.insert({key,
+                                             std::make_shared<SimpleAnimation>(
                                                StripAnimation(sf::Vector2i(data[0], data[1]), {data[2], data[3]},
                                                               {data[4], data[5]}, data[6], data[7]))
                                       });
                     } else if (data.size() >= 9) {
                         //printf(" %i frames, x scale: %i\n", data[6], data[8]);
-                        block->insert({key,
-                                       std::make_shared<SimpleAnimation>(
+                        block->m_map.insert({key,
+                                             std::make_shared<SimpleAnimation>(
                                                StripAnimation(sf::Vector2i(data[0], data[1]), {data[2], data[3]},
                                                               {data[4], data[5]}, data[6], data[7]))
                                       });
@@ -176,4 +177,19 @@ namespace padi {
         return shader->loadFromFile(vert, sf::Shader::Type::Fragment);
     }
 
+    std::shared_ptr<padi::Animation> const &AnimationSet::at(const std::string& n) const {
+        return m_map.at(n);
+    }
+
+    AnimationSet::AnimationSet(std::string n) : m_name(std::move(n)) {
+
+    }
+
+    std::string const &AnimationSet::getName() const {
+        return m_name;
+    }
+
+    bool AnimationSet::has(const std::string &name) const {
+        return m_map.find(name) != m_map.end();
+    }
 } // padi

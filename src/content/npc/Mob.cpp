@@ -29,7 +29,7 @@ namespace padi::content {
             if (explode) {
                 chr->entity->intentCast(chr->abilities[1], chr->entity->getPosition());
                 {
-                    PlayerCastPayload payload;
+                    CharacterCastPayload payload;
                     payload.ability = uint8_t(1);
                     payload.pos = level->getCursorLocation();
                     sf::Packet packet = PackagePayload(payload);
@@ -56,7 +56,7 @@ namespace padi::content {
                 chr->entity->intentCast(walk, target);
                 {
                     sf::Packet packet;
-                    PlayerCastPayload payload;
+                    CharacterCastPayload payload;
                     payload.ability = uint8_t(0);
                     payload.pos = target;
                     printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);

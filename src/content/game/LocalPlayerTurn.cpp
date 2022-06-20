@@ -64,7 +64,7 @@ namespace padi::content {
                     character->entity->intentCast(character->abilities[m_activeAbility], level->getCursorLocation());
                     {
                         sf::Packet packet;
-                        PlayerCastPayload payload;
+                        CharacterCastPayload payload;
                         payload.ability = uint8_t(m_activeAbility);
                         payload.pos = level->getCursorLocation();
                         printf("[LocalPlayerTurn] Casting %lld at (%i, %i)\n", m_activeAbility, payload.pos.x,

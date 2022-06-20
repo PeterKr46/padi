@@ -408,6 +408,6 @@ namespace padi {
     }
 
     uint32_t content::Peep::getAbilityType() const {
-        return -1; // welp
+        return AbilityType::Peep;
     }
 }

@@ -29,46 +29,21 @@ namespace padi::content {
 
     void ClientGame::initializeCharacters() {
         auto apollo = m_level->getApollo();
-        PlayerSpawnPayload playerSpawnPL;
-        PlayerAssignAbilityPayload playerAbilityPL;
-        std::shared_ptr<Character> player;
+        CharacterSpawnPayload characterPL;
+        EntitySpawnPayload entityPL;
+        CharacterAbilityAssignPayload playerAbilityPL;
+        std::shared_ptr<Character> chr;
         LocalPlayerTurn localPlayerTurn(&m_uiContext);
         RemotePlayerTurn remotePlayerTurn(m_lobby.host);
         for (size_t id = 0; id < m_lobby.names.size(); ++id) {
-            while (!m_lobby.host.fetch(playerSpawnPL)) {
-                if (m_lobby.host.receive() == -1) {
-                    printf("[OnlineGame|Client] Lost connection!\n");
-                    exit(-1);
-                }
+            if (!m_lobby.host.fetchBlocking(characterPL)) {
+                exit(-1);
             }
-            player = std::make_shared<Character>(Character{uint32_t(playerSpawnPL.character)});
-            m_characters[id] = player;
-
-            player->entity = std::make_shared<padi::LivingEntity>(
-                    m_lobby.names[id],
-                    apollo->lookupAnimContext("cube"),
-                    playerSpawnPL.pos
-            );
-            player->entity->setColor(playerSpawnPL.color);
-
-            for (int i = 0; i < 4; ++i) {
-                while (!m_lobby.host.fetch(playerAbilityPL)) {
-                    if (m_lobby.host.receive() == -1) {
-                        printf("[OnlineGame|Client] Lost connection!\n");
-                        exit(-1);
-                    }
-                }
-                assignPlayerAbility(playerAbilityPL);
+            if (!m_lobby.host.fetchBlocking(entityPL)) {
+                exit(-1);
             }
-
-            if (playerSpawnPL.local) {
-                player->controller = localPlayerTurn;
-            } else {
-                player->controller = remotePlayerTurn;
-            }
-
-            auto spawnEvent = std::make_shared<padi::SpawnEvent>(player->entity);
-            spawnEvent->dispatch(m_level);
+            spawnNewCharacter(characterPL);
+            spawnNewEntity(entityPL);
         }
 
     }
@@ -81,14 +56,11 @@ namespace padi::content {
         // CLIENT   send your name
         // CLIENT   receive all names
         printf("[OnlineGame|Client] Receiving lobby size!\n");
-        while (!m_lobby.host.fetch(lobbySizePL)) {
-            if (m_lobby.host.receive() == -1) {
-                printf("[OnlineGame|Client] Lost connection!\n");
-                exit(-1);
-            }
+        if (!m_lobby.host.fetchBlocking(lobbySizePL)) {
+            exit(-1);
         }
-        printf("[OnlineGame|Client] Received lobby size: %hhu!\n", lobbySizePL.players);
-        m_lobby.size = lobbySizePL.players;
+        printf("[OnlineGame|Client] Received lobby size: %hhu!\n", lobbySizePL.numPlayers);
+        m_lobby.size = lobbySizePL.numPlayers;
         m_lobby.names.resize(m_lobby.size, "");
         printf("[OnlineGame|Client] Sending own name!\n");
         std::memcpy(&namePL.name, ownName.c_str(), std::min(8ull, ownName.length()));
@@ -96,14 +68,11 @@ namespace padi::content {
         m_lobby.host.send(packet);
         printf("[OnlineGame|Client] Sent own name!\n");
         for (size_t id = 0; id < m_lobby.names.size() - 1; ++id) {
-            while (!m_lobby.host.fetch(namePL)) {
-                if (m_lobby.host.receive() == -1) {
-                    printf("[OnlineGame|Client] Lost connection!\n");
-                    exit(-1);
-                }
+            if (!m_lobby.host.fetchBlocking(namePL)) {
+                exit(-1);
             }
-            printf("[OnlineGame|Client] Received name %hhu: %.*s!\n", namePL.character, 8, namePL.name);
-            m_lobby.names[namePL.character] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
+            printf("[OnlineGame|Client] Received name %hhu: %.*s!\n", namePL.cid, 8, namePL.name);
+            m_lobby.names[namePL.cid] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
         }
         printf("[OnlineGame|Client] Received all names!\n");
     }
@@ -124,33 +93,26 @@ namespace padi::content {
             );
             return;
         }
-        if (host.has(PayloadType::CharacterSpawn)) {
-            PlayerSpawnPayload playerSpawnPayload;
-            host.fetch(playerSpawnPayload);
-            if (m_characters.find(playerSpawnPayload.character) != m_characters.end()) {
-                // TODO
+        while (host.has(PayloadType::CharacterSpawn)) {
+            CharacterSpawnPayload characterSpawn;
+            host.fetch(characterSpawn);
+            spawnNewCharacter(characterSpawn);
+        }
+        while (host.has(PayloadType::EntitySpawn)) {
+            EntitySpawnPayload entitySpawn;
+            host.fetch(entitySpawn);
+            if (m_characters.find(entitySpawn.cid) == m_characters.end()) {
+                printf("[OnlineGame|Client] Received invalid Entity spawn data! (Unknown character id)\n");
             } else {
-                auto & newChar = m_characters[playerSpawnPayload.character];
-                newChar = std::make_shared<Character>(Character{playerSpawnPayload.character});
-                newChar->entity = std::make_shared<padi::LivingEntity>(
-                        "TODO",
-                        m_level->getApollo()->lookupAnimContext("cube"),
-                        playerSpawnPayload.pos);
-                if(playerSpawnPayload.local) {
-                    newChar->controller = LocalPlayerTurn(&m_uiContext);
-                } else {
-                    newChar->controller = RemotePlayerTurn(host);
-                }
-                auto spawnEvent = std::make_shared<SpawnEvent>(newChar->entity);
-                spawnEvent->dispatch(m_level);
+                spawnNewEntity(entitySpawn);
             }
         }
-        if(host.has(PayloadType::CharacterAbilityAssign)) {
-            PlayerAssignAbilityPayload abilityPayload;
+        while (host.has(PayloadType::CharacterAbilityAssign)) {
+            CharacterAbilityAssignPayload abilityPayload;
             host.fetch(abilityPayload);
             assignPlayerAbility(abilityPayload);
         }
-        if (host.has(PayloadType::ChatMessage)) {
+        while (host.has(PayloadType::ChatMessage)) {
             ChatMessagePayload payload;
             host.fetch(payload);
             printChatMessage(std::string(payload.message, std::min(32ull, strlen(payload.message))));
@@ -166,8 +128,8 @@ namespace padi::content {
         } else {
             CharacterTurnBeginPayload nextTurn(0);
             if (m_lobby.host.fetch(nextTurn)) {
-                printf("[OnlineGame|Client] Character %u is starting their turn.\n", nextTurn.characterId);
-                m_activeChar = m_characters.at(nextTurn.characterId);
+                printf("[OnlineGame|Client] Character %u is starting their turn.\n", nextTurn.cid);
+                m_activeChar = m_characters.at(nextTurn.cid);
                 if (m_activeChar->entity) {
                     m_level->centerView(m_activeChar->entity->getPosition());
                     m_level->moveCursor(m_activeChar->entity->getPosition());
@@ -191,6 +153,31 @@ namespace padi::content {
 
     void ClientGame::broadcast(sf::Packet &packet) {
         m_lobby.host.send(packet);
+    }
+
+    void ClientGame::spawnNewEntity(EntitySpawnPayload payload) {
+        auto charIter = m_characters.find(payload.cid);
+        if(charIter != m_characters.end()) {
+            auto & chr = charIter->second;
+            chr->entity = std::make_shared<padi::LivingEntity>(
+                    "TODO",
+                    m_level->getApollo()->lookupAnimContext(payload.animations),
+                    payload.pos);
+            chr->entity->setColor(payload.color);
+            auto spawnEvent = std::make_shared<SpawnEvent>(chr->entity);
+            spawnEvent->dispatch(m_level);
+        }
+    }
+
+
+    void ClientGame::spawnNewCharacter(CharacterSpawnPayload payload) {
+        auto &newChar = m_characters[payload.cid];
+        newChar = std::make_shared<Character>(Character{payload.cid});
+        if (payload.local) {
+            newChar->controller = LocalPlayerTurn(&m_uiContext);
+        } else {
+            newChar->controller = RemotePlayerTurn(m_lobby.host);
+        }
     }
 
 }

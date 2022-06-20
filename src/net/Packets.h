@@ -31,6 +31,7 @@ namespace padi::content {
         PlayerName,
         GameSeed,
         CharacterSpawn,
+        EntitySpawn,
         CharacterAbilityCast,
         CharacterAbilityAssign,
         CharacterTurnBegin,
@@ -47,13 +48,13 @@ namespace padi::content {
 
     struct alignas(64) LobbySizePayload {
         const PayloadType type = LobbySize;
-        uint8_t players{};
+        uint8_t numPlayers{};
     };
 
     struct alignas(64) PlayerNamePayload {
         const PayloadType type = PlayerName;
-        uint8_t character{};
-        char name[8] = "\0";
+        uint8_t cid{};
+        char    name[8] = "\0";
     };
 
     struct alignas(64) GameSeedPayload {
@@ -61,31 +62,43 @@ namespace padi::content {
         uint32_t seed{};
     };
 
-    struct alignas(64) PlayerSpawnPayload {
+    /**
+     * Declares the creation of a new *Character*.
+     */
+    struct alignas(64) CharacterSpawnPayload {
         const PayloadType type = CharacterSpawn;
-        uint32_t character{};
-        sf::Vector2i pos;
-        sf::Color color;
-        bool local{};
+        uint32_t    cid{};
+        bool        local{};
     };
 
-    struct alignas(64) PlayerCastPayload {
+    /**
+     * Declares the creation of a new *LivingEntity* that belongs to a specific *Character*
+     */
+    struct alignas(64) EntitySpawnPayload {
+        const PayloadType type = EntitySpawn;
+        uint32_t        cid{};
+        sf::Vector2i    pos;
+        sf::Color       color;
+        char            animations[12] = "\0";
+    };
+
+    struct alignas(64) CharacterCastPayload {
         const PayloadType type = CharacterAbilityCast;
-        uint8_t ability{};
-        sf::Vector2i pos;
+        uint8_t         ability{};
+        sf::Vector2i    pos;
     };
 
-    struct alignas(64) PlayerAssignAbilityPayload {
+    struct alignas(64) CharacterAbilityAssignPayload {
         const PayloadType type = CharacterAbilityAssign;
-        uint32_t character{};
-        uint8_t abilitySlot{};
-        uint32_t abilityType{};
-        uint8_t abilityProps[16]{};
+        uint32_t    cid{};
+        uint8_t     abilitySlot{};
+        uint32_t    abilityType{};
+        uint8_t     abilityProps[16]{};
     };
 
     struct alignas(64) CharacterTurnBeginPayload {
-        explicit CharacterTurnBeginPayload(uint32_t id) : characterId(id) {}
+        explicit CharacterTurnBeginPayload(uint32_t id) : cid(id) {}
         const PayloadType type = CharacterTurnBegin;
-        uint32_t characterId{};
+        uint32_t cid{};
     };
 }
