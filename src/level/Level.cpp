@@ -14,7 +14,7 @@
 
 namespace padi {
 
-    void handleFrameBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, Level *lvl, uint8_t frame) {
+    void handleFrameBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, std::weak_ptr<Level> lvl, uint8_t frame) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onFrameBegin(lvl, frame)) i = listeners.erase(i);
@@ -22,7 +22,7 @@ namespace padi {
         }
     }
 
-    void handleFrameEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, Level *lvl, uint8_t frame) {
+    void handleFrameEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, std::weak_ptr<Level> lvl, uint8_t frame) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onFrameEnd(lvl, frame)) i = listeners.erase(i);
@@ -30,7 +30,7 @@ namespace padi {
         }
     }
 
-    void handleCycleBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, Level *lvl) {
+    void handleCycleBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, std::weak_ptr<Level> lvl) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onCycleBegin(lvl)) i = listeners.erase(i);
@@ -38,7 +38,7 @@ namespace padi {
         }
     }
 
-    void handleCycleEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, Level *lvl) {
+    void handleCycleEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, std::weak_ptr<Level> lvl) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onCycleEnd(lvl))
@@ -63,7 +63,7 @@ namespace padi {
         }
 
         while (m_cycle.carried_uS > padi::FrameTime_uS) {
-            handleFrameEnd(m_cycleListeners.frameEnd, this, m_cycle.frame);
+            handleFrameEnd(m_cycleListeners.frameEnd, shared_from_this(), m_cycle.frame);
 
             m_view.setSize(m_viewTarget.getSize());
             auto delta = m_viewTarget.getCenter() - m_view.getCenter();
@@ -80,13 +80,13 @@ namespace padi {
             m_cycle.carried_uS -= padi::FrameTime_uS;
 
             if (m_cycle.frame + 1 == padi::CycleLength_F) {
-                handleCycleEnd(m_cycleListeners.cycleEnd, this);
+                handleCycleEnd(m_cycleListeners.cycleEnd, shared_from_this());
                 m_cycle.frame = 0;
-                handleCycleBegin(m_cycleListeners.cycleBegin, this);
+                handleCycleBegin(m_cycleListeners.cycleBegin, shared_from_this());
             } else {
                 ++m_cycle.frame;
             }
-            handleFrameBegin(m_cycleListeners.frameBegin, this, m_cycle.frame);
+            handleFrameBegin(m_cycleListeners.frameBegin, shared_from_this(), m_cycle.frame);
         }
         if (m_viewTarget.getSize().x == 0) {
             sf::Vector2f size{float(renderTarget->getSize().x) / renderTarget->getSize().y * 256, 256};

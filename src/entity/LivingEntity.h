@@ -39,8 +39,8 @@ namespace padi {
         padi::AnimationSet const* getAnimationSet() const;
         void trySetAnimation(std::string const& anim);
 
-        bool onCycleBegin(Level *) override;
-        bool onCycleEnd(Level *) override;
+        bool onCycleBegin(std::weak_ptr<padi::Level> const &lvl) override;
+        bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;
 
         void setColor(sf::Color const &color);
         sf::Color getColor() const;

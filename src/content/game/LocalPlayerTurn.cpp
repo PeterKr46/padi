@@ -11,6 +11,7 @@
 #include "../../entity/LivingEntity.h"
 #include "../../entity/Ability.h"
 #include "../../ui/Immediate.h"
+#include "../../media/AudioPlayback.h"
 #include "../../level/Level.h"
 
 
@@ -56,10 +57,12 @@ namespace padi::content {
                 level->pause();
                 m_activeAbility = 0;
                 m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(), {8, 8});
+                auto ap = std::make_shared<AudioPlayback>(m_uiContext->getApollo()->lookupAudio("select"));
+                ap->start(level);
             }
         } else if (state == SELECTING) {
             if (!level->isPaused()) {
-                character->abilities[m_activeAbility]->castIndicator(level.get());
+                character->abilities[m_activeAbility]->castIndicator(level);
                 if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
                     character->entity->intentCast(character->abilities[m_activeAbility], level->getCursorLocation());
                     {
@@ -76,7 +79,7 @@ namespace padi::content {
                     m_hasCast = true;
                     level->hideCursor();
                 } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
-                    character->abilities[m_activeAbility]->castCancel(level.get());
+                    character->abilities[m_activeAbility]->castCancel(level);
                     level->pause();
                     m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(), {8, 8});
                 }
@@ -86,19 +89,24 @@ namespace padi::content {
                     m_uiContext->removeText("ability");
                 } else {
                     if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
-                        character->abilities[m_activeAbility]->castCancel(level.get());
+                        character->abilities[m_activeAbility]->castCancel(level);
                         level->play();
                         m_uiContext->removeText("ability");
                         m_activeAbility = -1;
                     } else {
+                        int dir = 0;
                         if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
-                            character->abilities[m_activeAbility]->castCancel(&(*level));
+                            dir = -1;
                             m_activeAbility = (int64_t(character->abilities.size()) + m_activeAbility - 1) % int64_t(character->abilities.size());
-                            m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),{8, 8});
                         } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
-                            character->abilities[m_activeAbility]->castCancel(&(*level));
+                            dir = 1;
                             m_activeAbility = (m_activeAbility + 1) % int64_t(character->abilities.size());
+                        }
+                        if(dir != 0) {
+                            character->abilities[m_activeAbility]->castCancel(level);
                             m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),{8, 8});
+                            auto ap = std::make_shared<AudioPlayback>(m_uiContext->getApollo()->lookupAudio("select"));
+                            ap->start(level);
                         }
                         auto numAbilities = character->abilities.size();
                         sf::FloatRect bounds{223 - 20 * float(numAbilities), 256 - 72, 40 * float(numAbilities) - 8, 32};

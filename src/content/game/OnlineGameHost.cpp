@@ -166,7 +166,7 @@ namespace padi::content {
                 m_lobby.remotes[m_activeChar->id].send(packet);
             } else if (m_activeChar->id == m_lobby.remotes.size() ||
                        (m_activeChar->id == 0 && m_lobby.remotes.empty())) {
-                printChatMessage("Your turn.");
+                printChatMessage("Your turn.", true);
             }
             auto nextTurn = PackagePayload(CharacterTurnBeginPayload(m_activeChar->id));
             broadcast(nextTurn);
@@ -190,6 +190,8 @@ namespace padi::content {
     }
 
     void HostGame::sendChatMessage(const std::string &msg) {
+        if(msg.empty()) return;
+
         ChatMessagePayload msgPayload;
         if(msg == "exit") {
             m_next = std::make_shared<MainMenu>(
@@ -201,7 +203,7 @@ namespace padi::content {
         std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), sizeof(msgPayload.message)));
         sf::Packet packet = PackagePayload(msgPayload);
         broadcast(packet);
-        printChatMessage(m_lobby.names[m_lobby.size-1] + ": " + msg.substr(0, sizeof(msgPayload.message)));
+        printChatMessage(m_lobby.names[m_lobby.size-1] + ": " + msg.substr(0, sizeof(msgPayload.message)), true);
     }
 
     HostGame::HostGame(const std::vector<InOutBox> &clients, const std::string &name, size_t seed)

@@ -21,11 +21,11 @@ namespace padi {
 
         void dispatch(std::shared_ptr<Level> const &level);
 
-        bool onCycleBegin(Level *) override;
+        bool onCycleBegin(std::weak_ptr<padi::Level> const &lvl) override;
 
-        bool onCycleEnd(Level *) override;
+        bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;
 
-        bool onFrameBegin(Level *, uint8_t frame) override;
+        bool onFrameBegin(std::weak_ptr<padi::Level> const &lvl, uint8_t frame) override;
 
         bool pullFocus{false};
 

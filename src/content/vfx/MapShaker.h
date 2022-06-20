@@ -4,13 +4,14 @@
 
 #pragma once
 
+#include <memory>
 #include "../../level/CycleListener.h"
 
 namespace padi::content {
 
     class MapShaker : public CycleListener{
     public:
-        bool onFrameBegin(padi::Level *, uint8_t frame) override;
+        bool onFrameBegin(const std::weak_ptr<Level> &lvl, uint8_t frame) override;
     private:
         int m_numFrames = 0;
         int m_maxFrames = 14;

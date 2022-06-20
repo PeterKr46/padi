@@ -11,13 +11,13 @@ namespace padi {
 
     class CycleListener {
     public:
-        virtual bool onCycleBegin(padi::Level *) { return false; }
+        virtual bool onCycleBegin(std::weak_ptr<padi::Level> const &lvl) { return false; }
 
-        virtual bool onCycleEnd(padi::Level *) { return false; }
+        virtual bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) { return false; }
 
-        virtual bool onFrameBegin(padi::Level *, uint8_t frame) { return false; }
+        virtual bool onFrameBegin(std::weak_ptr<padi::Level> const &lvl, uint8_t frame) { return false; }
 
-        virtual bool onFrameEnd(padi::Level *, uint8_t frame) { return false; }
+        virtual bool onFrameEnd(std::weak_ptr<padi::Level> const &lvl, uint8_t frame) { return false; }
     };
 
 }

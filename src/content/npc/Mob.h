@@ -17,15 +17,15 @@ namespace padi::content {
     public:
         explicit SelfDestruct(std::shared_ptr<padi::LivingEntity> user);
 
-        bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
+        bool cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) override;
 
-        void castCancel(padi::Level *level) override;
+        void castCancel(const std::weak_ptr<Level> &level) override;
 
-        void castIndicator(padi::Level *level) override;
+        void castIndicator(const std::weak_ptr<Level> &level) override;
 
         bool isCastComplete() override;
 
-        bool onFrameBegin(padi::Level *, uint8_t frame) override;
+        bool onFrameBegin(std::weak_ptr<padi::Level> const &lvl, uint8_t frame) override;
 
         uint32_t getAbilityType() const override;
 

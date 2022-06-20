@@ -113,9 +113,9 @@ namespace padi::content {
             ChatMessagePayload payload;
             host.fetch(payload);
             if(payload.cid == -1) {
-                printChatMessage(std::string(payload.message, std::min(sizeof(payload.message), strlen(payload.message))));
+                printChatMessage(std::string(payload.message, std::min(sizeof(payload.message), strlen(payload.message))), true);
             } else {
-                printChatMessage(m_lobby.names[payload.cid] + ": " + std::string(payload.message, std::min(sizeof(payload.message), strlen(payload.message))));
+                printChatMessage(m_lobby.names[payload.cid] + ": " + std::string(payload.message, std::min(sizeof(payload.message), strlen(payload.message))),true);
             }
         }
         while(host.has(PayloadType::PlayerDespawn)) {
@@ -154,6 +154,7 @@ namespace padi::content {
     }
 
     void ClientGame::sendChatMessage(const std::string &msg) {
+        if(msg.empty()) return;
         sf::Packet packet = PackagePayload(ChatMessagePayload(0, msg.c_str()));
         m_lobby.host.send(packet);
         m_uiContext.setFocusActive(false);

@@ -58,7 +58,8 @@ namespace padi::content {
         if (abilities.size() <= payload.abilitySlot) {
             abilities.resize(payload.abilitySlot + 1, {nullptr});
         }
-        printf("[OnlineGame] Assigning Ability (%i, %i) to character %i\n", payload.abilityType, *payload.abilityProps, payload.cid);
+        printf("[OnlineGame] Assigning Ability (%i, %i) to character %i\n", payload.abilityType, *payload.abilityProps,
+               payload.cid);
         switch (payload.abilityType) {
             case AbilityType::Walk: {
                 abilities[payload.abilitySlot] = std::make_shared<padi::content::Walk>(
@@ -102,12 +103,15 @@ namespace padi::content {
         return m_level;
     }
 
-    void OnlineGame::printChatMessage(const std::string &msg) {
-        if(!m_chat.notification) {
-            m_chat.notification = std::make_shared<padi::AudioPlayback>(m_uiContext.getApollo()->lookupAudio("chat_msg"));
-            m_chat.notification->start(m_level.get());
+    void OnlineGame::printChatMessage(const std::string &msg, bool notify) {
+        if (notify) {
+            if (!m_chat.notification) {
+                m_chat.notification = std::make_shared<padi::AudioPlayback>(
+                        m_uiContext.getApollo()->lookupAudio("chat_msg"));
+                m_chat.notification->start(m_level);
+            }
+            m_chat.notification->restart(m_level);
         }
-        m_chat.notification->restart(m_level.get());
         m_chat.ui.write(&m_uiContext, msg);
     }
 
@@ -125,6 +129,7 @@ namespace padi::content {
         m_chat.ui.write(&m_uiContext, "Press T to chat.");
         m_chat.ui.submit = [&](std::string const &msg) {
             sendChatMessage(msg);
+            m_uiContext.setFocusActive(false);
         };
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
         initializeCharacters();

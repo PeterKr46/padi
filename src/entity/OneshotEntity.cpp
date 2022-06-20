@@ -11,14 +11,15 @@ namespace padi {
 
     }
 
-    bool OneshotEntity::onCycleBegin(Level *level) {
+    bool OneshotEntity::onCycleBegin(std::weak_ptr<padi::Level> const &lvl) {
+        auto level = lvl.lock();
         level->addCycleEndListener(shared_from_this());
         level->getMap()->addEntity(shared_from_this());
         return false;
     }
 
-    bool OneshotEntity::onCycleEnd(Level *level) {
-        level->getMap()->removeEntity(shared_from_this());
+    bool OneshotEntity::onCycleEnd(std::weak_ptr<padi::Level> const &level) {
+        level.lock()->getMap()->removeEntity(shared_from_this());
         return false;
     }
 
@@ -30,16 +31,17 @@ namespace padi {
 
     }
 
-    bool OneshotEntityStack::onCycleBegin(Level *level) {
+    bool OneshotEntityStack::onCycleBegin(std::weak_ptr<padi::Level> const &lvl) {
+        auto level = lvl.lock();
 
         level->addCycleEndListener(shared_from_this());
         level->getMap()->addEntity(shared_from_this());
         return false;
     }
 
-    bool OneshotEntityStack::onCycleEnd(Level *level) {
+    bool OneshotEntityStack::onCycleEnd(std::weak_ptr<padi::Level> const &level) {
 
-        level->getMap()->removeEntity(shared_from_this());
+        level.lock()->getMap()->removeEntity(shared_from_this());
         return false;
     }
 

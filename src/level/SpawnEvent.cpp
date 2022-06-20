@@ -28,7 +28,8 @@ namespace padi {
         }
     }
 
-    bool SpawnEvent::onCycleBegin(Level *level) {
+    bool SpawnEvent::onCycleBegin(std::weak_ptr<padi::Level> const &lvl) {
+        auto level = lvl.lock();
         if (m_ray) {
             level->getMap()->addEntity(m_entity, m_ray->getPosition());
             level->getMap()->addEntity(m_ray);
@@ -41,8 +42,8 @@ namespace padi {
         return false;
     }
 
-    bool SpawnEvent::onCycleEnd(Level *level) {
-        level->addCycleBeginListener(m_entity);
+    bool SpawnEvent::onCycleEnd(std::weak_ptr<padi::Level> const &level) {
+        level.lock()->addCycleBeginListener(m_entity);
         return false;
     }
 
@@ -50,7 +51,8 @@ namespace padi {
         level->addCycleBeginListener(shared_from_this());
     }
 
-    bool SpawnEvent::onFrameBegin(Level *level, uint8_t frame) {
+    bool SpawnEvent::onFrameBegin(std::weak_ptr<padi::Level> const &lvl, uint8_t frame) {
+        auto level = lvl.lock();
         sf::Vector2i pos = m_ray->getPosition();
         if (pullFocus)
             level->centerView(pos);

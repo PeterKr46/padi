@@ -50,7 +50,7 @@ namespace padi {
         m_locked = false;
     }
 
-    bool Cursor::onFrameBegin(padi::Level *level, uint8_t frame) {
+    bool Cursor::onFrameBegin(std::weak_ptr<padi::Level> const &level, uint8_t frame) {
         //auto tile = level->getMap()->getTile(getPosition());
         //tile->setVerticalOffset((0.5f + 0.5f * sin(float(frame) * (2 * 3.141f / CycleLength_F)) * 1.2f));
         return false;

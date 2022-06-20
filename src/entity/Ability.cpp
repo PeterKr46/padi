@@ -46,7 +46,7 @@ namespace padi {
         m_rangeChanged = true;
     }
 
-    void LimitedRangeAbility::recalculateRange(Level *level) {
+    void LimitedRangeAbility::recalculateRange(const std::weak_ptr<Level> &level) {
         m_inRange.clear();
         m_inRange.reserve((m_range * 2) * (m_range * 2));
         sf::Vector2i min = m_user->getPosition();
@@ -57,7 +57,8 @@ namespace padi {
         m_rangeChanged = false;
     }
 
-    void LimitedRangeAbility::castIndicator(padi::Level *lvl) {
+    void LimitedRangeAbility::castIndicator(const std::weak_ptr<Level> &level) {
+        auto lvl = level.lock();
         if (m_rangeChanged) {
             recalculateRange(lvl);
             if (m_inRange.size() < m_rangeIndicators.size()) {
@@ -80,7 +81,8 @@ namespace padi {
         }
     }
 
-    bool LimitedRangeAbility::cast(padi::Level *level, const sf::Vector2i &pos) {
+    bool LimitedRangeAbility::cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) {
+        auto level = lvl.lock();
         m_rangeChanged = true;
         for (auto const &ind: m_rangeIndicators) {
             level->getMap()->removeUIObject(ind);
@@ -88,7 +90,8 @@ namespace padi {
         return true;
     }
 
-    void LimitedRangeAbility::castCancel(padi::Level *level) {
+    void LimitedRangeAbility::castCancel(const std::weak_ptr<Level> &lvl) {
+        auto level = lvl.lock();
         m_rangeChanged = true;
         for (auto const &ind: m_rangeIndicators) {
             level->getMap()->removeUIObject(ind);

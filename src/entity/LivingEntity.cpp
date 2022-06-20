@@ -76,7 +76,7 @@ padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_
     return 4;
 }
 
-bool padi::LivingEntity::onCycleBegin(padi::Level *lvl) {
+bool padi::LivingEntity::onCycleBegin(std::weak_ptr<padi::Level> const &lvl) {
     if (m_intent.move) {
         //std::cout << "[padi::LivingEntity(" << m_name << ")] Moving." << std::endl;
         m_intent.move = false;
@@ -85,7 +85,7 @@ bool padi::LivingEntity::onCycleBegin(padi::Level *lvl) {
         m_animation = anims.first;
         m_slaves.front()->m_animation = anims.second;
         m_slaves.front()->m_color = m_color;
-        lvl->getMap()->addEntity(m_slaves.front(), getPosition() + m_intent.move_dir);
+        lvl.lock()->getMap()->addEntity(m_slaves.front(), getPosition() + m_intent.move_dir);
     } else if (m_intent.cast) {
         //std::cout << "[padi::LivingEntity(" << m_name << ")] Casting." << std::endl;
         m_intent.cast = false;
@@ -99,11 +99,12 @@ bool padi::LivingEntity::onCycleBegin(padi::Level *lvl) {
     return true;
 }
 
-bool padi::LivingEntity::onCycleEnd(padi::Level *lvl) {
+bool padi::LivingEntity::onCycleEnd(std::weak_ptr<padi::Level> const &lvl) {
     if (m_inAction.move) {
+        auto level = lvl.lock();
         m_inAction.move = false;
-        lvl->getMap()->removeEntity(m_slaves.front());
-        lvl->getMap()->moveEntity(shared_from_this(), m_slaves.front()->getPosition());
+        level->getMap()->removeEntity(m_slaves.front());
+        level->getMap()->moveEntity(shared_from_this(), m_slaves.front()->getPosition());
         m_animation = m_apolloCtx->at("idle");
     }
     if (m_inAction.cast || m_inAction.cast_failed) {

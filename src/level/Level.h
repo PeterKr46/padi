@@ -14,10 +14,11 @@
 namespace padi {
 
     class LevelGenerator;
+
     class Cursor;
 
     class Level
-            : public sf::Drawable {
+            : public sf::Drawable, public std::enable_shared_from_this<Level> {
         friend class LevelGenerator;
 
     public:
@@ -45,19 +46,26 @@ namespace padi {
 
         bool addCycleEndListener(std::shared_ptr<CycleListener> const &listener);
 
-        const Apollo* getApollo() const;
+        const Apollo *getApollo() const;
 
         size_t getVBOCapacity() const;
 
-        void initCursor(std::string const& anim);
+        void initCursor(std::string const &anim);
+
         sf::Vector2i getCursorLocation() const;
-        void moveCursor(sf::Vector2i const & pos);
+
+        void moveCursor(sf::Vector2i const &pos);
+
         void hideCursor();
+
         void showCursor();
 
         void pause();
+
         void play();
+
         bool togglePause();
+
         bool isPaused() const;
 
         std::shared_ptr<padi::Cursor> getCursor() const;

@@ -19,11 +19,11 @@ namespace padi {
     public:
         explicit Ability(std::shared_ptr<padi::LivingEntity> user);
 
-        virtual bool cast(padi::Level *level, sf::Vector2i const &pos) = 0;
+        virtual bool cast(const std::weak_ptr<Level> &level, sf::Vector2i const &pos) = 0;
 
-        virtual void castIndicator(padi::Level *level) = 0;
+        virtual void castIndicator(const std::weak_ptr<Level> &level) = 0;
 
-        virtual void castCancel(padi::Level *level) = 0;
+        virtual void castCancel(const std::weak_ptr<Level> &level) = 0;
 
         virtual bool isCastComplete() = 0;
 
@@ -48,11 +48,11 @@ namespace padi {
     public:
         LimitedRangeAbility(std::shared_ptr<padi::LivingEntity> user, size_t range);
 
-        void castIndicator(padi::Level *level) override;
+        void castIndicator(const std::weak_ptr<Level> &level) override;
 
-        bool cast(padi::Level *level, const sf::Vector2i &pos) override;
+        bool cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) override;
 
-        void castCancel(padi::Level *level) override;
+        void castCancel(const std::weak_ptr<Level> &level) override;
 
         [[nodiscard]] size_t getRange() const;
 
@@ -65,7 +65,7 @@ namespace padi {
         void writeProperties(uint8_t* data, uint32_t maxSize) override { };
 
     protected:
-        virtual void recalculateRange(Level* level);
+        virtual void recalculateRange(const std::weak_ptr<Level> &level);
         std::vector<sf::Vector2i> m_inRange;
         bool m_rangeChanged{true};
     private:

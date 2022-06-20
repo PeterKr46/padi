@@ -39,10 +39,10 @@ namespace padi::content {
                 chr->alive = false;
             } else {
                 auto walk = std::static_pointer_cast<Walk>(chr->abilities[0]);
-                walk->castIndicator(level.get());
+                walk->castIndicator(level);
                 auto const &targets = walk->getPossibleTargets();
                 if (targets.empty()) {
-                    walk->castCancel(level.get());
+                    walk->castCancel(level);
                     return true; // TODO
                 }
                 auto target = targets.back();
@@ -92,7 +92,8 @@ namespace padi::content {
 
     }
 
-    bool SelfDestruct::cast(padi::Level *lvl, const sf::Vector2i &pos) {
+    bool SelfDestruct::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
+        auto lvl = level.lock();
         for(auto & direction : Neighborhood) {
             auto strike = std::make_shared<padi::OneshotEntity>(pos + direction);
             strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
@@ -111,11 +112,11 @@ namespace padi::content {
         return true;
     }
 
-    void SelfDestruct::castCancel(padi::Level *level) {
+    void SelfDestruct::castCancel(const std::weak_ptr<Level> &level) {
 
     }
 
-    void SelfDestruct::castIndicator(padi::Level *level) {
+    void SelfDestruct::castIndicator(const std::weak_ptr<Level> &level) {
         // NOP
     }
 
@@ -123,7 +124,8 @@ namespace padi::content {
         return m_complete;
     }
 
-    bool SelfDestruct::onFrameBegin(padi::Level *lvl, uint8_t frame) {
+    bool SelfDestruct::onFrameBegin(std::weak_ptr<padi::Level> const &level, uint8_t frame) {
+        auto lvl = level.lock();
         if (frame < 8) {
             auto pos = m_user->getPosition();
             for(auto & dir : Neighborhood) {

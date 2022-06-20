@@ -17,7 +17,7 @@ namespace padi {
 
         void update(padi::Level *level);
 
-        bool onFrameBegin(padi::Level *, uint8_t frame) override;
+        bool onFrameBegin(std::weak_ptr<padi::Level> const &lvl, uint8_t frame) override;
 
         void lock();
         void unlock();

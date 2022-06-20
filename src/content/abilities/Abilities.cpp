@@ -13,7 +13,8 @@
 
 namespace padi {
 
-    bool content::Teleport::cast(padi::Level *lvl, const sf::Vector2i &pos) {
+    bool content::Teleport::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
+        auto lvl = level.lock();
         auto tile = lvl->getMap()->getTile(pos);
         if (!tile || !tile->m_walkable) {
             castCancel(lvl);
@@ -43,7 +44,8 @@ namespace padi {
         return true;
     }
 
-    void content::Teleport::castIndicator(padi::Level *level) {
+    void content::Teleport::castIndicator(const std::weak_ptr<Level> &lvl) {
+        auto level = lvl.lock();
         level->showCursor();
         auto pos = level->getCursorLocation();
         auto tile = level->getMap()->getTile(pos);
@@ -64,7 +66,8 @@ namespace padi {
         }
     }
 
-    void content::Teleport::castCancel(padi::Level *level) {
+    void content::Teleport::castCancel(const std::weak_ptr<Level> &lvl) {
+        auto level = lvl.lock();
         level->hideCursor();
         level->getMap()->removeEntity(m_ghost);
         level->getMap()->removeEntity(m_ghostFX);
@@ -84,7 +87,7 @@ namespace padi {
         return m_complete;
     }
 
-    bool content::Teleport::onCycleEnd(padi::Level *) {
+    bool content::Teleport::onCycleEnd(std::weak_ptr<padi::Level> const &lvl) {
         m_complete = true;
         return false;
     }
@@ -93,7 +96,8 @@ namespace padi {
         return AbilityType::Teleport;
     }
 
-    bool content::Lighten::cast(padi::Level *lvl, const sf::Vector2i &pos) {
+    bool content::Lighten::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
+        auto lvl = level.lock();
         lvl->hideCursor();
         strikePos = pos;
         auto strike = std::make_shared<padi::OneshotEntity>(pos);
@@ -106,11 +110,13 @@ namespace padi {
         return true;
     }
 
-    void content::Lighten::castIndicator(padi::Level *level) {
-        level->showCursor();
+    void content::Lighten::castIndicator(const std::weak_ptr<Level> &level) {
+        level.lock()->showCursor();
     }
 
-    bool content::Lighten::onFrameBegin(Level *lvl, uint8_t frame) {
+    bool content::Lighten::onFrameBegin(std::weak_ptr<padi::Level> const &level, uint8_t frame) {
+        auto lvl = level.lock();
+
         if (frame == 8) {
             auto fire = std::make_shared<padi::StaticEntity>(strikePos);
             fire->m_animation = lvl->getApollo()->lookupAnim("fire");
@@ -122,8 +128,8 @@ namespace padi {
         return true;
     }
 
-    void content::Lighten::castCancel(padi::Level *level) {
-        level->hideCursor();
+    void content::Lighten::castCancel(const std::weak_ptr<Level> &level) {
+        level.lock()->hideCursor();
         m_complete = true;
     }
 
@@ -140,7 +146,8 @@ namespace padi {
         return AbilityType::Lighten;
     }
 
-    bool content::Darken::cast(padi::Level *lvl, const sf::Vector2i &pos) {
+    bool content::Darken::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
+        auto lvl = level.lock();
         lvl->hideCursor();
         strikePos = pos;
         auto strike = std::make_shared<padi::OneshotEntity>(pos);
@@ -154,11 +161,12 @@ namespace padi {
         return true;
     }
 
-    void content::Darken::castIndicator(padi::Level *level) {
-        level->showCursor();
+    void content::Darken::castIndicator(const std::weak_ptr<Level> &level) {
+        level.lock()->showCursor();
     }
 
-    bool content::Darken::onFrameBegin(Level *lvl, uint8_t frame) {
+    bool content::Darken::onFrameBegin(std::weak_ptr<padi::Level> const &level, uint8_t frame) {
+        auto lvl = level.lock();
         auto tile = lvl->getMap()->getTile(strikePos);
         if (frame < 8) {
             auto color = tile->getColor();
@@ -178,8 +186,8 @@ namespace padi {
         return true;
     }
 
-    void content::Darken::castCancel(padi::Level *level) {
-        level->hideCursor();
+    void content::Darken::castCancel(const std::weak_ptr<Level> &level) {
+        level.lock()->hideCursor();
         m_complete = true;
     }
 
@@ -195,8 +203,9 @@ namespace padi {
         return AbilityType::Darken;
     }
 
-    bool content::Walk::cast(padi::Level *lvl, const sf::Vector2i &pos) {
-        LimitedRangeAbility::cast(lvl, pos);
+    bool content::Walk::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
+        auto lvl = level.lock();
+        LimitedRangeAbility::cast(level, pos);
         lvl->hideCursor();
         if (std::find(m_inRange.begin(), m_inRange.end(), pos) == m_inRange.end()) {
             return false;
@@ -214,20 +223,20 @@ namespace padi {
         return true;
     }
 
-    bool content::Walk::onCycleEnd(Level *lvl) {
+    bool content::Walk::onCycleEnd(std::weak_ptr<padi::Level> const &lvl) {
         if (m_path.empty()) {
             m_complete = true;
             return false;
         } else {
             m_user->intentMove(m_path.front());
-            lvl->addCycleBeginListener(shared_from_this());
+            lvl.lock()->addCycleBeginListener(shared_from_this());
 
             m_path.erase(m_path.begin());
             return true;
         }
     }
 
-    bool content::Walk::onCycleBegin(Level *lvl) {
+    bool content::Walk::onCycleBegin(std::weak_ptr<padi::Level> const &lvl) {
         /* auto ap = std::make_shared<padi::AudioPlayback>(lvl->getApollo()->lookupAudio("chord_01"));
          float pitches[3]{1.0, 1.2, 0.8};
          ap->sound.setPitch(pitches[rand() % 3]);
@@ -237,8 +246,9 @@ namespace padi {
         return false;
     }
 
-    void content::Walk::castIndicator(padi::Level *level) {
-        LimitedRangeAbility::castIndicator(level);
+    void content::Walk::castIndicator(const std::weak_ptr<Level> &lvl) {
+        auto level = lvl.lock();
+        LimitedRangeAbility::castIndicator(lvl);
         level->showCursor();
         auto tile = level->getMap()->getTile(level->getCursorLocation());
         if (!tile || !tile->m_walkable) {
@@ -246,9 +256,9 @@ namespace padi {
         }
     }
 
-    void content::Walk::castCancel(padi::Level *level) {
+    void content::Walk::castCancel(const std::weak_ptr<Level> &level) {
         LimitedRangeAbility::castCancel(level);
-        level->hideCursor();
+        level.lock()->hideCursor();
         m_complete = true;
     }
 
@@ -258,8 +268,8 @@ namespace padi {
         m_iconId = "walk";
     }
 
-    void content::Walk::recalculateRange(Level *level) {
-        m_shortestPaths = padi::Crawl(level->getMap(), m_user->getPosition(), getRange());
+    void content::Walk::recalculateRange(const std::weak_ptr<Level> &level) {
+        m_shortestPaths = padi::Crawl(level.lock()->getMap(), m_user->getPosition(), getRange());
         m_inRange.clear();
         for (auto &m_shortestPath: m_shortestPaths) {
             m_inRange.emplace_back(m_shortestPath.first);
@@ -295,7 +305,8 @@ namespace padi {
         m_iconId = "dash";
     }
 
-    bool content::Dash::cast(padi::Level *lvl, const sf::Vector2i &pos) {
+    bool content::Dash::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
+        auto lvl = level.lock();
         auto delta = pos - m_user->getPosition();
 
         if (delta.x < 0) m_direction = Left;
@@ -334,7 +345,8 @@ namespace padi {
         return true;
     }
 
-    void content::Dash::castIndicator(padi::Level *lvl) {
+    void content::Dash::castIndicator(const std::weak_ptr<Level> &level) {
+        auto lvl = level.lock();
         if (padi::Controls::wasKeyPressed(sf::Keyboard::Up)) {
             m_direction = Up;
             m_rangeChanged = true;
@@ -348,19 +360,19 @@ namespace padi {
             m_direction = Right;
             m_rangeChanged = true;
         }
-        LimitedRangeAbility::castIndicator(lvl);
+        LimitedRangeAbility::castIndicator(level);
         lvl->moveCursor(m_user->getPosition() + m_direction * int(getRange()));
         lvl->hideCursor();
         lvl->getCursor()->lock();
     }
 
-    void content::Dash::castCancel(padi::Level *lvl) {
+    void content::Dash::castCancel(const std::weak_ptr<Level> &lvl) {
         LimitedRangeAbility::castCancel(lvl);
         m_complete = true;
-        lvl->getCursor()->unlock();
+        lvl.lock()->getCursor()->unlock();
     }
 
-    void content::Dash::recalculateRange(Level *level) {
+    void content::Dash::recalculateRange(const std::weak_ptr<Level> &level) {
         m_inRange.resize(getRange());
         sf::Vector2i min = m_user->getPosition();
         for (int i = 0; i < getRange(); ++i) {
@@ -373,7 +385,7 @@ namespace padi {
         return m_complete;
     }
 
-    bool content::Dash::onCycleEnd(padi::Level *) {
+    bool content::Dash::onCycleEnd(std::weak_ptr<padi::Level> const &lvl) {
         m_complete = true;
         return false;
     }
@@ -386,15 +398,16 @@ namespace padi {
         return false;
     }
 
-    void content::Peep::castCancel(padi::Level *level) {
-        level->hideCursor();
+    void content::Peep::castCancel(const std::weak_ptr<Level> &level) {
+        level.lock()->hideCursor();
     }
 
-    void content::Peep::castIndicator(padi::Level *level) {
-        level->showCursor();
+    void content::Peep::castIndicator(const std::weak_ptr<Level> &level) {
+        level.lock()->showCursor();
     }
 
-    bool content::Peep::cast(padi::Level *level, const sf::Vector2i &pos) {
+    bool content::Peep::cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) {
+        auto level = lvl.lock();
         auto blob = std::make_shared<OneshotEntity>(pos);
         blob->m_animation = level->getApollo()->lookupAnim("air_strike");
         blob->m_color = m_user->getColor();

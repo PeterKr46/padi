@@ -13,10 +13,10 @@ namespace padi {
     public:
         explicit AudioPlayback(std::shared_ptr<sf::SoundBuffer> s);
 
-        bool onCycleEnd(padi::Level *) override;
+        bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;
 
-        void start(padi::Level *lvl);
-        void restart(padi::Level *lvl);
+        void start(const std::weak_ptr<Level>& lvl);
+        void restart(const std::weak_ptr<Level>& lvl);
 
         sf::Sound sound;
     private:

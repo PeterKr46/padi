@@ -16,7 +16,9 @@ audio high_clack        ../media/audio/the_sample_workshop/high_clack.ogg
 audio switch_on         ../media/audio/greatsoundstube/switch_on.ogg
 audio switch_off        ../media/audio/greatsoundstube/switch_off.ogg
 
-audio chat_msg          ../media/audio/the_sample_workshop/high_clack.ogg
+audio chat_msg          ../media/audio/suntemple/sfx-ui-button-click.ogg
+audio error             ../media/audio/breviceps/8-bit-error.ogg
+audio select            ../media/audio/breviceps/hit-a-ball.ogg
 
 
 anim walk               32 32   96 0    0 0 1

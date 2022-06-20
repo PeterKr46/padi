@@ -46,7 +46,7 @@ namespace padi::content {
 
         void assignPlayerAbility(padi::content::CharacterAbilityAssignPayload &payload);
 
-        void printChatMessage(std::string const &msg);
+        void printChatMessage(std::string const &msg, bool notify = false);
 
         virtual void initializeCharacters() = 0;
 

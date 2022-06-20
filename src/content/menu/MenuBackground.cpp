@@ -12,7 +12,8 @@ namespace padi::content {
 
     class Disolver : public CycleListener, public std::enable_shared_from_this<Disolver> {
     public:
-        bool onFrameBegin(Level *level, uint8_t frame) override {
+        bool onFrameBegin(std::weak_ptr<padi::Level> const &lvl, uint8_t frame) override {
+            auto level = lvl.lock();
             std::vector<sf::Vector2i> remove;
             auto rm = &remove;
             level->getMap()->for_each([level, rm](auto &&PH1) {
@@ -28,7 +29,7 @@ namespace padi::content {
             return true;
         }
 
-        static void dissolve(Level *lvl, std::vector<sf::Vector2i> *remove, std::shared_ptr<Tile> const &tile) {
+        static void dissolve(std::shared_ptr<Level> lvl, std::vector<sf::Vector2i> *remove, std::shared_ptr<Tile> const &tile) {
             static const sf::Vector2i directions[4]{
                     sf::Vector2i(0, 1),
                     sf::Vector2i(0, -1),
@@ -56,7 +57,8 @@ namespace padi::content {
             m_entities = entity;
         }
 
-        bool onCycleEnd(Level *lvl) override {
+        bool onCycleEnd(std::weak_ptr<padi::Level> const &level) override {
+            auto lvl = level.lock();
             static const sf::Vector2i directions[4]{
                     sf::Vector2i(0, 1),
                     sf::Vector2i(0, -1),

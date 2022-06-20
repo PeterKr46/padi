@@ -14,16 +14,16 @@ namespace padi {
         m_cycles = 1 + (m_buffer->getDuration().asMicroseconds() / (padi::CycleLength_F * padi::FrameTime_uS));
     }
 
-    void AudioPlayback::restart(padi::Level * lvl) {
+    void AudioPlayback::restart(const std::weak_ptr<Level>& lvl) {
         sound.play();
         if(m_hasTerminated) {
-            lvl->addCycleEndListener(shared_from_this());
+            lvl.lock()->addCycleEndListener(shared_from_this());
             m_hasTerminated = false;
         }
         m_cycles = 1 + (m_buffer->getDuration().asMicroseconds() / (padi::CycleLength_F * padi::FrameTime_uS));
     }
 
-    bool AudioPlayback::onCycleEnd(padi::Level *) {
+    bool AudioPlayback::onCycleEnd(std::weak_ptr<padi::Level> const &lvl) {
         if(m_cycles-- == 0) {
             m_hasTerminated = true;
             return false;
@@ -31,11 +31,11 @@ namespace padi {
         return true;
     }
 
-    void AudioPlayback::start(padi::Level * lvl) {
+    void AudioPlayback::start(const std::weak_ptr<Level>& lvl) {
         if(m_hasTerminated) {
             sound.play();
             m_cycles = 1 + (m_buffer->getDuration().asMicroseconds() / (padi::CycleLength_F * padi::FrameTime_uS));
-            lvl->addCycleEndListener(shared_from_this());
+            lvl.lock()->addCycleEndListener(shared_from_this());
             m_hasTerminated = false;
         }
     }

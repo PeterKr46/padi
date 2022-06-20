@@ -10,7 +10,6 @@
 #include "../../Controls.h"
 #include "SFML/Network/Packet.hpp"
 #include "../game/OnlineGame.h"
-#include "../../Constants.h"
 
 namespace padi::content {
 

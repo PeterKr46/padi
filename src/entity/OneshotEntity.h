@@ -23,9 +23,9 @@ namespace padi {
     public:
         explicit OneshotEntity(sf::Vector2i const &pos);
 
-        bool onCycleBegin(Level *) override;
+        bool onCycleBegin(std::weak_ptr<padi::Level> const &lvl) override;
 
-        bool onCycleEnd(Level *) override;
+        bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;
 
         void dispatch(Level *);
     };
@@ -40,9 +40,9 @@ namespace padi {
     public:
         explicit OneshotEntityStack(sf::Vector2i const &pos);
 
-        bool onCycleBegin(Level *) override;
+        bool onCycleBegin(std::weak_ptr<padi::Level> const &lvl) override;
 
-        bool onCycleEnd(Level *) override;
+        bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;
 
         void dispatch(Level *);
     };

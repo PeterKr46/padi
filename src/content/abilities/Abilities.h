@@ -33,9 +33,9 @@ namespace padi::content {
     public:
         explicit Peep(std::shared_ptr<LivingEntity> user);
         bool isCastComplete() override;
-        void castCancel(padi::Level *level) override;
-        void castIndicator(padi::Level *level) override;
-        bool cast(padi::Level *level, const sf::Vector2i &pos) override;
+        void castCancel(const std::weak_ptr<Level> &level) override;
+        void castIndicator(const std::weak_ptr<Level> &level) override;
+        bool cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) override;
         uint32_t getAbilityType() const override;
     };
 
@@ -45,13 +45,13 @@ namespace padi::content {
 
         sf::Vector2i strikePos;
 
-        bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
+        bool cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) override;
 
-        void castCancel(padi::Level *level) override;
+        void castCancel(const std::weak_ptr<Level> &level) override;
 
-        void castIndicator(padi::Level *level) override;
+        void castIndicator(const std::weak_ptr<Level> &level) override;
 
-        bool onFrameBegin(padi::Level *, uint8_t frame) override;
+        bool onFrameBegin(std::weak_ptr<padi::Level> const &lvl, uint8_t frame) override;
 
         bool isCastComplete() override;
 
@@ -68,13 +68,13 @@ namespace padi::content {
 
         sf::Vector2i strikePos;
 
-        bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
+        bool cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) override;
 
-        void castCancel(padi::Level *level) override;
+        void castCancel(const std::weak_ptr<Level> &level) override;
 
-        void castIndicator(padi::Level *level) override;
+        void castIndicator(const std::weak_ptr<Level> &level) override;
 
-        bool onFrameBegin(Level *, uint8_t frame) override;
+        bool onFrameBegin(std::weak_ptr<padi::Level> const &lvl, uint8_t frame) override;
 
         bool isCastComplete() override;
 
@@ -88,15 +88,15 @@ namespace padi::content {
     public:
         explicit Teleport(std::shared_ptr<padi::LivingEntity> user);
 
-        bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
+        bool cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) override;
 
-        void castCancel(padi::Level *level) override;
+        void castCancel(const std::weak_ptr<Level> &level) override;
 
-        void castIndicator(padi::Level *level) override;
+        void castIndicator(const std::weak_ptr<Level> &level) override;
 
         bool isCastComplete() override;
 
-        bool onCycleEnd(padi::Level *) override;
+        bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;
 
         uint32_t getAbilityType() const override;
 
@@ -111,17 +111,17 @@ namespace padi::content {
     public:
         Walk(std::shared_ptr<padi::LivingEntity> user, size_t range);
 
-        bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
+        bool cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) override;
 
-        void castCancel(padi::Level *level) override;
+        void castCancel(const std::weak_ptr<Level> &level) override;
 
-        void castIndicator(padi::Level *level) override;
+        void castIndicator(const std::weak_ptr<Level> &level) override;
 
-        bool onCycleEnd(Level *) override;
+        bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;
 
-        bool onCycleBegin(Level *) override;
+        bool onCycleBegin(std::weak_ptr<padi::Level> const &lvl) override;
 
-        void recalculateRange(Level *level) override;
+        void recalculateRange(const std::weak_ptr<Level> &level) override;
 
         bool isCastComplete() override;
 
@@ -145,17 +145,17 @@ namespace padi::content {
 
         Dash(std::shared_ptr<padi::LivingEntity> user, size_t range);
 
-        bool cast(padi::Level *lvl, const sf::Vector2i &pos) override;
+        bool cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) override;
 
-        void castCancel(padi::Level *level) override;
+        void castCancel(const std::weak_ptr<Level> &level) override;
 
-        void castIndicator(padi::Level *level) override;
+        void castIndicator(const std::weak_ptr<Level> &level) override;
 
-        void recalculateRange(Level *level) override;
+        void recalculateRange(const std::weak_ptr<Level> &level) override;
 
         bool isCastComplete() override;
 
-        bool onCycleEnd(padi::Level *) override;
+        bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;
 
         uint32_t getAbilityType() const override;
 
