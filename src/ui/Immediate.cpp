@@ -71,9 +71,9 @@ namespace padi {
                     frame = *ptr;
                     if (*ptr) {
                         // TODO register
-                        auto audio = std::make_shared<AudioPlayback>(ctx->getApollo()->lookupAudio("switch_on"));
+                        //auto audio = std::make_shared<AudioPlayback>(ctx->getApollo()->lookupAudio("switch_on"));
                     } else {
-                        auto audio = std::make_shared<AudioPlayback>(ctx->getApollo()->lookupAudio("switch_off"));
+                        //auto audio = std::make_shared<AudioPlayback>(ctx->getApollo()->lookupAudio("switch_off"));
                     }
                 }
             }

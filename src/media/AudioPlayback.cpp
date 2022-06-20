@@ -11,7 +11,6 @@ namespace padi {
 
     AudioPlayback::AudioPlayback(std::shared_ptr<sf::SoundBuffer> s) : m_buffer(std::move(s)) {
         sound.setBuffer(*m_buffer);
-        sound.play();
         m_cycles = 1 + (m_buffer->getDuration().asMicroseconds() / (padi::CycleLength_F * padi::FrameTime_uS));
     }
 
@@ -30,5 +29,14 @@ namespace padi {
             return false;
         }
         return true;
+    }
+
+    void AudioPlayback::start(padi::Level * lvl) {
+        if(m_hasTerminated) {
+            sound.play();
+            m_cycles = 1 + (m_buffer->getDuration().asMicroseconds() / (padi::CycleLength_F * padi::FrameTime_uS));
+            lvl->addCycleEndListener(shared_from_this());
+            m_hasTerminated = false;
+        }
     }
 }

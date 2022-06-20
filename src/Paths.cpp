@@ -25,7 +25,7 @@ namespace padi {
                 for (auto d: padi::AllDirections) {
                     sf::Vector2i neighbor = bestGuess.second + d;
                     auto neighborTile = map->getTile(neighbor);
-                    if (neighborTile && neighborTile->m_walkable ) {
+                    if (neighborTile && neighborTile->m_walkable && !map->hasEntities(neighbor) ) {
                         auto score = geodesicDistance.find(neighbor);
                         if (score == geodesicDistance.end()) {
                             frontier.push({bestGuess.first + 1, neighbor});
@@ -72,7 +72,7 @@ namespace padi {
             for (auto d: adjacency) {
                 auto neighbor = bestGuess.second + d;
                 auto neighborTile = map->getTile(neighbor);
-                if (neighborTile && neighborTile->m_walkable ) {
+                if (neighborTile && neighborTile->m_walkable &&  !map->hasEntities(neighbor)) {
                     auto score = geodesicDistance.find(neighbor);
                     if (score == geodesicDistance.end()) {
                         frontier.push({bestGuess.first + 1 + L1(neighbor, to), neighbor});

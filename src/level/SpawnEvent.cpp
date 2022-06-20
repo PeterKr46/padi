@@ -30,7 +30,7 @@ namespace padi {
 
     bool SpawnEvent::onCycleBegin(Level *level) {
         if (m_ray) {
-            level->getMap()->addEntity(m_entity, m_ray->getPosition(), ~0u);
+            level->getMap()->addEntity(m_entity, m_ray->getPosition());
             level->getMap()->addEntity(m_ray);
             level->addCycleEndListener(m_ray);
         }

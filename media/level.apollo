@@ -34,6 +34,9 @@ anim houses_a           32 32   992 288
 anim houses_b           32 32   992 320
 anim pillars            32 32   992 352
 
+# end gate
+anim end_gate           32 48   960 0
+
 # ui
 anim cursor             32 32   960 648     0 32    6  1
 anim indicator          32 32   960 832     0 32    1  11
@@ -42,6 +45,7 @@ anim cursor_alt         32 52   928 640     0 40    6  1
 # debug
 anim debug              32 41   992 640     0 32    12
 
+audio attention_ping    ../media/audio/the_sample_workshop/high_clack.ogg
 audio chord_01          ../media/audio/jorgesbcomposer/chord_01.ogg
 audio guitar_01         ../media/audio/jorgesbcomposer/string_01.ogg
 

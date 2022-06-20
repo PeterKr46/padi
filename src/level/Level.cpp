@@ -106,7 +106,9 @@ namespace padi {
 
         // draw the vertex array
         target.draw(&m_vbo[0], m_numVerts, sf::PrimitiveType::Quads, states);
-        sf::Listener::setPosition(m_view.getCenter().x, m_view.getCenter().y, 1);
+        sf::Listener::setPosition(m_view.getCenter().x, m_view.getCenter().y, 0);
+        sf::Listener::setUpVector(0, 0, 1);
+        sf::Listener::setDirection(0, 1, 0);
     }
 
     bool Level::centerView(const sf::Vector2i &position) {

@@ -311,10 +311,7 @@ namespace padi::content {
     }
 
     void MainMenu::sendChatMessage(const std::string &msg) {
-        sf::Packet packet;
-        ChatMessagePayload payload;
-        std::memcpy(payload.message, msg.c_str(), std::min(32ull, msg.length()));
-        packet.append(&payload, sizeof(payload));
+        sf::Packet packet = PackagePayload(ChatMessagePayload(-1,msg.c_str()));
         if (clientRole.client) {
             clientRole.client.send(packet);
         } else if (hostRole.active) {

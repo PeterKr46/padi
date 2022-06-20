@@ -28,14 +28,11 @@ namespace padi::content {
     }
 
     void ClientGame::initializeCharacters() {
-        auto apollo = m_level->getApollo();
         CharacterSpawnPayload characterPL;
         EntitySpawnPayload entityPL;
-        CharacterAbilityAssignPayload playerAbilityPL;
         std::shared_ptr<Character> chr;
-        LocalPlayerTurn localPlayerTurn(&m_uiContext);
         RemotePlayerTurn remotePlayerTurn(m_lobby.host);
-        for (size_t id = 0; id < m_lobby.names.size(); ++id) {
+        for (size_t id = 0; id < m_lobby.size; ++id) {
             if (!m_lobby.host.fetchBlocking(characterPL)) {
                 exit(-1);
             }
@@ -67,11 +64,11 @@ namespace padi::content {
         PackagePayload(packet, namePL);
         m_lobby.host.send(packet);
         printf("[OnlineGame|Client] Sent own name!\n");
-        for (size_t id = 0; id < m_lobby.names.size() - 1; ++id) {
+        for (size_t id = 0; id < m_lobby.names.size(); ++id) {
             if (!m_lobby.host.fetchBlocking(namePL)) {
                 exit(-1);
             }
-            printf("[OnlineGame|Client] Received name %hhu: %.*s!\n", namePL.cid, 8, namePL.name);
+            printf("[OnlineGame|Client] Received name %u: %.*s!\n", namePL.cid, 8, namePL.name);
             m_lobby.names[namePL.cid] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
         }
         printf("[OnlineGame|Client] Received all names!\n");
@@ -115,7 +112,25 @@ namespace padi::content {
         while (host.has(PayloadType::ChatMessage)) {
             ChatMessagePayload payload;
             host.fetch(payload);
-            printChatMessage(std::string(payload.message, std::min(32ull, strlen(payload.message))));
+            if(payload.cid == -1) {
+                printChatMessage(std::string(payload.message, std::min(sizeof(payload.message), strlen(payload.message))));
+            } else {
+                printChatMessage(m_lobby.names[payload.cid] + ": " + std::string(payload.message, std::min(sizeof(payload.message), strlen(payload.message))));
+            }
+        }
+        while(host.has(PayloadType::PlayerDespawn)) {
+            PlayerDespawnPayload payload;
+            host.fetch(payload);
+            auto & chr = m_characters[payload.cid];
+            chr->alive = false;
+            m_level->getMap()->removeEntity(chr->entity);
+        }
+        if(host.has(PayloadType::NextLevel)) {
+            m_next = std::make_shared<MainMenu>(
+                    "../media/ui.apollo",
+                    "../media/ui_sheet.png"
+                    );
+            return;
         }
         takeTurn();
     }
@@ -139,9 +154,7 @@ namespace padi::content {
     }
 
     void ClientGame::sendChatMessage(const std::string &msg) {
-        ChatMessagePayload msgPayload;
-        std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), 32ull));
-        sf::Packet packet = PackagePayload(msgPayload);
+        sf::Packet packet = PackagePayload(ChatMessagePayload(0, msg.c_str()));
         m_lobby.host.send(packet);
         m_uiContext.setFocusActive(false);
     }

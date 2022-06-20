@@ -39,7 +39,7 @@ namespace padi {
         [[nodiscard]] std::weak_ptr<padi::LivingEntity> getUser() const;
 
     protected:
-        std::shared_ptr<padi::LivingEntity> m_user;
+        std::shared_ptr<padi::LivingEntity> m_user; // TODO weak_ptr instead
         std::string m_description;
         std::string m_iconId;
     };

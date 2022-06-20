@@ -33,7 +33,7 @@ namespace padi {
 
         auto ap = std::make_shared<padi::AudioPlayback>(lvl->getApollo()->lookupAudio("chord_01"));
         ap->sound.setPitch((abs(pos.x) + abs(pos.y)) % 2 == 0 ? 1.2 : 1.0);
-        lvl->addCycleEndListener(ap);
+        ap->start(lvl);
 
         lvl->getMap()->removeEntity(m_user);
         auto spawnEvent = std::make_shared<padi::SpawnEvent>(m_user, pos);
@@ -397,8 +397,13 @@ namespace padi {
     bool content::Peep::cast(padi::Level *level, const sf::Vector2i &pos) {
         auto blob = std::make_shared<OneshotEntity>(pos);
         blob->m_animation = level->getApollo()->lookupAnim("air_strike");
+        blob->m_color = m_user->getColor();
         level->getMap()->addEntity(blob);
         level->addCycleEndListener(blob);
+        auto ping = std::make_shared<AudioPlayback>(level->getApollo()->lookupAudio("attention_ping"));
+        auto pingPos = Map::mapTilePosToWorld(pos);
+        ping->sound.setPosition(pingPos.x, pingPos.y, 0);
+        ping->start(level);
         return false;
     }
 

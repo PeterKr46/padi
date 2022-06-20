@@ -101,9 +101,11 @@ namespace padi::content {
     std::weak_ptr<Level> OnlineGame::getLevel() const {
         return m_level;
     }
+
     void OnlineGame::printChatMessage(const std::string &msg) {
         if(!m_chat.notification) {
             m_chat.notification = std::make_shared<padi::AudioPlayback>(m_uiContext.getApollo()->lookupAudio("chat_msg"));
+            m_chat.notification->start(m_level.get());
         }
         m_chat.notification->restart(m_level.get());
         m_chat.ui.write(&m_uiContext, msg);
@@ -120,7 +122,7 @@ namespace padi::content {
         m_uiContext.init("../media/ui.apollo", "../media/ui_sheet.png");
         m_uiContext.setFocusActive(false);
         m_chat.ui.init(&m_uiContext);
-        m_chat.ui.write(&m_uiContext, "Press T to window.");
+        m_chat.ui.write(&m_uiContext, "Press T to chat.");
         m_chat.ui.submit = [&](std::string const &msg) {
             sendChatMessage(msg);
         };

@@ -35,11 +35,18 @@ namespace padi::content {
         CharacterAbilityCast,
         CharacterAbilityAssign,
         CharacterTurnBegin,
+        PlayerDespawn,
+        NextLevel,
     };
 
     struct alignas(64) ChatMessagePayload {
+        ChatMessagePayload() = default;
+        explicit ChatMessagePayload(uint32_t origin, const char* msg) : cid(origin) {
+            std::memcpy(message, msg, std::min(strlen(msg), 32ull));
+        }
         const PayloadType type = ChatMessage;
-        char message[32] = "\0";
+        uint32_t cid{};
+        char message[22] = "\0";
     };
 
     struct alignas(64) GameStartPayload {
@@ -47,13 +54,15 @@ namespace padi::content {
     };
 
     struct alignas(64) LobbySizePayload {
+        LobbySizePayload() = default;
+        explicit LobbySizePayload(uint32_t size) : numPlayers(size) {}
         const PayloadType type = LobbySize;
         uint8_t numPlayers{};
     };
 
     struct alignas(64) PlayerNamePayload {
         const PayloadType type = PlayerName;
-        uint8_t cid{};
+        uint32_t cid{};
         char    name[8] = "\0";
     };
 
@@ -97,8 +106,20 @@ namespace padi::content {
     };
 
     struct alignas(64) CharacterTurnBeginPayload {
+        CharacterTurnBeginPayload() = default;
         explicit CharacterTurnBeginPayload(uint32_t id) : cid(id) {}
         const PayloadType type = CharacterTurnBegin;
         uint32_t cid{};
+    };
+
+    struct alignas(64) PlayerDespawnPayload {
+        PlayerDespawnPayload() = default;
+        explicit PlayerDespawnPayload(uint32_t id) : cid(id) {}
+        const PayloadType type = PlayerDespawn;
+        uint32_t cid{};
+    };
+
+    struct alignas(64) NextLevelPayload {
+        const PayloadType type = NextLevel;
     };
 }

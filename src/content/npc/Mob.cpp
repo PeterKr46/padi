@@ -107,7 +107,7 @@ namespace padi::content {
         auto audioPos = Map::mapTilePosToWorld(pos);
         ap->sound.setPosition(audioPos.x, audioPos.y, 0);
         ap->sound.setVolume(100);
-        lvl->addCycleEndListener(ap);
+        ap->start(lvl);
         return true;
     }
 
