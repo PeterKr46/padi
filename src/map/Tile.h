@@ -24,6 +24,8 @@ namespace padi {
 
         void setColor(sf::Color const &c);
 
+        void lerpColor(sf::Color const& target, float power);
+
         [[nodiscard]] sf::Color getColor() const;
 
         void setVerticalOffset(float vo);

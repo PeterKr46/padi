@@ -147,7 +147,7 @@ namespace padi {
         for(sf::Vector2i pos = {-8, -8}; pos.x <= 8; ++pos.x) {
             for ( pos.y = -8; pos.y <= 8; ++pos.y) {
                 tile = std::make_shared<padi::Tile>(pos);
-                tile->setColor(sf::Color(0x202020FF));
+                tile->setColor(sf::Color(0x222222FF));
                 float rad = sqrt(float(pos.x * pos.x) + float(pos.y * pos.y));
                 if(rad > 7) {
                     decor = std::make_shared<padi::TileDecoration>(pos);

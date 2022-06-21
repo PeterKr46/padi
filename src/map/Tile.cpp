@@ -71,4 +71,14 @@ namespace padi {
     Tile::Tile(int x, int y) : GridObject({x, y}) {
 
     }
+
+    void Tile::lerpColor(const sf::Color &c, float power) {
+        const auto* rawTarget = reinterpret_cast<const uint8_t *>(&c);
+        auto* rawStatus = reinterpret_cast<uint8_t *>(&m_color);
+        int16_t delta;
+        for(int i = 0; i < 3; ++i) {
+            delta = rawTarget[i] - rawStatus[i];
+            rawStatus[i] = rawStatus[i] + int16_t(delta * power);
+        }
+    }
 } // padi

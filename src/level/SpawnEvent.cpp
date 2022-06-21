@@ -12,14 +12,14 @@
 
 namespace padi {
 
-    SpawnEvent::SpawnEvent(const std::shared_ptr<LivingEntity>& entity)
+    SpawnEvent::SpawnEvent(const std::shared_ptr<LivingEntity> &entity)
             : SpawnEvent(entity, entity->getPosition()) {}
 
     SpawnEvent::SpawnEvent(std::shared_ptr<LivingEntity> entity, sf::Vector2i const &pos)
             : m_entity(std::move(entity)) {
         m_entity->trySetAnimation("spawn");
         auto apolloCtx = m_entity->getAnimationSet();
-        if(apolloCtx->has("spawn_ray")) {
+        if (apolloCtx->has("spawn_ray")) {
             m_ray = std::make_shared<OneshotEntityStack>(pos);
             m_ray->m_color = m_entity->getColor();
             m_ray->m_animation = apolloCtx->at("spawn_ray");
@@ -57,13 +57,18 @@ namespace padi {
         if (pullFocus)
             level->centerView(pos);
 
+        auto eColor = m_entity->getColor();
         static const int radius = 4;
         for (int x = -radius; x < radius; ++x)
             for (int y = -radius; y < radius; ++y) {
                 auto tile = level->getMap()->getTile(pos.x + x, pos.y + y);
-                float power = 32 * (1 - std::min<float>(1.f, std::sqrt(x * x + y * y) / radius));
                 if (tile) {
-                    tile->setColor(tile->getColor() + m_entity->getColor() * sf::Color(power, power, power));
+                    float power = 0.2f * (1 - std::min<float>(1.f, std::sqrt(x * x + y * y) / radius));
+                    if (tile->getColor().r + tile->getColor().g + tile->getColor().b < 100) {
+
+                    } else {
+                        tile->lerpColor(eColor, power);
+                    }
                 }
             }
 

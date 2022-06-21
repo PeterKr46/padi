@@ -142,7 +142,7 @@ namespace padi::content {
             for(auto & dir : Neighborhood) {
                 auto tile = lvl->getMap()->getTile(pos + dir);
                 auto color = tile->getColor();
-                color = sf::Color(std::max(48, color.r - 32), std::max(48, color.g - 32), std::max(48, color.b - 32),
+                color = sf::Color(std::max(32, color.r - 32), std::max(32, color.g - 32), std::max(32, color.b - 32),
                                   255);
                 tile->setColor(color);
                 tile->setVerticalOffset(float(frame % 2));
