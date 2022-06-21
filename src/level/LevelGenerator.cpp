@@ -10,10 +10,12 @@
 #include "../map/Tile.h"
 #include "../Constants.h"
 #include "../map/TileDecoration.h"
+#include "../content/vfx/MapShaker.h"
 
 namespace padi {
 
     LevelGenerator &LevelGenerator::withSeed(uint64_t seed) {
+        m_seed = seed;
         m_perlin = siv::PerlinNoise{static_cast<siv::PerlinNoise::seed_type>(seed)};
         printf("[LVL] SEED %llu\n", seed);
         return *this;
@@ -68,6 +70,10 @@ namespace padi {
     }
 
     std::shared_ptr<Level> LevelGenerator::generate() {
+        if(m_seed == 8008135) {
+            return generateTutorial();
+        }
+
         static const float zScale = 0.2f;
         static const float cScale = 0.05f;
         static const float mScale = 0.05f;
@@ -116,11 +122,73 @@ namespace padi {
 
         level->centerView(m_targetArea / 2);
         level->initCursor("cursor");
+        level->addFrameBeginListener(std::make_shared<padi::content::MapShaker>());
         return level;
     }
 
     LevelGenerator &LevelGenerator::withApollo(const std::string &path) {
         m_apolloPath = path;
         return *this;
+    }
+
+    std::shared_ptr<Level> LevelGenerator::generateTutorial() {
+        auto level = std::make_shared<Level>(m_targetArea, padi::TileSize);
+        level->m_sprites.loadFromFile(m_spritesheetPath);
+        level->m_apollo.loadFromFile(m_apolloPath);
+
+        auto map = level->getMap();
+        auto & apollo = level->m_apollo;
+
+        std::shared_ptr<padi::TileDecoration> decor;
+        std::shared_ptr<padi::Tile> tile;
+        std::mt19937 rand(m_seed);
+
+        auto mountain = apollo.lookupAnim("mountain");
+        for(sf::Vector2i pos = {-8, -8}; pos.x <= 8; ++pos.x) {
+            for ( pos.y = -8; pos.y <= 8; ++pos.y) {
+                tile = std::make_shared<padi::Tile>(pos);
+                tile->setColor(sf::Color(0x202020FF));
+                float rad = sqrt(float(pos.x * pos.x) + float(pos.y * pos.y));
+                if(rad > 7) {
+                    decor = std::make_shared<padi::TileDecoration>(pos);
+                    decor->m_animation = mountain;
+                    tile->m_walkable = false;
+                    tile->m_decoration = decor;
+                    tile->m_verticalOffset = (rad - 7) * 12;
+                }
+                map->addTile(tile);
+            }
+        }
+
+        auto rocks = apollo.lookupAnim("rocks");
+        auto hill = apollo.lookupAnim("hill");
+        auto pillars = apollo.lookupAnim("pillars");
+        for(int i = 0; i < 20; ++i) {
+            sf::Vector2i spawn{int(rand() % 14) - 7, int(rand() % 14) - 7};
+            decor = std::make_shared<padi::TileDecoration>(spawn);
+            if(rand() % 2) {
+                decor->m_animation = rocks;
+                tile = map->getTile(spawn);
+                tile->m_decoration = decor;
+                tile->m_walkable = false;
+                for (auto &dir: AllDirections) {
+                    tile = map->getTile(spawn + dir);
+                    if (!tile->m_decoration) {
+                        decor = std::make_shared<padi::TileDecoration>(spawn + dir);
+                        decor->m_animation = hill;
+                        tile->m_decoration = decor;
+                    }
+                }
+            }
+            else {
+                decor->m_animation = pillars;
+                tile = map->getTile(spawn);
+                tile->m_decoration = decor;
+                tile->m_walkable = false;
+            }
+        }
+        level->centerView({0,0});
+        level->initCursor("cursor");
+        return level;
     }
 } // padi

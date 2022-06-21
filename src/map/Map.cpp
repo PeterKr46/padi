@@ -203,5 +203,14 @@ namespace padi {
         return m_tiles.size();
     }
 
+    bool Map::hasEntities(const sf::Vector2i &pos, uint32_t t) const {
+        auto iter = m_tiles.find(pos);
+        if (iter != m_tiles.end()) {
+            auto entities = iter->second.second;
+            return std::any_of(entities.begin(), entities.end(), [t](std::shared_ptr<Entity> const& e) { return e->getType() == t;});
+        }
+        return false;
+    }
+
 
 } // padi

@@ -15,8 +15,10 @@ namespace padi {
 
     class Tile
             : public GridObject {
+        friend class LevelGenerator;
     public:
         explicit Tile(sf::Vector2i const &pos);
+        Tile(int x, int y);
 
         size_t populate(padi::Map const *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const override;
 

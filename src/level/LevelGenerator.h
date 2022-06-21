@@ -19,9 +19,11 @@ namespace padi {
         LevelGenerator& withSeed(uint64_t seed);
         LevelGenerator& withArea(sf::Vector2i const& size);
         std::shared_ptr<Level> generate();
+        std::shared_ptr<Level> generateTutorial();
     private:
         static void log(std::string const& output);
 
+        uint64_t m_seed;
         siv::PerlinNoise m_perlin;
 
         std::string m_spritesheetPath;

@@ -13,8 +13,9 @@ namespace padi {
 
     }
 
-    size_t Tile::populate(const padi::Map *context, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const {
-        sf::Vertex* quad = &array[vertexOffset];
+    size_t Tile::populate(const padi::Map *context, sf::VertexArray &array, size_t vertexOffset, uint8_t frame,
+                          float tileVerticalOffset) const {
+        sf::Vertex *quad = &array[vertexOffset];
         sf::Vector2f anchor = padi::Map::mapTilePosToWorld(getPosition());
         anchor.y += m_verticalOffset;
         sf::Vector2f tileSize(padi::TileSize);
@@ -31,7 +32,7 @@ namespace padi {
         quad[3].texCoords = sf::Vector2f(992 + 0, 32 + m_detail * tileSize.y);
 
         size_t offset = 0;
-        if(m_decoration) {
+        if (m_decoration) {
             offset += m_decoration->populate(context, array, vertexOffset + 4, frame, m_verticalOffset);
             quad = &array[vertexOffset + 4];
             quad[0].color = quad[1].color = quad[2].color = quad[3].color = m_color;
@@ -65,5 +66,9 @@ namespace padi {
 
     size_t Tile::numQuads() const {
         return m_decoration ? 2 : 1;
+    }
+
+    Tile::Tile(int x, int y) : GridObject({x, y}) {
+
     }
 } // padi

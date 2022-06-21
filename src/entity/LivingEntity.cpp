@@ -177,7 +177,7 @@ std::string const &padi::LivingEntity::getName() {
 }
 
 size_t padi::LivingEntity::numQuads() const {
-    return m_hp ? 8 : 4;
+    return m_hp ? 2 : 1;
 }
 
 std::weak_ptr<padi::HPBar> padi::LivingEntity::getHPBar() {

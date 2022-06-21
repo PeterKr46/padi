@@ -22,7 +22,7 @@ namespace padi::content {
         if (!m_turnStarted) {
             bool explode = false;
             for (auto dir: AllDirections) {
-                if (level->getMap()->hasEntities(chr->entity->getPosition() + dir)) {
+                if (level->getMap()->hasEntities(chr->entity->getPosition() + dir,LivingEntity::EntityType)) {
                     explode = true;
                 }
             }
@@ -48,7 +48,7 @@ namespace padi::content {
                 auto target = targets.back();
                 for (auto pos: targets) {
                     for (auto dir: AllDirections) {
-                        if (pos + dir != chr->entity->getPosition() && level->getMap()->hasEntities(pos + dir)) {
+                        if (pos + dir != chr->entity->getPosition() && level->getMap()->hasEntities(pos + dir, LivingEntity::EntityType)) {
                             target = pos;
                         }
                     }

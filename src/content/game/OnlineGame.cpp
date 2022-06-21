@@ -4,7 +4,6 @@
 
 #include "OnlineGame.h"
 
-#include <utility>
 
 #include "../../entity/LivingEntity.h"
 #include "../../level/LevelGenerator.h"
@@ -12,7 +11,6 @@
 #include "../abilities/Abilities.h"
 #include "Character.h"
 #include "SFML/Window/Keyboard.hpp"
-#include "../vfx/MapShaker.h"
 #include "../../media/AudioPlayback.h"
 #include "../npc/Mob.h"
 
@@ -133,7 +131,6 @@ namespace padi::content {
         };
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
         initializeCharacters();
-        m_level->addFrameBeginListener(std::make_shared<MapShaker>());
 
         /*auto ent = std::make_shared<StaticEntity>(sf::Vector2i{5,5}, 5);
         ent->m_animation = m_level->getApollo()->lookupAnim("q_mark");
