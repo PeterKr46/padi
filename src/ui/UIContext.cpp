@@ -2,6 +2,7 @@
 // Created by Peter on 05/05/2022.
 //
 
+#include <cstring>
 #include "UIContext.h"
 #include "../Controls.h"
 

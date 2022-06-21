@@ -102,19 +102,19 @@ namespace padi::content {
                 exit(-1);
             }
             namePL.cid = id;
-            m_lobby.names[id] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
+            m_lobby.names[id] = std::string(namePL.name, std::min<size_t>(strlen(namePL.name), 8ull));
             printf("[OnlineGame|Server] Received name %zu: %.*s!\n", id, 8, namePL.name);
         }
         for (size_t id = 0; id < m_lobby.remotes.size(); ++id) {
 
             auto &playerName = m_lobby.names[id];
             namePL.cid = id;
-            std::memcpy(&namePL.name, playerName.c_str(), std::min(8ull, playerName.length()));
+            std::memcpy(&namePL.name, playerName.c_str(), std::min<size_t>(8ull, playerName.length()));
             PackagePayload(packet, namePL);
 
             broadcast(packet);
         }
-        std::memcpy(&namePL.name, name.c_str(), std::min(8ull, name.length()));
+        std::memcpy(&namePL.name, name.c_str(), std::min<size_t>(8ull, name.length()));
         namePL.cid = m_lobby.remotes.size();
         printf("[OnlineGame|Server] Propagating own name %i: %.*s!\n", namePL.cid, 8, namePL.name);
         m_lobby.names.back() = name;

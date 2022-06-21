@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstring>
+#include <cmath>
 #include "SFML/Network.hpp"
 #include "SFML/Graphics/Color.hpp"
 
@@ -43,7 +45,7 @@ namespace padi::content {
     struct alignas(64) ChatMessagePayload {
         ChatMessagePayload() = default;
         explicit ChatMessagePayload(uint32_t origin, const char* msg) : cid(origin) {
-            std::memcpy(message, msg, std::min(strlen(msg), 32ull));
+            memcpy(message, msg, std::min<size_t>(strlen(msg), 32ull));
         }
         const PayloadType type = ChatMessage;
         uint32_t cid{};

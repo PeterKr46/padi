@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <SFML/Audio.hpp>
+#include <cmath>
 #include "../map/Tile.h"
 #include "../Constants.h"
 #include "../Controls.h"
