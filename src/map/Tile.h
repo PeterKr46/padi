@@ -25,6 +25,7 @@ namespace padi {
         void setColor(sf::Color const &c);
 
         void lerpColor(sf::Color const& target, float power);
+        void lerpAdditiveColor(sf::Color const& target, float power);
 
         [[nodiscard]] sf::Color getColor() const;
 

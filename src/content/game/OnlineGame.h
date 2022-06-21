@@ -110,6 +110,7 @@ namespace padi::content {
             std::vector<std::string> names;
             uint8_t size;
         } m_lobby;
+        sf::Clock m_roundCooldown;
 
         void advanceLevel();
 

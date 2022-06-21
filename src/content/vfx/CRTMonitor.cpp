@@ -6,15 +6,15 @@
 
 
 namespace padi::content {
-#define CRT_WIDTH   int(453.3 * 2)
-#define CRT_HEIGHT  int(255 * 2)
-
+#define CRT_WIDTH   int(453)
+#define CRT_HEIGHT  int(255)
+    
     CRTMonitor::CRTMonitor(std::shared_ptr<sf::Shader> crtShader)
             : m_crtShader(std::move(crtShader)) {
         if (!m_vfxBuffer.create(CRT_WIDTH, CRT_HEIGHT)) {
-            m_vfxBuffer.setSmooth(true);
             printf("[CRTMonitor] ERROR: Failed to create RenderTarget.\r");
         }
+        //m_vfxBuffer.setSmooth(true);
     }
 
     void CRTMonitor::draw(sf::RenderTarget &target, sf::RenderStates states) const {
@@ -43,10 +43,10 @@ namespace padi::content {
         m_screenQuad[1].texCoords = {0, 1};
 
         m_screenQuad[2].position = monitorSize;
-        m_screenQuad[2].texCoords = {CRT_WIDTH + 1, 0};
+        m_screenQuad[2].texCoords = {CRT_WIDTH, 0};
 
-        m_screenQuad[3].position = {monitorSize.x, 1};
-        m_screenQuad[3].texCoords = {CRT_WIDTH + 1, CRT_HEIGHT};
+        m_screenQuad[3].position = {monitorSize.x, 0};
+        m_screenQuad[3].texCoords = {CRT_WIDTH, CRT_HEIGHT};
 
         m_view.setSize(float(width), float(height));
         m_view.setCenter(monitorSize / 2.f);

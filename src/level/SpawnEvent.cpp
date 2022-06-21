@@ -32,8 +32,7 @@ namespace padi {
         auto level = lvl.lock();
         if (m_ray) {
             level->getMap()->addEntity(m_entity, m_ray->getPosition());
-            level->getMap()->addEntity(m_ray);
-            level->addCycleEndListener(m_ray);
+            m_ray->dispatchImmediate(lvl);
         }
 
         level->addCycleEndListener(shared_from_this());
@@ -58,6 +57,7 @@ namespace padi {
             level->centerView(pos);
 
         auto eColor = m_entity->getColor();
+        bool eDark = eColor.r + eColor.g + eColor.b < 100;
         static const int radius = 4;
         for (int x = -radius; x < radius; ++x)
             for (int y = -radius; y < radius; ++y) {
@@ -67,7 +67,8 @@ namespace padi {
                     if (tile->getColor().r + tile->getColor().g + tile->getColor().b < 100) {
 
                     } else {
-                        tile->lerpColor(eColor, power);
+                        if(eDark) tile->lerpColor(eColor, power);
+                        else tile->lerpAdditiveColor(eColor, power);
                     }
                 }
             }

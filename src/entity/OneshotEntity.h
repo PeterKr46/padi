@@ -27,7 +27,8 @@ namespace padi {
 
         bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;
 
-        void dispatch(Level *);
+        void dispatch(std::weak_ptr<Level> const &level);
+        void dispatchImmediate(std::weak_ptr<Level> const &level);
     };
 
     /**
@@ -44,7 +45,8 @@ namespace padi {
 
         bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;
 
-        void dispatch(Level *);
+        void dispatch(std::weak_ptr<Level> const &level);
+        void dispatchImmediate(std::weak_ptr<Level> const &level);
     };
 
 } // padi

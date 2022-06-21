@@ -70,13 +70,13 @@ namespace padi {
             float deltaMag = abs(delta.x) + abs(delta.y);
             if(deltaMag > float(TileSize.x * 8)) {
                 sf::Vector2f target = m_viewTarget.getCenter();
-                target.x = round(target.x);
-                target.y = round(target.y);
+                target.x = floor(target.x) + 0.5f;
+                target.y = floor(target.y) + 0.5f;
                 m_view.setCenter(target);
             } else if(deltaMag > float(TileSize.x * 3)){
                 sf::Vector2f target = m_view.getCenter() + delta * 0.8f * (1 - float(TileSize.x * 3) / deltaMag);
-                target.x = round(target.x);
-                target.y = round(target.y);
+                target.x = floor(target.x) + 0.5f;
+                target.y = floor(target.y) + 0.5f;
                 m_view.setCenter(target);
             }
 

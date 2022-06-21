@@ -29,8 +29,7 @@ namespace padi {
         ose->m_animation = lvl->getApollo()->lookupAnim("lightning");
         ose->m_stackSize = 8;
         ose->m_color = m_user->getColor();
-        lvl->addCycleEndListener(ose);
-        lvl->getMap()->addEntity(ose);
+        ose->dispatchImmediate(level);
 
         auto ap = std::make_shared<padi::AudioPlayback>(lvl->getApollo()->lookupAudio("chord_01"));
         ap->sound.setPitch((abs(pos.x) + abs(pos.y)) % 2 == 0 ? 1.2 : 1.0);
@@ -102,8 +101,10 @@ namespace padi {
         strikePos = pos;
         auto strike = std::make_shared<padi::OneshotEntity>(pos);
         strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
-        lvl->addCycleEndListener(strike);
-        lvl->getMap()->addEntity(strike);
+        strike->dispatchImmediate(level);
+        auto fire = std::make_shared<padi::OneshotEntity>(strikePos);
+        fire->m_animation = lvl->getApollo()->lookupAnim("fire");
+        fire->dispatchImmediate(level);
         lvl->getMap()->getTile(pos)->m_walkable = false;
         lvl->addFrameBeginListener(shared_from_this());
         m_complete = false;
@@ -116,11 +117,8 @@ namespace padi {
 
     bool content::Lighten::onFrameBegin(std::weak_ptr<padi::Level> const &level, uint8_t frame) {
         auto lvl = level.lock();
-
+        auto tile = lvl->getMap()->getTile(strikePos);
         if (frame == 8) {
-            auto fire = std::make_shared<padi::StaticEntity>(strikePos);
-            fire->m_animation = lvl->getApollo()->lookupAnim("fire");
-            lvl->getMap()->addEntity(fire);
             std::vector<std::shared_ptr<Entity>> ents;
             if(lvl->getMap()->getEntities(strikePos, ents)) {
                 for( auto & entity : ents) {
@@ -137,6 +135,8 @@ namespace padi {
             m_complete = true;
             return false;
         }
+        // TODO
+        tile->lerpAdditiveColor(sf::Color::White, 0.05);
         return true;
     }
 

@@ -76,9 +76,14 @@ namespace padi::content {
      * Declares the creation of a new *Character*.
      */
     struct alignas(64) CharacterSpawnPayload {
+        enum ControllerType : uint8_t {
+            LocalPlayer,
+            RemotePlayer,
+            Narrator
+        };
         const PayloadType type = CharacterSpawn;
-        uint32_t    cid{};
-        bool        local{};
+        uint32_t        cid{};
+        ControllerType  controller{};
     };
 
     /**

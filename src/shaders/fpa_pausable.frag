@@ -39,14 +39,8 @@ float noise(vec2 n) {
 // Please take and use, change, or whatever.
 //
 
-// Emulated input resolution.
-#if 1
-// Fix resolution to set amount.
-#define res (vec2(453.3, 255.0))
-#else
-// Optimize for resize.
-#define res (iResolution.xy/6.0)
-#endif
+#define res (vec2(453, 255))
+#define halfpx (vec2(0.5) / res)
 
 // Hardness of scanline.
 //  -8.0 = soft
@@ -56,12 +50,7 @@ float hardScan=-6.0;
 // Hardness of pixels in scanline.
 // -2.0 = soft
 // -4.0 = hard
-float hardPix=-2.0;
-
-// Display warp.
-// 0.0 = none
-// 1.0/8.0 = extreme
-vec2 warp=vec2(1.0/32.0, 1.0/24.0);
+float hardPix=-4.0;
 
 // Amount of shadow mask.
 float maskDark=0.5;
@@ -72,7 +61,7 @@ float maskLight=1.5;
 // Nearest emulated sample given floating point position and texel offset.
 // Also zero's off screen.
 vec3 Fetch(vec2 pos, vec2 off){
-    pos=floor(pos*res+off)/res;
+    pos= halfpx + floor(pos*res+off)/res;
     return texture2D(texture, pos.xy, -16.0).rgb * step(pos.x,1.0) * (1.0 - step(pos.x,0.0)) * step(pos.y,1.0) * (1.0 - step(pos.y,0.0));
 }
 
@@ -133,13 +122,6 @@ vec3 Tri(vec2 pos){
     return a*wa+b*wb+c*wc;
 }
 
-// Distortion of scanlines, and end of screen alpha.
-vec2 Warp(vec2 pos){
-    pos=pos*2.0-1.0;
-    pos*=vec2(1.0+(pos.y*pos.y)*warp.x, 1.0+(pos.x*pos.x)*warp.y);
-    return pos*0.5+0.5;
-}
-
 vec2 curvature = vec2(4.8, 3.5);
 vec2 curveRemapUV(vec2 uv)
 {
@@ -163,15 +145,14 @@ void main(){
     }
     vec4 fragColor = texture2D(texture, fragCoord);
 
-    vec2 pos=fragCoord;
-    fragColor.rgb = Tri(pos) * multiplicativeNoise;
+    fragColor.rgb = Tri(fragCoord) * multiplicativeNoise;
     if(paused) {
         //fragColor.r = fragColor.g = fragColor.b = max(fragColor.r, max(fragColor.b, fragColor.g));
     }
 
     // Bloom a little?
-    vec3 add = Horz5(fragCoord, 0.0);
-    fragColor.rgb += ((add.r + add.g + add.b) / 6.0) - 0.0675;
+    // vec3 add = Horz5(fragCoord, 0.0);
+    // fragColor.rgb += ((add.r + add.g + add.b) / 6.0) - 0.0675;
 
     fragColor.a=1.0;
 

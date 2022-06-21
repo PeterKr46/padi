@@ -196,7 +196,7 @@ namespace padi::content {
     void ClientGame::spawnNewCharacter(CharacterSpawnPayload payload) {
         auto &newChar = m_characters[payload.cid];
         newChar = std::make_shared<Character>(Character{payload.cid});
-        if (payload.local) {
+        if (payload.controller == CharacterSpawnPayload::LocalPlayer) {
             newChar->controller = LocalPlayerTurn(&m_uiContext);
         } else {
             newChar->controller = RemotePlayerTurn(m_lobby.host, false);

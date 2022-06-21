@@ -130,8 +130,15 @@ namespace padi::content {
     }
 
     void HostGame::advanceTurn() {
-        m_activeChar.reset();
+        if(m_activeChar) {
+            m_activeChar.reset();
+            m_roundCooldown.restart();
+        }
+
         if(m_turnQueue.empty()) {
+            if (m_roundCooldown.getElapsedTime().asMilliseconds() < 2000) {
+                return;
+            }
             // End of Round fun!
             endOfRound();
 
@@ -256,7 +263,9 @@ namespace padi::content {
         // Let everyone know about the character.
         for (int32_t i = 0; i < m_lobby.remotes.size(); ++i) {
             auto &remote = m_lobby.remotes[i];
-            PackagePayload(packet, CharacterSpawnPayload{PayloadType::CharacterSpawn, cid, i == owner});
+            auto payload = CharacterSpawnPayload{PayloadType::CharacterSpawn, cid};
+            payload.controller = (i == owner) ? CharacterSpawnPayload::LocalPlayer : CharacterSpawnPayload::RemotePlayer;
+            PackagePayload(packet, payload);
             remote.send(packet);
         }
 

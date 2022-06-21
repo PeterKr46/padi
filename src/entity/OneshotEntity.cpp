@@ -23,8 +23,15 @@ namespace padi {
         return false;
     }
 
-    void OneshotEntity::dispatch(Level * l) {
-        l->addCycleBeginListener(shared_from_this());
+    void OneshotEntity::dispatch(std::weak_ptr<Level> const &level) {
+        level.lock()->addCycleBeginListener(shared_from_this());
+    }
+
+    void OneshotEntity::dispatchImmediate(const std::weak_ptr<Level> &level) {
+        auto lvl = level.lock();
+        auto share = shared_from_this();
+        lvl->addCycleEndListener(share);
+        lvl->getMap()->addEntity(share);
     }
 
     OneshotEntityStack::OneshotEntityStack(const sf::Vector2i &pos, uint32_t type) : EntityStack(pos, type) {
@@ -33,9 +40,9 @@ namespace padi {
 
     bool OneshotEntityStack::onCycleBegin(std::weak_ptr<padi::Level> const &lvl) {
         auto level = lvl.lock();
-
-        level->addCycleEndListener(shared_from_this());
-        level->getMap()->addEntity(shared_from_this());
+        auto share = shared_from_this();
+        level->addCycleEndListener(share);
+        level->getMap()->addEntity(share);
         return false;
     }
 
@@ -45,7 +52,14 @@ namespace padi {
         return false;
     }
 
-    void OneshotEntityStack::dispatch(Level * l) {
-        l->addCycleBeginListener(shared_from_this());
+    void OneshotEntityStack::dispatch(std::weak_ptr<Level> const &level) {
+        level.lock()->addCycleBeginListener(shared_from_this());
+    }
+
+    void OneshotEntityStack::dispatchImmediate(const std::weak_ptr<Level> &level) {
+        auto lvl = level.lock();
+        auto share = shared_from_this();
+        lvl->addCycleEndListener(share);
+        lvl->getMap()->addEntity(share);
     }
 } // padi

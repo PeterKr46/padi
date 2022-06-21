@@ -75,9 +75,19 @@ namespace padi {
     void Tile::lerpColor(const sf::Color &c, float power) {
         const auto* rawTarget = reinterpret_cast<const uint8_t *>(&c);
         auto* rawStatus = reinterpret_cast<uint8_t *>(&m_color);
-        int16_t delta;
+        int delta;
         for(int i = 0; i < 3; ++i) {
             delta = rawTarget[i] - rawStatus[i];
+            rawStatus[i] = rawStatus[i] + int16_t(delta * power);
+        }
+    }
+
+    void Tile::lerpAdditiveColor(const sf::Color &c, float power) {
+        const auto* rawTarget = reinterpret_cast<const uint8_t *>(&c);
+        auto* rawStatus = reinterpret_cast<uint8_t *>(&m_color);
+        int delta;
+        for(int i = 0; i < 3; ++i) {
+            delta = std::max(0, rawTarget[i] - rawStatus[i]);
             rawStatus[i] = rawStatus[i] + int16_t(delta * power);
         }
     }
