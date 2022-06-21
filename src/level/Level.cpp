@@ -69,7 +69,10 @@ namespace padi {
             auto delta = m_viewTarget.getCenter() - m_view.getCenter();
             float deltaMag = abs(delta.x) + abs(delta.y);
             if(deltaMag > float(TileSize.x * 8)) {
-                m_view.setCenter(m_viewTarget.getCenter());
+                sf::Vector2f target = m_viewTarget.getCenter();
+                target.x = round(target.x);
+                target.y = round(target.y);
+                m_view.setCenter(target);
             } else if(deltaMag > float(TileSize.x * 3)){
                 sf::Vector2f target = m_view.getCenter() + delta * 0.8f * (1 - float(TileSize.x * 3) / deltaMag);
                 target.x = round(target.x);
@@ -89,7 +92,7 @@ namespace padi {
             handleFrameBegin(m_cycleListeners.frameBegin, shared_from_this(), m_cycle.frame);
         }
         if (m_viewTarget.getSize().x == 0) {
-            sf::Vector2f size{float(renderTarget->getSize().x) / renderTarget->getSize().y * 256, 256};
+            sf::Vector2f size{float(renderTarget->getSize().x) / renderTarget->getSize().y * 255, 255};
             m_viewTarget.setSize(size);
             printf("[padi::Level] view Target size initialized to %.f,%.f\n", size.x, size.y);
         }
