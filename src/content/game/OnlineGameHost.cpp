@@ -133,7 +133,7 @@ namespace padi::content {
     void HostGame::advanceTurn() {
         if (!m_turnQueue.empty()) {
             if(m_activeChar && m_activeChar->entity && m_activeChar->alive) {
-                if(m_activeChar->id < m_lobby.size && m_activeChar->entity->getPosition() == sf::Vector2i {0,0}) {
+                if(m_activeChar->id < m_lobby.size && m_activeChar->entity->getPosition() == sf::Vector2i {0, 0}) {
                     m_activeChar->alive = false;
                     m_level->getMap()->removeEntity(m_activeChar->entity);
                     auto despawn = PackagePayload(PlayerDespawnPayload(m_activeChar->id));

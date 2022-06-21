@@ -122,4 +122,5 @@ namespace padi::content {
     struct alignas(64) NextLevelPayload {
         const PayloadType type = NextLevel;
     };
+
 }

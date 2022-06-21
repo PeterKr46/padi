@@ -21,7 +21,7 @@ namespace padi {
     class OneshotEntity
             : public padi::StaticEntity, public CycleListener, public std::enable_shared_from_this<OneshotEntity> {
     public:
-        explicit OneshotEntity(sf::Vector2i const &pos);
+        explicit OneshotEntity(sf::Vector2i const &pos, uint32_t type = 0);
 
         bool onCycleBegin(std::weak_ptr<padi::Level> const &lvl) override;
 
@@ -38,7 +38,7 @@ namespace padi {
     class OneshotEntityStack
             : public padi::EntityStack, public CycleListener, public std::enable_shared_from_this<OneshotEntityStack> {
     public:
-        explicit OneshotEntityStack(sf::Vector2i const &pos);
+        explicit OneshotEntityStack(sf::Vector2i const &pos, uint32_t type = 0);
 
         bool onCycleBegin(std::weak_ptr<padi::Level> const &lvl) override;
 

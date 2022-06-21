@@ -4,6 +4,18 @@
 
 #pragma once
 
+namespace std {
+    template<typename S>
+    struct std::hash<sf::Vector2<S>> {
+        std::hash<S> hash;
+        std::size_t operator()(sf::Vector2<S> const &s) const noexcept {
+            std::size_t h1 = hash(s.x);
+            std::size_t h2 = hash(s.y);
+            return h1 ^ (h2 << 1);
+        }
+    };
+}
+
 namespace padi {
     //const unsigned int FrameTime_uS{83333};
     const unsigned int CyclesPerMinute{60};

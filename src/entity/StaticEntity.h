@@ -14,7 +14,7 @@ namespace padi {
     class StaticEntity
             : public padi::Entity {
     public:
-        explicit StaticEntity(const sf::Vector2i &pos);
+        explicit StaticEntity(const sf::Vector2i &pos, uint32_t type = 0);
 
         size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const override;
 

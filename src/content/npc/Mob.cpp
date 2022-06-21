@@ -14,7 +14,7 @@ namespace padi::content {
 
     Mob::Mob(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos)
             : LivingEntity(std::move(name), moveset, pos) {
-        setColor(sf::Color(64, 64, 64));
+        setColor(sf::Color(32, 32, 32));
     }
 
     bool Mob::takeTurn(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr) {
@@ -105,8 +105,7 @@ namespace padi::content {
         lvl->addFrameBeginListener(shared_from_this());
         auto ap = std::make_shared<padi::AudioPlayback>(lvl->getApollo()->lookupAudio("chord_01"));
         ap->sound.setPitch(0.3);
-        auto audioPos = Map::mapTilePosToWorld(pos);
-        ap->sound.setPosition(audioPos.x, audioPos.y, 0);
+        ap->setPosition(pos);
         ap->sound.setVolume(100);
         ap->start(lvl);
         return true;

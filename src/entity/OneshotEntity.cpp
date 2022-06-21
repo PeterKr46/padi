@@ -7,7 +7,7 @@
 
 namespace padi {
 
-    OneshotEntity::OneshotEntity(const sf::Vector2i &pos) : StaticEntity(pos) {
+    OneshotEntity::OneshotEntity(const sf::Vector2i &pos, uint32_t type) : StaticEntity(pos, type) {
 
     }
 
@@ -27,7 +27,7 @@ namespace padi {
         l->addCycleBeginListener(shared_from_this());
     }
 
-    OneshotEntityStack::OneshotEntityStack(const sf::Vector2i &pos) : EntityStack(pos) {
+    OneshotEntityStack::OneshotEntityStack(const sf::Vector2i &pos, uint32_t type) : EntityStack(pos, type) {
 
     }
 

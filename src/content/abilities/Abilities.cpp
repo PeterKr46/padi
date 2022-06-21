@@ -395,7 +395,7 @@ namespace padi {
     }
 
     bool content::Peep::isCastComplete() {
-        return false;
+        return true;
     }
 
     void content::Peep::castCancel(const std::weak_ptr<Level> &level) {
@@ -414,9 +414,17 @@ namespace padi {
         level->getMap()->addEntity(blob);
         level->addCycleEndListener(blob);
         auto ping = std::make_shared<AudioPlayback>(level->getApollo()->lookupAudio("attention_ping"));
-        auto pingPos = Map::mapTilePosToWorld(pos);
-        ping->sound.setPosition(pingPos.x, pingPos.y, 0);
+        ping->setPosition(pos);
         ping->start(level);
+
+        std::vector<std::shared_ptr<padi::Entity>> entities;
+        if(level->getMap()->getEntities(pos, entities)) {
+            for(auto & entity : entities) {
+                if(entity->getType() == 5) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

@@ -7,6 +7,7 @@
 #include "../Controls.h"
 #include "../Constants.h"
 #include "../map/Tile.h"
+#include "../media/AudioPlayback.h"
 
 namespace padi {
 
@@ -38,7 +39,7 @@ namespace padi {
         }
     }
 
-    Cursor::Cursor(std::shared_ptr<padi::Animation> anim) : padi::StaticEntity({0, 0}) {
+    Cursor::Cursor(std::shared_ptr<padi::Animation> anim) : padi::StaticEntity({0, 0}, EntityType) {
         m_animation = std::move(anim);
     }
 
@@ -54,5 +55,13 @@ namespace padi {
         //auto tile = level->getMap()->getTile(getPosition());
         //tile->setVerticalOffset((0.5f + 0.5f * sin(float(frame) * (2 * 3.141f / CycleLength_F)) * 1.2f));
         return false;
+    }
+
+    void Cursor::moved(const std::weak_ptr<padi::Level> &level) {
+        if(!m_beep) {
+            m_beep = std::make_shared<padi::AudioPlayback>(level.lock()->getApollo()->lookupAudio("deep_beep"));
+        }
+        //m_beep->setPosition(getPosition());
+        m_beep->restart(level);
     }
 }

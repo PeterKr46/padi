@@ -14,7 +14,7 @@
 
 namespace padi {
 
-    void handleFrameBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, std::weak_ptr<Level> lvl, uint8_t frame) {
+    void handleFrameBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level>& lvl, uint8_t frame) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onFrameBegin(lvl, frame)) i = listeners.erase(i);
@@ -22,7 +22,7 @@ namespace padi {
         }
     }
 
-    void handleFrameEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, std::weak_ptr<Level> lvl, uint8_t frame) {
+    void handleFrameEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level>& lvl, uint8_t frame) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onFrameEnd(lvl, frame)) i = listeners.erase(i);
@@ -30,7 +30,7 @@ namespace padi {
         }
     }
 
-    void handleCycleBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, std::weak_ptr<Level> lvl) {
+    void handleCycleBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level>& lvl) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onCycleBegin(lvl)) i = listeners.erase(i);
@@ -38,7 +38,7 @@ namespace padi {
         }
     }
 
-    void handleCycleEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, std::weak_ptr<Level> lvl) {
+    void handleCycleEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level>& lvl) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onCycleEnd(lvl))
@@ -106,9 +106,9 @@ namespace padi {
 
         // draw the vertex array
         target.draw(&m_vbo[0], m_numVerts, sf::PrimitiveType::Quads, states);
-        sf::Listener::setPosition(m_view.getCenter().x, m_view.getCenter().y, 0);
-        sf::Listener::setUpVector(0, 0, 1);
-        sf::Listener::setDirection(0, 1, 0);
+        sf::Listener::setPosition(m_view.getCenter().x / TileSize.x, m_view.getCenter().y / TileSize.y, 10);
+        sf::Listener::setUpVector(0, 1, 2);
+        sf::Listener::setDirection(0, 2, 1);
     }
 
     bool Level::centerView(const sf::Vector2i &position) {
@@ -185,6 +185,7 @@ namespace padi {
     void Level::moveCursor(sf::Vector2i const &pos) {
         m_map.getTile(m_cursor->getPosition())->setVerticalOffset(0);
         m_map.moveEntity(m_cursor, pos, ~0u);
+        m_cursor->moved(shared_from_this());
     }
 
     sf::Vector2i Level::getCursorLocation() const {

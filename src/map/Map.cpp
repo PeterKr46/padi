@@ -39,6 +39,7 @@ namespace padi {
     size_t Map::getEntities(const sf::Vector2i &pos, std::vector<std::shared_ptr<Entity>> &out) const {
         auto iter = m_tiles.find(pos);
         if (iter != m_tiles.end()) {
+            out.resize(iter->second.second.size());
             std::copy(iter->second.second.begin(), iter->second.second.end(), out.begin());
             return iter->second.second.size();
         }

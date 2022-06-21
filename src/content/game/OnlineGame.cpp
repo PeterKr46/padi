@@ -134,6 +134,10 @@ namespace padi::content {
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
         initializeCharacters();
         m_level->addFrameBeginListener(std::make_shared<MapShaker>());
+
+        auto ent = std::make_shared<StaticEntity>(sf::Vector2i{5,5}, 5);
+        ent->m_animation = m_level->getApollo()->lookupAnim("q_mark");
+        m_level->getMap()->addEntity(ent);
     }
 
 } // content

@@ -11,7 +11,7 @@ namespace padi {
 
     class EntityStack : public padi::StaticEntity {
     public:
-        explicit EntityStack(const sf::Vector2i &pos);
+        explicit EntityStack(const sf::Vector2i &pos, uint32_t type = 0);
 
         size_t
         populate(padi::Map const *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const override;
@@ -25,7 +25,7 @@ namespace padi {
 
     class EntityColumn : public padi::StaticEntity {
     public:
-        explicit EntityColumn(const sf::Vector2i & pos);
+        explicit EntityColumn(const sf::Vector2i & pos, uint32_t type = 0);
 
         size_t populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const override;
 

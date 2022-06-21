@@ -36,7 +36,7 @@ namespace padi::content {
         void castCancel(const std::weak_ptr<Level> &level) override;
         void castIndicator(const std::weak_ptr<Level> &level) override;
         bool cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) override;
-        uint32_t getAbilityType() const override;
+        [[nodiscard]] uint32_t getAbilityType() const override;
     };
 
     class Lighten : public padi::Ability, public padi::CycleListener, public std::enable_shared_from_this<Lighten> {

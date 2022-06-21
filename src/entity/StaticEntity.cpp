@@ -8,7 +8,7 @@
 
 namespace padi {
 
-    padi::StaticEntity::StaticEntity(const sf::Vector2i &pos) : Entity(pos) {
+    padi::StaticEntity::StaticEntity(const sf::Vector2i &pos, uint32_t type) : Entity(pos, type) {
 
     }
 

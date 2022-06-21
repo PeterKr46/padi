@@ -7,7 +7,7 @@
 #include "../Constants.h"
 
 namespace padi {
-    EntityStack::EntityStack(const sf::Vector2i &pos) : StaticEntity(pos) {
+    EntityStack::EntityStack(const sf::Vector2i &pos, uint32_t type) : StaticEntity(pos, type) {
 
     }
 
@@ -75,8 +75,8 @@ namespace padi {
         return m_stackSize * 4;
     }
 
-    EntityColumn::EntityColumn(const sf::Vector2i &pos)
-            : StaticEntity(pos) {
+    EntityColumn::EntityColumn(const sf::Vector2i &pos, uint32_t type)
+            : StaticEntity(pos, type) {
 
     }
 } // padi

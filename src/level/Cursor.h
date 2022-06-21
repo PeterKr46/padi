@@ -10,9 +10,14 @@
 
 namespace padi {
 
+    class AudioPlayback;
+
     class Cursor
             : public CycleListener, public padi::StaticEntity, public std::enable_shared_from_this<Cursor> {
     public:
+
+        static const uint32_t EntityType = 7;
+
         explicit Cursor(std::shared_ptr<padi::Animation> anim);
 
         void update(padi::Level *level);
@@ -22,8 +27,11 @@ namespace padi {
         void lock();
         void unlock();
 
+        void moved(std::weak_ptr<padi::Level> const& level);
+
     private:
         bool m_locked{false};
+        std::shared_ptr<AudioPlayback> m_beep;
     };
 
 } // padi

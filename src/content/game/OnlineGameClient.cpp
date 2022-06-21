@@ -90,6 +90,7 @@ namespace padi::content {
             );
             return;
         }
+        // TODO clean up this mess...
         while (host.has(PayloadType::CharacterSpawn)) {
             CharacterSpawnPayload characterSpawn;
             host.fetch(characterSpawn);
@@ -125,11 +126,21 @@ namespace padi::content {
             chr->alive = false;
             m_level->getMap()->removeEntity(chr->entity);
         }
-        if(host.has(PayloadType::NextLevel)) {
+        if (host.has(CharacterTurnBegin)) {
+            CharacterTurnBeginPayload nextTurn(0);
+            host.fetch(nextTurn);
+            printf("[OnlineGame|Client] Character %u is starting their turn.\n", nextTurn.cid);
+            m_activeChar = m_characters.at(nextTurn.cid);
+            if (m_activeChar->entity) {
+                m_level->centerView(m_activeChar->entity->getPosition());
+                m_level->moveCursor(m_activeChar->entity->getPosition());
+            }
+        }
+        if (host.has(PayloadType::NextLevel)) {
             m_next = std::make_shared<MainMenu>(
                     "../media/ui.apollo",
                     "../media/ui_sheet.png"
-                    );
+            );
             return;
         }
         takeTurn();
@@ -139,16 +150,6 @@ namespace padi::content {
         if (m_activeChar) {
             if (m_activeChar->controller(shared_from_this(), m_activeChar)) {
                 m_activeChar.reset();
-            }
-        } else {
-            CharacterTurnBeginPayload nextTurn(0);
-            if (m_lobby.host.fetch(nextTurn)) {
-                printf("[OnlineGame|Client] Character %u is starting their turn.\n", nextTurn.cid);
-                m_activeChar = m_characters.at(nextTurn.cid);
-                if (m_activeChar->entity) {
-                    m_level->centerView(m_activeChar->entity->getPosition());
-                    m_level->moveCursor(m_activeChar->entity->getPosition());
-                }
             }
         }
     }

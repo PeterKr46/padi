@@ -19,6 +19,8 @@ namespace padi {
             , public CycleListener {
 
     public:
+        static const uint32_t EntityType = 2;
+
         explicit LivingEntity(std::string  name, padi::AnimationSet const* moveset, const sf::Vector2i &pos);
 
         [[nodiscard]] sf::Vector2i getSize() const override;

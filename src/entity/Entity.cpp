@@ -6,8 +6,8 @@
 #include "../Constants.h"
 
 namespace padi {
-    Entity::Entity(sf::Vector2i const& pos)
-            : padi::GridObject(pos) {
+    Entity::Entity(sf::Vector2i const& pos, uint32_t type)
+            : padi::GridObject(pos), m_entityType(type) {
 
     }
 
@@ -21,5 +21,9 @@ namespace padi {
 
     float Entity::getVerticalOffset() const {
         return m_verticalOffset;
+    }
+
+    uint32_t Entity::getType() const {
+        return m_entityType;
     }
 }

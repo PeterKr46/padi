@@ -9,7 +9,7 @@
 namespace padi {
     class Entity : public padi::GridObject {
     public:
-        explicit Entity(sf::Vector2i const &pos);
+        explicit Entity(sf::Vector2i const &pos, uint32_t type);
 
         size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const = 0;
         [[nodiscard]] size_t numQuads() const override;
@@ -18,6 +18,11 @@ namespace padi {
 
         void setVerticalOffset(float vo);
         [[nodiscard]] float getVerticalOffset() const;
+
+        [[nodiscard]] uint32_t getType() const;
+
+    protected:
+        const uint32_t m_entityType;
     private:
         float m_verticalOffset{0};
     };
