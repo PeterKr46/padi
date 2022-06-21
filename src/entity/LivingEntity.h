@@ -15,7 +15,7 @@ namespace padi {
 
     class HPBar {
     public:
-        explicit HPBar(padi::AnimationSet const* sprites, int maxHP);
+        HPBar(padi::AnimationSet const *sprites, int maxHP, sf::Color const &overrideColor);
         size_t populate(sf::VertexArray &array, size_t vertexOffset, float verticalOffset, const std::shared_ptr<const Entity> &entity,
                         sf::Color color = sf::Color::Green) const;
 
@@ -28,6 +28,7 @@ namespace padi {
         [[nodiscard]] int getMaxHP() const;
 
         float m_verticalOffset = -32;
+        sf::Color m_overrideColor{0x0};
     private:
         int m_HP, m_maxHP;
         padi::AnimationSet const*  m_apolloCtx;
@@ -72,7 +73,7 @@ namespace padi {
 
         std::weak_ptr<HPBar> getHPBar();
         bool hasHPBar() const;
-        void initHPBar(int maxHP, padi::AnimationSet const *sprites);
+        void initHPBar(int maxHP, padi::AnimationSet const *sprites, sf::Color overrideColor = sf::Color{0x0});
 
     private:
 

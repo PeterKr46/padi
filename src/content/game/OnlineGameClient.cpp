@@ -107,7 +107,9 @@ namespace padi::content {
         while (host.has(PayloadType::InitHP)) {
             InitHPPayload payload;
             host.fetch(payload);
-            m_characters[payload.cid]->entity->initHPBar(payload.maxHP, m_level->getApollo()->lookupAnimContext("hp_bars"));
+            m_characters[payload.cid]->entity->initHPBar(payload.maxHP,
+                                                         m_level->getApollo()->lookupAnimContext("hp_bars"),
+                                                         payload.color);
         }
         while (host.has(PayloadType::CharacterAbilityAssign)) {
             CharacterAbilityAssignPayload abilityPayload;

@@ -128,6 +128,7 @@ namespace padi::content {
         const PayloadType type = InitHP;
         uint32_t cid{};
         uint32_t maxHP{};
+        sf::Color color{0x0};
     };
 
 }

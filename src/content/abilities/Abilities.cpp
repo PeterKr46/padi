@@ -121,6 +121,18 @@ namespace padi {
             auto fire = std::make_shared<padi::StaticEntity>(strikePos);
             fire->m_animation = lvl->getApollo()->lookupAnim("fire");
             lvl->getMap()->addEntity(fire);
+            std::vector<std::shared_ptr<Entity>> ents;
+            if(lvl->getMap()->getEntities(strikePos, ents)) {
+                for( auto & entity : ents) {
+                    if(entity->getType() == LivingEntity::EntityType) {
+                        auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
+                        if(livingEntity->hasHPBar()) {
+                            auto hpBar = livingEntity->getHPBar().lock();
+                            hpBar->setHP(hpBar->getHP()-1);
+                        }
+                    }
+                }
+            }
         } else if (frame == 11) {
             m_complete = true;
             return false;

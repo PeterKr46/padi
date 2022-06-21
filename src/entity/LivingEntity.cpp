@@ -188,9 +188,9 @@ bool padi::LivingEntity::hasHPBar() const {
     return bool(m_hp);
 }
 
-void padi::LivingEntity::initHPBar(int maxHP, padi::AnimationSet const *sprites) {
+void padi::LivingEntity::initHPBar(int maxHP, padi::AnimationSet const *sprites, sf::Color overrideColor) {
     if(!m_hp) {
-        m_hp = std::make_shared<padi::HPBar>(sprites, maxHP);
+        m_hp = std::make_shared<padi::HPBar>(sprites, maxHP, overrideColor);
     }
 }
 
@@ -238,12 +238,12 @@ size_t padi::HPBar::populate(sf::VertexArray &array, size_t vertexOffset, float 
     pVertex[2].texCoords = texCoordAnchor + sf::Vector2f(size);
     pVertex[3].texCoords = texCoordAnchor + sf::Vector2f(0, size.y);
 
-    for (int i = 0; i < 4; ++i) pVertex[i].color = color;
+    for (int i = 0; i < 4; ++i) pVertex[i].color = m_overrideColor.toInteger() ? m_overrideColor : color;
     return 4;
 }
 
-padi::HPBar::HPBar(const padi::AnimationSet *sprites, int maxHP)
-        : m_apolloCtx(sprites), m_maxHP(std::max(2, std::min(5, maxHP))) {
+padi::HPBar::HPBar(padi::AnimationSet const *sprites, int maxHP, sf::Color const &overrideColor)
+        : m_apolloCtx(sprites), m_maxHP(std::max(1, std::min(5, maxHP))), m_overrideColor(overrideColor) {
     m_HP = m_maxHP;
 
 }

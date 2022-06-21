@@ -42,13 +42,11 @@ namespace padi::content {
             playerCharacter.entity->initHPBar(2, apollo->lookupAnimContext("hp_bars"));
             playerCharacter.abilities = {
                     std::make_shared<Peep>(playerCharacter.entity),
-                    std::make_shared<Walk>(playerCharacter.entity, 5),
-                    std::make_shared<Teleport>(playerCharacter.entity),
+                    std::make_shared<Walk>(playerCharacter.entity, 3),
+                    std::make_shared<Lighten>(playerCharacter.entity),
             };
             spawnCharacter(playerCharacter, id);
         }
-        // Round end indicator
-        m_turnQueue.push(-1);
     }
 
     void HostGame::synchronizeLobby(const std::string &name) {
@@ -101,7 +99,6 @@ namespace padi::content {
             auto socket = remote.getSocket().lock();
             if (socket) socket->disconnect();
         }
-        while (!m_turnQueue.empty()) m_turnQueue.pop();
         m_activeChar.reset();
     }
 
@@ -133,59 +130,43 @@ namespace padi::content {
     }
 
     void HostGame::advanceTurn() {
-        if (!m_turnQueue.empty()) {
-            // Check end of level-ish
-            if(m_activeChar && m_activeChar->entity && m_activeChar->alive) {
-                if(m_activeChar->id < m_lobby.size && m_activeChar->entity->getPosition() == sf::Vector2i {0, 0}) {
-                    m_activeChar->alive = false;
-                    m_level->getMap()->removeEntity(m_activeChar->entity);
-                    auto despawn = PackagePayload(PlayerDespawnPayload(m_activeChar->id));
-                    broadcast(despawn);
-                    sendChatGeneric(m_lobby.names[m_activeChar->id] + " has reached the end.");
-                    bool anyMissing = false;
-                    for(size_t i = 0; i < m_lobby.size && !anyMissing; ++i) {
-                        anyMissing |= m_characters[i]->alive;
-                    }
-                    if(!anyMissing) {
-                        sendChatGeneric("Everyone made it!");
-                        advanceLevel();
-                        return;
+        m_activeChar.reset();
+        if(m_turnQueue.empty()) {
+            // End of Round fun!
+            endOfRound();
+
+            // Construct queue for next round.
+            for( auto & [cid, chr] : m_characters) {
+                // Entities that have an HP Bar which dropped to zero die at the end of the round.
+                if (chr->alive && chr->entity && chr->entity->hasHPBar()) {
+                    chr->alive &= (chr->entity->getHPBar().lock()->getHP() > 0);
+                    if (!chr->alive) {
+                        m_level->getMap()->removeEntity(chr->entity);
+                        if(chr->id < m_lobby.size) sendChatGeneric(m_lobby.names[chr->id] + " died.");
+                        auto packet = PackagePayload(PlayerDespawnPayload(chr->id));
+                        broadcast(packet);
                     }
                 }
-            }
-
-            if (m_activeChar && m_activeChar->alive) {
-                m_turnQueue.push(m_activeChar->id);
-            }
-            m_activeChar.reset();
-            do {
-                if(m_turnQueue.front() == -1) {
-                    endOfRound();
-
-                    m_turnQueue.push(m_turnQueue.front());
-                    m_turnQueue.pop();
-                } else {
-                    printf("[OnlineGame|Server] Character %i is starting their turn.\n", m_turnQueue.front());
-                    m_activeChar = m_characters.at(m_turnQueue.front());
-                    m_turnQueue.pop();
-                    if(m_activeChar->entity) {
-                        // Delete dead entities.
-                        if(m_activeChar->entity->hasHPBar()) {
-                            m_activeChar->alive &= (m_activeChar->entity->getHPBar().lock()->getHP() > 0);
-                            if(!m_activeChar->alive) {
-                                m_level->getMap()->removeEntity(m_activeChar->entity);
-                                sendChatGeneric(m_lobby.names[m_activeChar->id] + " has died.");
-                                auto packet = PackagePayload(PlayerDespawnPayload(m_activeChar->id));
-                                broadcast(packet);
-                            }
-                        }
-                    }
+                if (chr->alive) {
+                    m_turnQueue.push(cid);
                 }
-            } while(!m_activeChar || !m_activeChar->alive);
+            }
+        } else {
+            printf("[OnlineGame|Server] Character %i is starting their turn.\n", m_turnQueue.front());
+            m_activeChar = m_characters.at(m_turnQueue.front());
+            m_turnQueue.pop();
 
             if (m_activeChar->entity) {
                 m_level->centerView(m_activeChar->entity->getPosition());
                 m_level->moveCursor(m_activeChar->entity->getPosition());
+
+                // Dead characters don't get to take their turns :c
+                if(m_activeChar->entity->hasHPBar()) {
+                    if(m_activeChar->entity->getHPBar().lock()->getHP() == 0) {
+                        m_activeChar.reset();
+                        return;
+                    }
+                }
             }
             if (m_activeChar->id < m_lobby.remotes.size()) {
                 auto packet = PackagePayload(ChatMessagePayload(-1, "Your turn."));
@@ -197,7 +178,6 @@ namespace padi::content {
             auto nextTurn = PackagePayload(CharacterTurnBeginPayload(m_activeChar->id));
             broadcast(nextTurn);
         }
-
     }
 
     void HostGame::takeTurn() {
@@ -294,7 +274,12 @@ namespace padi::content {
             PackagePayload(packet, payload);
             broadcast(packet);
             if(newChar->entity->hasHPBar()) {
-                PackagePayload(packet, InitHPPayload{PayloadType::InitHP, cid, static_cast<uint32_t>(newChar->entity->getHPBar().lock()->getMaxHP())});
+                auto hpBar = newChar->entity->getHPBar().lock();
+                InitHPPayload hpPayload;
+                hpPayload.cid = cid;
+                hpPayload.maxHP = uint32_t(hpBar->getMaxHP());
+                hpPayload.color = hpBar->m_overrideColor;
+                PackagePayload(packet, hpPayload);
                 broadcast(packet);
             }
         }
@@ -339,6 +324,8 @@ namespace padi::content {
         printf("[OnlineGame|Server] Round ended.\n");
         auto mob = std::make_shared<Mob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
                                          sf::Vector2i{3, 3});
+        mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+
         auto cr = mob->asCharacter(0);
         spawnCharacter(cr, m_lobby.size-1);
     }
