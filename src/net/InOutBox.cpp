@@ -25,6 +25,12 @@ namespace padi::content {
             while (status == sf::Socket::Done) {
                 ++received;
                 auto data = reinterpret_cast<const uint8_t *>(incoming.getData());
+                auto type = *reinterpret_cast<const uint32_t *>(incoming.getData());
+                if(type == PayloadType::CharacterAbilityCast) {
+                    printf("Received a cast!\n");
+                } else if(type == PayloadType::CharacterTurnBegin) {
+                    printf("Received nex turn!\n");
+                }
                 auto &queue = (*m_inbox)[data[0]];
                 queue.emplace(data, data + incoming.getDataSize());
                 status = m_socket->receive(incoming);

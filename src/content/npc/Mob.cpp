@@ -100,6 +100,18 @@ namespace padi::content {
             strike->m_color = sf::Color::Black;
             lvl->addCycleEndListener(strike);
             lvl->getMap()->addEntity(strike);
+            std::vector<std::shared_ptr<Entity>> ents;
+            if(lvl->getMap()->getEntities(pos + direction, ents)) {
+                for( auto & entity : ents) {
+                    if(entity->getType() == LivingEntity::EntityType) {
+                        auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
+                        if(livingEntity->hasHPBar()) {
+                            auto hpBar = livingEntity->getHPBar().lock();
+                            hpBar->setHP(hpBar->getHP()-1);
+                        }
+                    }
+                }
+            }
         }
         lvl->getMap()->getTile(pos)->m_walkable = false;
         lvl->addFrameBeginListener(shared_from_this());

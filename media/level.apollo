@@ -48,8 +48,13 @@ anim debug              32 41   992 640     0 32    12
 audio attention_ping    ../media/audio/the_sample_workshop/high_clack.ogg
 audio chord_01          ../media/audio/jorgesbcomposer/chord_01.ogg
 audio guitar_01         ../media/audio/jorgesbcomposer/string_01.ogg
+audio deep_beep         ../media/audio/kenneth_cooney/one-beeper.ogg
 
-
+block hp_bars
+anim 2              32 8   896 640 0 32    8
+anim 3              82 8   896 648 0 32    8
+anim 4              32 8   896 656 0 32    8
+anim 5              32 8   896 664 0 32    8
 
 block cube
 anim move_x_from    32 32   0  0    0 48    12

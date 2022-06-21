@@ -6,12 +6,13 @@
 
 
 namespace padi::content {
-#define CRT_WIDTH (455 * 2)
-#define CRT_HEIGHT (256 * 2)
+#define CRT_WIDTH   int(453.3 * 2)
+#define CRT_HEIGHT  int(255 * 2)
 
     CRTMonitor::CRTMonitor(std::shared_ptr<sf::Shader> crtShader)
             : m_crtShader(std::move(crtShader)) {
         if (!m_vfxBuffer.create(CRT_WIDTH, CRT_HEIGHT)) {
+            m_vfxBuffer.setSmooth(true);
             printf("[CRTMonitor] ERROR: Failed to create RenderTarget.\r");
         }
     }

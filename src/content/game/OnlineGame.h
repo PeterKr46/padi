@@ -40,6 +40,8 @@ namespace padi::content {
 
         virtual void broadcast(sf::Packet &packet) = 0;
 
+        virtual void broadcast(sf::Packet &packet, const uint32_t* ignore, uint32_t num_ignored) = 0;
+
     protected:
 
         void synchronize(std::string const &ownName);
@@ -95,8 +97,10 @@ namespace padi::content {
         void advanceTurn();
 
         void sendChatMessage(const std::string &msg) override;
+        void sendChatGeneric(const std::string &msg, uint32_t from = -1);
 
         void broadcast(sf::Packet &packet) override;
+        void broadcast(sf::Packet &packet, const uint32_t *ignore, uint32_t num_ignored) override;
     protected:
         uint32_t spawnCharacter(Character const& c, uint32_t owner = 0);
     private:
@@ -108,6 +112,8 @@ namespace padi::content {
         } m_lobby;
 
         void advanceLevel();
+
+        void endOfRound();
     };
 
     class ClientGame : public OnlineGame {
@@ -127,6 +133,7 @@ namespace padi::content {
         void takeTurn();
 
         void broadcast(sf::Packet &packet) override;
+        void broadcast(sf::Packet &packet, const uint32_t *ignore, uint32_t num_ignored) override;
 
         void sendChatMessage(const std::string &msg) override;
 

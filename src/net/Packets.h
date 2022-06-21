@@ -37,6 +37,7 @@ namespace padi::content {
         CharacterTurnBegin,
         PlayerDespawn,
         NextLevel,
+        InitHP
     };
 
     struct alignas(64) ChatMessagePayload {
@@ -121,6 +122,12 @@ namespace padi::content {
 
     struct alignas(64) NextLevelPayload {
         const PayloadType type = NextLevel;
+    };
+
+    struct alignas(64) InitHPPayload {
+        const PayloadType type = InitHP;
+        uint32_t cid{};
+        uint32_t maxHP{};
     };
 
 }

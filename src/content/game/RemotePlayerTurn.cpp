@@ -23,8 +23,8 @@ namespace padi::content {
         DONE = 2
     };
 
-    RemotePlayerTurn::RemotePlayerTurn(InOutBox socket)
-            : m_socket(std::move(socket)) {
+    RemotePlayerTurn::RemotePlayerTurn(InOutBox socket, bool reflect, uint32_t ignore)
+            : m_socket(std::move(socket)), m_reflect(reflect), m_ignore(ignore) {
 
     }
 
@@ -48,8 +48,12 @@ namespace padi::content {
                 level->centerView(payload.pos);
                 ability->castIndicator(level);
                 chr->entity->intentCast(ability, payload.pos);
-                printf("[RemotePlayerTurn] Casting %u at (%i, %i)\n", m_activeAbility, payload.pos.x,
-                       payload.pos.y);
+                printf("[RemotePlayerTurn] Casting %u at (%i, %i)\n", m_activeAbility, payload.pos.x, payload.pos.y);
+                if(m_reflect) {
+                    printf("[RemotePlayerTurn] Reflecting to all but %i.\n", m_ignore);
+                    auto packet = PackagePayload(payload);
+                    game->broadcast(packet, &m_ignore, 1);
+                }
             }
         } else if (state == CASTING) {
             if (!chr->entity->hasCastIntent() && chr->entity->hasFailedCast()) {
@@ -59,6 +63,9 @@ namespace padi::content {
         }
         if (state == DONE) {
             m_activeAbility = -1;
+        }
+        if(chr->entity->hasHPBar() && chr->entity->getHPBar().lock()->getHP() == 0) {
+            chr->alive = false;
         }
         return state == DONE;
     }

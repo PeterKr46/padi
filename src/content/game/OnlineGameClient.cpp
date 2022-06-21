@@ -31,7 +31,6 @@ namespace padi::content {
         CharacterSpawnPayload characterPL;
         EntitySpawnPayload entityPL;
         std::shared_ptr<Character> chr;
-        RemotePlayerTurn remotePlayerTurn(m_lobby.host);
         for (size_t id = 0; id < m_lobby.size; ++id) {
             if (!m_lobby.host.fetchBlocking(characterPL)) {
                 exit(-1);
@@ -105,6 +104,11 @@ namespace padi::content {
                 spawnNewEntity(entitySpawn);
             }
         }
+        while (host.has(PayloadType::InitHP)) {
+            InitHPPayload payload;
+            host.fetch(payload);
+            m_characters[payload.cid]->entity->initHPBar(payload.maxHP, m_level->getApollo()->lookupAnimContext("hp_bars"));
+        }
         while (host.has(PayloadType::CharacterAbilityAssign)) {
             CharacterAbilityAssignPayload abilityPayload;
             host.fetch(abilityPayload);
@@ -126,16 +130,6 @@ namespace padi::content {
             chr->alive = false;
             m_level->getMap()->removeEntity(chr->entity);
         }
-        if (host.has(CharacterTurnBegin)) {
-            CharacterTurnBeginPayload nextTurn(0);
-            host.fetch(nextTurn);
-            printf("[OnlineGame|Client] Character %u is starting their turn.\n", nextTurn.cid);
-            m_activeChar = m_characters.at(nextTurn.cid);
-            if (m_activeChar->entity) {
-                m_level->centerView(m_activeChar->entity->getPosition());
-                m_level->moveCursor(m_activeChar->entity->getPosition());
-            }
-        }
         if (host.has(PayloadType::NextLevel)) {
             m_next = std::make_shared<MainMenu>(
                     "../media/ui.apollo",
@@ -150,6 +144,18 @@ namespace padi::content {
         if (m_activeChar) {
             if (m_activeChar->controller(shared_from_this(), m_activeChar)) {
                 m_activeChar.reset();
+            }
+        } else {
+            auto &host = m_lobby.host;
+            if (host.has(CharacterTurnBegin)) {
+                CharacterTurnBeginPayload nextTurn(0);
+                host.fetch(nextTurn);
+                printf("[OnlineGame|Client] Character %u is starting their turn.\n", nextTurn.cid);
+                m_activeChar = m_characters.at(nextTurn.cid);
+                if (m_activeChar->entity) {
+                    m_level->centerView(m_activeChar->entity->getPosition());
+                    m_level->moveCursor(m_activeChar->entity->getPosition());
+                }
             }
         }
     }
@@ -191,8 +197,19 @@ namespace padi::content {
         if (payload.local) {
             newChar->controller = LocalPlayerTurn(&m_uiContext);
         } else {
-            newChar->controller = RemotePlayerTurn(m_lobby.host);
+            newChar->controller = RemotePlayerTurn(m_lobby.host, false);
         }
+    }
+
+    void ClientGame::broadcast(sf::Packet &packet, const uint32_t *ignore, uint32_t num_ignored) {
+        /**
+         * A client will only ever send to the host - the host cannot be ignored.
+         */
+        uint32_t cid = m_lobby.size - 1;
+        bool ignored = false;
+        for(size_t j = 0; j < num_ignored; ++j) ignored |= (ignore[j] == cid);
+        if (!ignored)
+            m_lobby.host.send(packet);
     }
 
 }

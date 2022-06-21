@@ -135,9 +135,9 @@ namespace padi::content {
         initializeCharacters();
         m_level->addFrameBeginListener(std::make_shared<MapShaker>());
 
-        auto ent = std::make_shared<StaticEntity>(sf::Vector2i{5,5}, 5);
+        /*auto ent = std::make_shared<StaticEntity>(sf::Vector2i{5,5}, 5);
         ent->m_animation = m_level->getApollo()->lookupAnim("q_mark");
-        m_level->getMap()->addEntity(ent);
+        m_level->getMap()->addEntity(ent);*/
     }
 
 } // content

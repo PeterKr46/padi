@@ -39,6 +39,7 @@ namespace padi::content {
             playerColor = sf::Color(std::hash<std::string>()(m_lobby.names[id]));
             playerColor.a = 0xFF;
             playerCharacter.entity->setColor(playerColor);
+            playerCharacter.entity->initHPBar(2, apollo->lookupAnimContext("hp_bars"));
             playerCharacter.abilities = {
                     std::make_shared<Peep>(playerCharacter.entity),
                     std::make_shared<Walk>(playerCharacter.entity, 5),
@@ -46,7 +47,8 @@ namespace padi::content {
             };
             spawnCharacter(playerCharacter, id);
         }
-
+        // Round end indicator
+        m_turnQueue.push(-1);
     }
 
     void HostGame::synchronizeLobby(const std::string &name) {
@@ -132,19 +134,20 @@ namespace padi::content {
 
     void HostGame::advanceTurn() {
         if (!m_turnQueue.empty()) {
+            // Check end of level-ish
             if(m_activeChar && m_activeChar->entity && m_activeChar->alive) {
                 if(m_activeChar->id < m_lobby.size && m_activeChar->entity->getPosition() == sf::Vector2i {0, 0}) {
                     m_activeChar->alive = false;
                     m_level->getMap()->removeEntity(m_activeChar->entity);
                     auto despawn = PackagePayload(PlayerDespawnPayload(m_activeChar->id));
                     broadcast(despawn);
-                    sendChatMessage(m_lobby.names[m_activeChar->id] + " has reached the end.");
+                    sendChatGeneric(m_lobby.names[m_activeChar->id] + " has reached the end.");
                     bool anyMissing = false;
                     for(size_t i = 0; i < m_lobby.size && !anyMissing; ++i) {
                         anyMissing |= m_characters[i]->alive;
                     }
                     if(!anyMissing) {
-                        sendChatMessage("Everyone made it!");
+                        sendChatGeneric("Everyone made it!");
                         advanceLevel();
                         return;
                     }
@@ -154,9 +157,32 @@ namespace padi::content {
             if (m_activeChar && m_activeChar->alive) {
                 m_turnQueue.push(m_activeChar->id);
             }
-            printf("[OnlineGame|Server] Character %u is starting their turn.\n", m_turnQueue.front());
-            m_activeChar = m_characters.at(m_turnQueue.front());
-            m_turnQueue.pop();
+            m_activeChar.reset();
+            do {
+                if(m_turnQueue.front() == -1) {
+                    endOfRound();
+
+                    m_turnQueue.push(m_turnQueue.front());
+                    m_turnQueue.pop();
+                } else {
+                    printf("[OnlineGame|Server] Character %i is starting their turn.\n", m_turnQueue.front());
+                    m_activeChar = m_characters.at(m_turnQueue.front());
+                    m_turnQueue.pop();
+                    if(m_activeChar->entity) {
+                        // Delete dead entities.
+                        if(m_activeChar->entity->hasHPBar()) {
+                            m_activeChar->alive &= (m_activeChar->entity->getHPBar().lock()->getHP() > 0);
+                            if(!m_activeChar->alive) {
+                                m_level->getMap()->removeEntity(m_activeChar->entity);
+                                sendChatGeneric(m_lobby.names[m_activeChar->id] + " has died.");
+                                auto packet = PackagePayload(PlayerDespawnPayload(m_activeChar->id));
+                                broadcast(packet);
+                            }
+                        }
+                    }
+                }
+            } while(!m_activeChar || !m_activeChar->alive);
+
             if (m_activeChar->entity) {
                 m_level->centerView(m_activeChar->entity->getPosition());
                 m_level->moveCursor(m_activeChar->entity->getPosition());
@@ -172,11 +198,6 @@ namespace padi::content {
             broadcast(nextTurn);
         }
 
-        auto mob = std::make_shared<Mob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
-                                         sf::Vector2i{3, 3});
-        auto cr = mob->asCharacter(0);
-        spawnCharacter(cr, m_lobby.size-1);
-
     }
 
     void HostGame::takeTurn() {
@@ -189,7 +210,7 @@ namespace padi::content {
         }
     }
 
-    void HostGame::sendChatMessage(const std::string &msg) {
+    void HostGame::sendChatGeneric(const std::string &msg, uint32_t from) {
         if(msg.empty()) return;
 
         ChatMessagePayload msgPayload;
@@ -197,13 +218,22 @@ namespace padi::content {
             m_next = std::make_shared<MainMenu>(
                     "../media/ui.apollo",
                     "../media/ui_sheet.png"
-                    );
+            );
         }
-        msgPayload.cid = m_lobby.size - 1;
+        msgPayload.cid = from;
         std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), sizeof(msgPayload.message)));
         sf::Packet packet = PackagePayload(msgPayload);
         broadcast(packet);
-        printChatMessage(m_lobby.names[m_lobby.size-1] + ": " + msg.substr(0, sizeof(msgPayload.message)), true);
+        if(from < m_lobby.size) {
+            printChatMessage(m_lobby.names[m_lobby.size - 1] + ": " + msg.substr(0, sizeof(msgPayload.message)), true);
+        } else {
+            printChatMessage(msg, true);
+        }
+    }
+
+    void HostGame::sendChatMessage(const std::string &msg) {
+        if(msg.empty()) return;
+        sendChatGeneric(msg, m_lobby.size - 1);
     }
 
     HostGame::HostGame(const std::vector<InOutBox> &clients, const std::string &name, size_t seed)
@@ -236,7 +266,7 @@ namespace padi::content {
                 });
 
         if(cid < m_lobby.size - 1) {
-            newChar->controller = RemotePlayerTurn(m_lobby.remotes[owner]);
+            newChar->controller = RemotePlayerTurn(m_lobby.remotes[owner], true, cid);
         } else if (cid == m_lobby.size - 1) {
             newChar->controller = LocalPlayerTurn(&m_uiContext);
         }
@@ -263,6 +293,10 @@ namespace padi::content {
 
             PackagePayload(packet, payload);
             broadcast(packet);
+            if(newChar->entity->hasHPBar()) {
+                PackagePayload(packet, InitHPPayload{PayloadType::InitHP, cid, static_cast<uint32_t>(newChar->entity->getHPBar().lock()->getMaxHP())});
+                broadcast(packet);
+            }
         }
         // Let everyone know about the Character's abilities.
         for (size_t aid = 0; aid < c.abilities.size(); ++aid) {
@@ -291,5 +325,21 @@ namespace padi::content {
         for(size_t i = 0; i < m_lobby.size; ++i) {
             m_turnQueue.push(i);
         }
+    }
+
+    void HostGame::broadcast(sf::Packet &packet, const uint32_t *ignore, uint32_t num_ignored) {
+        for (size_t cid = 0; cid < m_lobby.remotes.size(); ++cid) {
+            bool ignored = false;
+            for(size_t j = 0; j < num_ignored; ++j) ignored |= (ignore[j] == cid);
+            if(!ignored) m_lobby.remotes[cid].send(packet);
+        }
+    }
+
+    void HostGame::endOfRound() {
+        printf("[OnlineGame|Server] Round ended.\n");
+        auto mob = std::make_shared<Mob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
+                                         sf::Vector2i{3, 3});
+        auto cr = mob->asCharacter(0);
+        spawnCharacter(cr, m_lobby.size-1);
     }
 }

@@ -42,7 +42,7 @@ float noise(vec2 n) {
 // Emulated input resolution.
 #if 1
 // Fix resolution to set amount.
-#define res (vec2(480.0, 270.0))
+#define res (vec2(453.3, 255.0))
 #else
 // Optimize for resize.
 #define res (iResolution.xy/6.0)
@@ -140,7 +140,7 @@ vec2 Warp(vec2 pos){
     return pos*0.5+0.5;
 }
 
-vec2 curvature = vec2(3.5, 3.5);
+vec2 curvature = vec2(4.8, 3.5);
 vec2 curveRemapUV(vec2 uv)
 {
     // as we near the edge of our screen apply greater distortion using a cubic function

@@ -13,6 +13,26 @@ namespace padi {
     class Ability;
     class StaticEntity;
 
+    class HPBar {
+    public:
+        explicit HPBar(padi::AnimationSet const* sprites, int maxHP);
+        size_t populate(sf::VertexArray &array, size_t vertexOffset, float verticalOffset, const std::shared_ptr<const Entity> &entity,
+                        sf::Color color = sf::Color::Green) const;
+
+        void setHP(int hp);
+
+        void setMaxHP(int hp);
+
+        [[nodiscard]] int getHP() const;
+
+        [[nodiscard]] int getMaxHP() const;
+
+        float m_verticalOffset = -32;
+    private:
+        int m_HP, m_maxHP;
+        padi::AnimationSet const*  m_apolloCtx;
+    };
+
     class LivingEntity
             : public padi::Entity
             , public std::enable_shared_from_this<LivingEntity>
@@ -26,6 +46,7 @@ namespace padi {
         [[nodiscard]] sf::Vector2i getSize() const override;
 
         size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const override;
+        size_t numQuads() const override;
 
         bool intentMove(sf::Vector2i const &dir);
         void intentStay();
@@ -49,11 +70,15 @@ namespace padi {
 
         std::string const& getName();
 
+        std::weak_ptr<HPBar> getHPBar();
+        bool hasHPBar() const;
+        void initHPBar(int maxHP, padi::AnimationSet const *sprites);
+
     private:
 
         padi::AnimationSet const*  m_apolloCtx;
         std::vector<std::shared_ptr<padi::StaticEntity>> m_slaves;
-
+        std::shared_ptr<HPBar> m_hp;
         struct {
             bool move{false};
             bool cast{false};

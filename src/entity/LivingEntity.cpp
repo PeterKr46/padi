@@ -12,7 +12,7 @@
 #include "StaticEntity.h"
 
 padi::LivingEntity::LivingEntity(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos)
-        : Entity(pos, 1),
+        : Entity(pos, EntityType),
           m_name(std::move(name)),
           m_apolloCtx(moveset) {
     m_animation = m_apolloCtx->at("idle");
@@ -54,7 +54,8 @@ sf::Color padi::LivingEntity::getColor() const {
 }
 
 size_t
-padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const {
+padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame,
+                             float tileVerticalOffset) const {
     sf::Vector2f size{getSize()};
     auto pVertex = &array[vertexOffset];
 
@@ -72,8 +73,12 @@ padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_
     pVertex[3].texCoords = texCoordAnchor + sf::Vector2f(0, size.y);
 
     for (int i = 0; i < 4; ++i) pVertex[i].color = m_color;
-
-    return 4;
+    size_t used = 4;
+    if(m_hp) {
+        auto ent = std::static_pointer_cast<const padi::Entity>(shared_from_this());
+        used += m_hp->populate(array, vertexOffset+used, tileVerticalOffset, ent, getColor());
+    }
+    return used;
 }
 
 bool padi::LivingEntity::onCycleBegin(std::weak_ptr<padi::Level> const &lvl) {
@@ -91,7 +96,7 @@ bool padi::LivingEntity::onCycleBegin(std::weak_ptr<padi::Level> const &lvl) {
         m_intent.cast = false;
         m_animation = m_apolloCtx->at("idle");
         m_inAction.cast = true;
-        m_inAction.cast_failed = ! m_intent.cast_ability->cast(lvl, m_intent.cast_pos);
+        m_inAction.cast_failed = !m_intent.cast_ability->cast(lvl, m_intent.cast_pos);
     } else {
         //std::cout << "[padi::LivingEntity(" << m_name << ")] Idle." << std::endl;
         m_animation = m_apolloCtx->at("idle");
@@ -171,3 +176,74 @@ std::string const &padi::LivingEntity::getName() {
     return m_name;
 }
 
+size_t padi::LivingEntity::numQuads() const {
+    return m_hp ? 8 : 4;
+}
+
+std::weak_ptr<padi::HPBar> padi::LivingEntity::getHPBar() {
+    return m_hp;
+}
+
+bool padi::LivingEntity::hasHPBar() const {
+    return bool(m_hp);
+}
+
+void padi::LivingEntity::initHPBar(int maxHP, padi::AnimationSet const *sprites) {
+    if(!m_hp) {
+        m_hp = std::make_shared<padi::HPBar>(sprites, maxHP);
+    }
+}
+
+
+int padi::HPBar::getMaxHP() const {
+    return m_maxHP;
+}
+
+void padi::HPBar::setMaxHP(int hp) {
+    m_maxHP = std::max(1, std::min(5, hp));
+}
+
+void padi::HPBar::setHP(int hp) {
+    m_HP = std::max(0, std::min(m_maxHP, hp));
+}
+
+int padi::HPBar::getHP() const {
+    return m_HP;
+}
+
+size_t padi::HPBar::populate(sf::VertexArray &array, size_t vertexOffset, float verticalOffset, const std::shared_ptr<const Entity> &entity,
+                             sf::Color color) const {
+    if(!m_apolloCtx) {
+        return 0;
+    }
+
+    auto frames = m_apolloCtx->at(std::to_string(m_maxHP));
+    if (!frames) {
+        return 0;
+    }
+    auto size = frames->getResolution();
+    auto pVertex = &array[vertexOffset];
+
+    sf::Vector2f anchor = padi::Map::mapTilePosToWorld(entity->getPosition());
+    float vo = m_verticalOffset + verticalOffset + float(padi::TileSize.y) / 2;
+
+    pVertex[0].position = anchor + sf::Vector2f(-size.x / 2, vo - size.y);
+    pVertex[1].position = anchor + sf::Vector2f(size.x / 2, vo - size.y);
+    pVertex[2].position = anchor + sf::Vector2f(size.x / 2, vo);
+    pVertex[3].position = anchor + sf::Vector2f(-size.x / 2, vo);
+
+    sf::Vector2f texCoordAnchor = (*frames)[m_HP];
+    pVertex[0].texCoords = texCoordAnchor;
+    pVertex[1].texCoords = texCoordAnchor + sf::Vector2f(size.x, 0);
+    pVertex[2].texCoords = texCoordAnchor + sf::Vector2f(size);
+    pVertex[3].texCoords = texCoordAnchor + sf::Vector2f(0, size.y);
+
+    for (int i = 0; i < 4; ++i) pVertex[i].color = color;
+    return 4;
+}
+
+padi::HPBar::HPBar(const padi::AnimationSet *sprites, int maxHP)
+        : m_apolloCtx(sprites), m_maxHP(std::max(2, std::min(5, maxHP))) {
+    m_HP = m_maxHP;
+
+}
