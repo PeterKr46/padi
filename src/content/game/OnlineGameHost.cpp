@@ -70,7 +70,7 @@ namespace padi::content {
         {
             auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
                                                  sf::Vector2i{2, 2});
-            mob->initHPBar(5, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+            mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
 
             auto cr = mob->asCharacter(0);
             spawnCharacter(cr, m_lobby.size - 1);

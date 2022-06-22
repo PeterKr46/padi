@@ -93,9 +93,13 @@ namespace padi::content {
 
     bool SlugWalk::onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) {
         auto level = lvl.lock();
-        auto tile = level->getMap()->getTile(m_user->getPosition());
+        auto target = m_user->getPosition();
+        if(m_user->isMoving() && frame >= CycleLength_F / 2) {
+            target += m_user->currentMoveDirection();
+        }
+        auto tile = level->getMap()->getTile(target);
 
-        tile->lerpColor(sf::Color::Black, 0.7);
+        tile->lerpColor(sf::Color::Black, 0.1);
         return !Walk::isCastComplete();
     }
 
