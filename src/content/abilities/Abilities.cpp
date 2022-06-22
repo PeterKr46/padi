@@ -313,19 +313,31 @@ namespace padi {
     }
 
 
-    content::Dash::Dash(std::shared_ptr<padi::LivingEntity> user, size_t range)
-            : padi::LimitedRangeAbility(std::move(user), range) {
+    content::Dash::Dash(std::shared_ptr<padi::LivingEntity> user, size_t range, Walk::Walkable walkable)
+            : padi::LimitedRangeAbility(std::move(user), range)
+            , m_walkable(walkable) {
         m_iconId = "dash";
+        m_description = "DASH\n\n"
+                        " Dash for a fixed number of tiles to a walkable position.\n"
+                        " Tiles that you dash over will be brightened unless cursed.\n"
+                        " Enemies that you dash through will take one point of damage.";
     }
 
     bool content::Dash::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
         auto lvl = level.lock();
         auto delta = pos - m_user->getPosition();
+        m_direction = sf::Vector2i (0,0);
+        for(auto & dir : AllDirections) {
+            if(delta == dir * int(getRange())) {
+                m_direction = dir;
+                break;
+            }
+        }
 
-        if (delta.x < 0) m_direction = Left;
+        /*if (delta.x < 0) m_direction = Left;
         else if (delta.x > 0) m_direction = Right;
         else if (delta.y > 0) m_direction = Down;
-        else if (delta.y < 0) m_direction = Up;
+        else if (delta.y < 0) m_direction = Up;*/
 
         if ((m_direction.x == 0 && m_direction.y == 0) || !lvl->getMap()->getTile(pos)->m_walkable) {
             castCancel(lvl);
@@ -379,18 +391,22 @@ namespace padi {
         if (padi::Controls::wasKeyPressed(sf::Keyboard::Up)) {
             m_direction = Up;
             m_rangeChanged = true;
+            lvl->getMap()->moveEntity(lvl->getCursor(), m_user->getPosition() + m_direction * int(getRange()));
         } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Down)) {
             m_direction = Down;
             m_rangeChanged = true;
+            lvl->getMap()->moveEntity(lvl->getCursor(), m_user->getPosition() + m_direction * int(getRange()));
         } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Left)) {
             m_direction = Left;
             m_rangeChanged = true;
+            lvl->getMap()->moveEntity(lvl->getCursor(), m_user->getPosition() + m_direction * int(getRange()));
         } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Right)) {
             m_direction = Right;
+            lvl->getMap()->moveEntity(lvl->getCursor(), m_user->getPosition() + m_direction * int(getRange()));
             m_rangeChanged = true;
         }
+        m_rangeChanged = true;
         LimitedRangeAbility::castIndicator(level);
-        lvl->moveCursor(m_user->getPosition() + m_direction * int(getRange()));
         lvl->hideCursor();
         lvl->getCursor()->lock();
     }
@@ -401,11 +417,25 @@ namespace padi {
         lvl.lock()->getCursor()->unlock();
     }
 
-    void content::Dash::recalculateRange(const std::weak_ptr<Level> &level) {
-        m_inRange.resize(getRange());
-        sf::Vector2i min = m_user->getPosition();
-        for (int i = 0; i < getRange(); ++i) {
-            m_inRange[i] = (min + m_direction * (i + 1));
+    void content::Dash::recalculateRange(const std::weak_ptr<Level> &l) {
+        auto level = l.lock();
+        auto map = level->getMap();
+        if(m_direction == sf::Vector2i(0,0)) {
+            m_inRange.clear();
+            for (auto &dir: AllDirections) {
+                auto tile = map->getTile(m_user->getPosition() + dir * int(getRange()));
+                if (m_walkable(map, tile)) {
+                    for (int i = 0; i < getRange(); ++i) {
+                        m_inRange.emplace_back(m_user->getPosition() + dir * int(i+1));
+                    }
+                }
+            }
+        } else {
+            m_inRange.resize(getRange());
+            sf::Vector2i min = m_user->getPosition();
+            for (int i = 0; i < getRange(); ++i) {
+                m_inRange[i] = (min + m_direction * (i + 1));
+            }
         }
         m_rangeChanged = false;
     }
@@ -421,6 +451,13 @@ namespace padi {
 
     uint32_t content::Dash::getAbilityType() const {
         return AbilityType::Dash;
+    }
+
+    void content::Dash::writeProperties(uint8_t *data, uint32_t maxSize) {
+        if (maxSize >= sizeof(uint16_t) + sizeof(uint8_t)) {
+            data[0] = uint8_t(getRange());
+            std::memcpy(data + 1, &m_walkable.cutOff, sizeof(int16_t));
+        }
     }
 
     bool content::Peep::isCastComplete() {

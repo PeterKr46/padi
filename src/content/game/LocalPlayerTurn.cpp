@@ -53,12 +53,16 @@ namespace padi::content {
             }
         }
         if (state == IDLE) {
+            m_uiContext->setText("press_space", "PRESS SPACE", {227,50}, true);
+            m_uiContext->updateTextOutline("press_space", sf::Color::Black, 1);
+            m_uiContext->updateTextColor("press_space", sf::Color::Yellow);
             if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
                 level->pause();
                 m_activeAbility = 0;
-                m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(), {8, 8});
+                m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(), {8, 24});
                 auto ap = std::make_shared<AudioPlayback>(m_uiContext->getApollo()->lookupAudio("select"));
                 ap->start(level);
+                m_uiContext->removeText("press_space");
             }
         } else if (state == SELECTING) {
             if (!level->isPaused()) {
@@ -81,7 +85,7 @@ namespace padi::content {
                 } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
                     character->abilities[m_activeAbility]->castCancel(level);
                     level->pause();
-                    m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(), {8, 8});
+                    m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),{8, 24});
                 }
             } else {
                 if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
@@ -95,16 +99,16 @@ namespace padi::content {
                         m_activeAbility = -1;
                     } else {
                         int dir = 0;
-                        if (padi::Controls::wasKeyReleased(sf::Keyboard::Q)) {
+                        if (padi::Controls::wasKeyReleased(sf::Keyboard::Left)) {
                             dir = -1;
                             m_activeAbility = (int64_t(character->abilities.size()) + m_activeAbility - 1) % int64_t(character->abilities.size());
-                        } else if (padi::Controls::wasKeyReleased(sf::Keyboard::E)) {
+                        } else if (padi::Controls::wasKeyReleased(sf::Keyboard::Right)) {
                             dir = 1;
                             m_activeAbility = (m_activeAbility + 1) % int64_t(character->abilities.size());
                         }
                         if(dir != 0) {
                             character->abilities[m_activeAbility]->castCancel(level);
-                            m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),{8, 8});
+                            m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),{8, 24});
                             auto ap = std::make_shared<AudioPlayback>(m_uiContext->getApollo()->lookupAudio("select"));
                             ap->start(level);
                         }

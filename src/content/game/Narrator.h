@@ -14,6 +14,8 @@ namespace padi::content {
         explicit Narrator(UIContext *uiContext);
 
         void displayText(std::string const& txt);
+
+        bool operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
     private:
         padi::UIContext *m_uiContext;
     };

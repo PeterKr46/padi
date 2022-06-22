@@ -84,9 +84,13 @@ namespace padi::content {
                 break;
             }
             case AbilityType::Dash: {
+                uint8_t range = payload.abilityProps[0];
+                int16_t walkable = *reinterpret_cast<int16_t *>(payload.abilityProps + 1);
                 abilities[payload.abilitySlot] = std::make_shared<padi::content::Dash>(
                         chr->entity,
-                        payload.abilityProps[0]);
+                        range,
+                        Walk::Walkable{walkable}
+                );
                 break;
             }
             case AbilityType::Peep: {
@@ -156,7 +160,8 @@ namespace padi::content {
     size_t OnlineGame::getSeed() const {
         return m_seed;
     }
-    const std::map<uint32_t, std::shared_ptr<Character>, std::less<>> & OnlineGame::getCharacters() const {
+
+    const std::map<uint32_t, std::shared_ptr<Character>, std::less<>> &OnlineGame::getCharacters() const {
         return m_characters;
     }
 

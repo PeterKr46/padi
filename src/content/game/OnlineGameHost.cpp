@@ -32,11 +32,13 @@ namespace padi::content {
 
         Character playerCharacter;
         sf::Color playerColor;
+        int offset = 1;
         for (size_t id = 0; id < m_lobby.size; ++id) {
+            if(id - 4*(offset-1) >= 4) offset++;
             playerCharacter.entity = std::make_shared<padi::LivingEntity>(
                     m_lobby.names[id],
                     apollo->lookupAnimContext("cube"),
-                    sf::Vector2i{int(id), 0}
+                    AllDirections[id%4] * offset
             );
             playerColor = sf::Color(std::hash<std::string>()(m_lobby.names[id]));
             playerColor.a = 0xFF;
@@ -45,17 +47,21 @@ namespace padi::content {
             playerCharacter.abilities = {
                     std::make_shared<Peep>(playerCharacter.entity),
                     std::make_shared<Walk>(playerCharacter.entity, 5),
-                    std::make_shared<Lighten>(playerCharacter.entity),
-                    std::make_shared<Darken>(playerCharacter.entity),
-                    std::make_shared<Teleport>(playerCharacter.entity),
-                    std::make_shared<Dash>(playerCharacter.entity, 3),
-                    std::make_shared<SelfDestruct>(playerCharacter.entity)
+                    std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100})
             };
             spawnCharacter(playerCharacter, id);
         }
-        {
+        for (int i = 0; i < m_lobby.size * 2; ++i) {
+            auto refPos = m_characters[i % m_lobby.size]->entity->getPosition();
+            std::shared_ptr<Tile> target = nullptr;
+            while(!target) {
+                target = m_level->getMap()->getTile(refPos + AllDirections[m_rand() % 4] + AllDirections[m_rand() % 4] +AllDirections[m_rand() % 4] + AllDirections[m_rand() % 4]);
+                if(target && (!target->m_walkable || m_level->getMap()->hasEntities(target->getPosition(), LivingEntity::EntityType))) {
+                    target.reset();
+                }
+            }
             auto mob = std::make_shared<ExplosiveMob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
-                                                      sf::Vector2i{3, 3});
+                                                      target->getPosition());
             mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
 
             auto cr = mob->asCharacter(0);
@@ -72,8 +78,9 @@ namespace padi::content {
         {
             auto mob = std::make_shared<EndGate>("gate", m_level->getApollo()->lookupAnimContext("gate"),
                                                  sf::Vector2i{-3, -3});
+            mob->m_requiredKills = m_lobby.size * 3;
             auto cr = mob->asCharacter(0);
-            spawnCharacter(cr, m_lobby.size - 1);
+            m_turnQueue.push(spawnCharacter(cr, m_lobby.size - 1));
         }
     }
 
@@ -159,6 +166,9 @@ namespace padi::content {
 
     void HostGame::advanceTurn() {
         if(m_activeChar) {
+            if(m_activeChar->id == m_lobby.size - 1) {
+                sendChatGeneric("The darkness moves.");
+            }
             m_activeChar.reset();
             m_roundCooldown.restart();
         }

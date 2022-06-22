@@ -25,7 +25,7 @@ namespace padi::content {
                     if (id >= game->getLobbySize() && !c->alive) ++killed;
                 }
                 if (killed < m_requiredKills) {
-                    game->sendChatGeneric("Slay " + std::to_string(m_requiredKills - killed) + " more.");
+                    game->sendChatGeneric("Clear " + std::to_string(m_requiredKills - killed) + " enemies!");
                     target.x++;
                 } else {
                     m_open = true;
@@ -90,6 +90,7 @@ namespace padi::content {
                 auto gate = std::make_shared<padi::EntityColumn>(pos);
                 gate->m_animation = gateFloor;
                 gate->m_stackAnimation = gateAnim;
+                gate->m_stackSize = 8;
                 //gate->setVerticalOffset(-8);
                 map->addEntity(gate);
                 map->removeEntity(m_user);

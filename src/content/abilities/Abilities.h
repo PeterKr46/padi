@@ -152,7 +152,7 @@ namespace padi::content {
             : public padi::LimitedRangeAbility, public padi::CycleListener, public std::enable_shared_from_this<Dash> {
     public:
 
-        Dash(std::shared_ptr<padi::LivingEntity> user, size_t range);
+        Dash(std::shared_ptr<padi::LivingEntity> user, size_t range, Walk::Walkable walkable);
 
         bool cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) override;
 
@@ -168,9 +168,12 @@ namespace padi::content {
 
         uint32_t getAbilityType() const override;
 
+        void writeProperties(uint8_t *data, uint32_t maxSize) override;
+
     private:
         bool m_complete{true};
         sf::Vector2i m_direction{0, 0};
+        Walk::Walkable m_walkable;
     };
 
 }

@@ -63,7 +63,7 @@ namespace padi::content {
         return Character{id,
                          shared_from_this(),
                          {
-                                 std::make_shared<SlugWalk>(shared_from_this(), 2, Walk::Walkable{-700}),
+                                 std::make_shared<SlugWalk>(shared_from_this(), 2, Walk::Walkable{-600}),
                          },
                          [=](const std::shared_ptr<OnlineGame> &l, const std::shared_ptr<Character> &c) {
                              return takeTurn(l, c);

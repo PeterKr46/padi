@@ -42,7 +42,7 @@ namespace padi::content {
                     size_t dir_id = rand() % 4;
                     sf::Vector2i dir = AllDirections[dir_id];
                     auto tile = level->getMap()->getTile(chr->entity->getPosition() + dir);
-                    if (tile && tile->m_walkable) {
+                    if (tile && tile->m_walkable && !level->getMap()->hasEntities(tile->getPosition(), LivingEntity::EntityType)) {
                         auto child1 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
                                                                      chr->entity->getAnimationSet(),
                                                                      tile->getPosition());
@@ -52,7 +52,7 @@ namespace padi::content {
 
                     dir = AllDirections[(dir_id + 1) % 4];
                     tile = level->getMap()->getTile(chr->entity->getPosition() + dir);
-                    if (tile && tile->m_walkable) {
+                    if (tile && tile->m_walkable && !level->getMap()->hasEntities(tile->getPosition(), LivingEntity::EntityType)) {
                         auto child2 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
                                                                      chr->entity->getAnimationSet(),
                                                                      tile->getPosition());
@@ -62,7 +62,7 @@ namespace padi::content {
 
                     dir = AllDirections[(dir_id + 2) % 4];
                     tile = level->getMap()->getTile(chr->entity->getPosition() + dir);
-                    if (tile && tile->m_walkable) {
+                    if (tile && tile->m_walkable && !level->getMap()->hasEntities(tile->getPosition(), LivingEntity::EntityType)) {
                         auto child2 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
                                                                      chr->entity->getAnimationSet(),
                                                                      tile->getPosition());

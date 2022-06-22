@@ -16,4 +16,8 @@ namespace padi::content {
         m_uiContext->updateTextOutline("narrator_text", sf::Color::Black, 1);
     }
 
+    bool Narrator::operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &) {
+        return false;
+    }
+
 } // content
