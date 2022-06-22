@@ -5,6 +5,7 @@
 #include "Abilities.h"
 
 #include <utility>
+#include <cstring>
 #include "../../level/Cursor.h"
 #include "../../Controls.h"
 #include "../../entity/OneshotEntity.h"
