@@ -17,18 +17,21 @@ namespace padi::content {
 
             auto game = std::static_pointer_cast<HostGame>(g);
             auto level = game->getLevel().lock();
-            size_t killed = 0;
-            for(auto & [id, c] : game->getCharacters()) {
-                if(id >= game->getLobbySize() && !c->alive) ++killed;
-            }
 
             sf::Vector2i target = chr->entity->getPosition();
-            if(killed < requiredKills) {
-                game->sendChatGeneric("Slay " + std::to_string(requiredKills - killed) + " more.");
-                target.x++;
-            } else {
-                chr->alive = false;
-                printf("[EndGat] Opening.\n");
+            if(!m_open) {
+                size_t killed = 0;
+                for (auto &[id, c]: game->getCharacters()) {
+                    if (id >= game->getLobbySize() && !c->alive) ++killed;
+                }
+                if (killed < m_requiredKills) {
+                    game->sendChatGeneric("Slay " + std::to_string(m_requiredKills - killed) + " more.");
+                    target.x++;
+                } else {
+                    m_open = true;
+                    game->sendChatGeneric("THE GATE IS OPEN!");
+                    game->sendChatGeneric("Follow the light.");
+                }
             }
 
             chr->entity->intentCast(chr->abilities[0], target);
@@ -39,6 +42,30 @@ namespace padi::content {
                 payload.pos = target;
                 packet.append(&payload, sizeof(payload));
                 game->broadcast(packet);
+            }
+            if(m_open) {
+                bool safe = true;
+                for (auto &[id, c]: game->getCharacters()) {
+                    if (id < game->getLobbySize() && c->alive) {
+                        if (c->entity->getPosition() != chr->entity->getPosition()) {
+                            safe = false;
+                        } else {
+                            game->getLevel().lock()->getMap()->removeEntity(c->entity);
+                            c->alive = false;
+                            {
+                                sf::Packet packet;
+                                PlayerDespawnPayload payload;
+                                payload.cid = uint8_t(id);
+                                packet.append(&payload, sizeof(payload));
+                                game->broadcast(packet);
+                            }
+                        }
+                    }
+                }
+                if (safe) {
+                    game->sendChatGeneric("Everyone has made it.");
+                    game->sendChatGeneric("(Level Over)");
+                }
             }
             return true;
         }
@@ -58,9 +85,12 @@ namespace padi::content {
         bool GateUnlock::cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) {
             if(pos == m_user->getPosition()) {
                 auto map = lvl.lock()->getMap();
-                auto gateAnim = lvl.lock()->getApollo()->lookupAnim("open_gate");
-                auto gate = std::make_shared<padi::StaticEntity>(pos);
-                gate->m_animation = gateAnim;
+                auto gateAnim = lvl.lock()->getApollo()->lookupAnim("lightning_hold");
+                auto gateFloor = lvl.lock()->getApollo()->lookupAnim("lightning_hold_end");
+                auto gate = std::make_shared<padi::EntityColumn>(pos);
+                gate->m_animation = gateFloor;
+                gate->m_stackAnimation = gateAnim;
+                //gate->setVerticalOffset(-8);
                 map->addEntity(gate);
                 map->removeEntity(m_user);
             }

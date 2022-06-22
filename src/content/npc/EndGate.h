@@ -37,7 +37,8 @@ namespace padi::content {
         Character asCharacter(uint32_t id);
 
     private:
-        size_t requiredKills = 4;
+        bool m_open = false;
+        size_t m_requiredKills = 0;
     };
 } // content
 

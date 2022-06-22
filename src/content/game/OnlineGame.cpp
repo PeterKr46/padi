@@ -14,6 +14,7 @@
 #include "../../media/AudioPlayback.h"
 #include "../npc/ExplosiveMob.h"
 #include "../npc/SlugMob.h"
+#include "../npc/EndGate.h"
 
 
 namespace padi::content {
@@ -104,6 +105,10 @@ namespace padi::content {
                         range,
                         Walk::Walkable{walkable}
                 );
+                break;
+            }
+            case AbilityType::GateUnlock: {
+                abilities[payload.abilitySlot] = std::make_shared<GateUnlock>(chr->entity);
                 break;
             }
             default: {
