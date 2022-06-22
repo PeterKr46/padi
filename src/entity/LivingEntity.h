@@ -15,7 +15,9 @@ namespace padi {
 
     class HPBar {
     public:
+        explicit HPBar(const std::weak_ptr<HPBar>& copy);
         HPBar(padi::AnimationSet const *sprites, int maxHP, sf::Color const &overrideColor);
+
         size_t populate(sf::VertexArray &array, size_t vertexOffset, float verticalOffset, const std::shared_ptr<const Entity> &entity,
                         sf::Color color = sf::Color::Green) const;
 
@@ -74,6 +76,7 @@ namespace padi {
         std::weak_ptr<HPBar> getHPBar();
         bool hasHPBar() const;
         void initHPBar(int maxHP, padi::AnimationSet const *sprites, sf::Color overrideColor = sf::Color{0x0});
+        void initHPBar(const std::weak_ptr<HPBar>& copyFrom);
 
     private:
 

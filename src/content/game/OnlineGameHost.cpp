@@ -42,8 +42,12 @@ namespace padi::content {
             playerCharacter.entity->initHPBar(2, apollo->lookupAnimContext("hp_bars"));
             playerCharacter.abilities = {
                     std::make_shared<Peep>(playerCharacter.entity),
-                    std::make_shared<Walk>(playerCharacter.entity, 3),
+                    std::make_shared<Walk>(playerCharacter.entity, 5),
                     std::make_shared<Lighten>(playerCharacter.entity),
+                    std::make_shared<Darken>(playerCharacter.entity),
+                    std::make_shared<Teleport>(playerCharacter.entity),
+                    std::make_shared<Dash>(playerCharacter.entity, 3),
+                    std::make_shared<SelfDestruct>(playerCharacter.entity)
             };
             spawnCharacter(playerCharacter, id);
         }
@@ -299,9 +303,6 @@ namespace padi::content {
             c.abilities[aid]->writeProperties(p.abilityProps, 16);
             PackagePayload(packet, p);
             broadcast(packet);
-        }
-        if(c.alive) {
-            m_turnQueue.push(cid);
         }
         return cid;
     }

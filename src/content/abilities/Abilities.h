@@ -109,7 +109,12 @@ namespace padi::content {
     class Walk
             : public padi::LimitedRangeAbility, public padi::CycleListener, public std::enable_shared_from_this<Walk> {
     public:
-        Walk(std::shared_ptr<padi::LivingEntity> user, size_t range);
+        struct Walkable {
+            int16_t cutOff;
+            bool operator()(const Map* map, std::shared_ptr<Tile> const& t);
+        };
+
+        Walk(std::shared_ptr<padi::LivingEntity> user, size_t range, Walkable walkable = Walkable{100});
 
         bool cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) override;
 
@@ -133,10 +138,10 @@ namespace padi::content {
 
         void writeProperties(uint8_t *data, uint32_t maxSize) override;
 
+        Walkable walkable;
     private:
         bool m_complete{true};
         std::vector<sf::Vector2i> m_path;
-        std::map<sf::Vector2i, sf::Vector2i, padi::compair> m_shortestPaths;
     };
 
     class Dash

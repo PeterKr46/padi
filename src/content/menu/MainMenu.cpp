@@ -335,7 +335,7 @@ namespace padi::content {
             inboxes.reserve(hostRole.clients.size());
             for (const auto &client: hostRole.clients) inboxes.emplace_back(client);
 
-            auto game = std::make_shared<padi::content::HostGame>(inboxes, m_uiContext.getTextString("nick_input"));
+            auto game = std::make_shared<padi::content::HostGame>(inboxes, m_uiContext.getTextString("nick_input"), 12345);
             m_next = game;
         }
     }

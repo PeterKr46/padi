@@ -22,7 +22,7 @@ namespace padi::content {
         if (!m_turnStarted) {
             bool explode = false;
             for (auto dir: AllDirections) {
-                if (level->getMap()->hasEntities(chr->entity->getPosition() + dir,LivingEntity::EntityType)) {
+                if (level->getMap()->hasEntities(chr->entity->getPosition() + dir, LivingEntity::EntityType)) {
                     explode = true;
                 }
             }
@@ -35,21 +35,45 @@ namespace padi::content {
                     sf::Packet packet = PackagePayload(payload);
                     printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
                     game->broadcast(packet);
+
+                    auto child1 = std::make_shared<Mob>(chr->entity->getName(), chr->entity->getAnimationSet(), chr->entity->getPosition());
+                    child1->initHPBar(chr->entity->getHPBar());
+                    auto host = std::static_pointer_cast<HostGame>(game);
+                    host->spawnCharacter(child1->asCharacter(0));
+
+                    auto child2 = std::make_shared<Mob>(chr->entity->getName(), chr->entity->getAnimationSet(), chr->entity->getPosition());
+                    child2->initHPBar(chr->entity->getHPBar());
+                    host->spawnCharacter(child2->asCharacter(0));
                 }
                 chr->alive = false;
             } else {
                 auto walk = std::static_pointer_cast<Walk>(chr->abilities[0]);
                 walk->castIndicator(level);
-                auto const &targets = walk->getPossibleTargets();
+                walk->recalculateRange(level);
+                std::vector<sf::Vector2i> targets = walk->getPossibleTargets();
+                auto rng = std::mt19937(game->getSeed() + chr->id * 7341);
+                std::shuffle(targets.begin(), targets.end(), rng);
                 if (targets.empty()) {
                     walk->castCancel(level);
                     return true; // TODO
                 }
-                auto target = targets.back();
+                auto target = targets.front();
+                std::vector<std::shared_ptr<Entity>> ents;
                 for (auto pos: targets) {
                     for (auto dir: AllDirections) {
-                        if (pos + dir != chr->entity->getPosition() && level->getMap()->hasEntities(pos + dir, LivingEntity::EntityType)) {
-                            target = pos;
+                        auto neighborPos = pos + dir;
+                        if(neighborPos != chr->entity->getPosition()) {
+                            if(level->getMap()->getEntities(pos + dir, ents)) {
+                                for(auto & ent : ents) {
+                                    if(ent->getType() == LivingEntity::EntityType) {
+                                        auto livingEnt = std::static_pointer_cast<LivingEntity>(ent);
+                                        if(livingEnt->hasHPBar() && livingEnt->getHPBar().lock()->getHP() > 0) {
+                                            target = pos;
+                                        }
+                                    }
+                                }
+
+                            }
                         }
                     }
                 }
@@ -79,7 +103,7 @@ namespace padi::content {
     Character Mob::asCharacter(uint32_t id) {
         return {id,
                 shared_from_this(),
-                {std::make_shared<Walk>(shared_from_this(), 5), std::make_shared<SelfDestruct>(shared_from_this())},
+                {std::make_shared<Walk>(shared_from_this(), 5, Walk::Walkable{-700}), std::make_shared<SelfDestruct>(shared_from_this())},
                 [=](const std::shared_ptr<OnlineGame> &l, const std::shared_ptr<Character> &c) {
                     return takeTurn(l, c);
                 }
@@ -94,26 +118,25 @@ namespace padi::content {
 
     bool SelfDestruct::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
         auto lvl = level.lock();
-        for(auto & direction : Neighborhood) {
+        for (auto &direction: Neighborhood) {
             auto strike = std::make_shared<padi::OneshotEntity>(pos + direction);
             strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
             strike->m_color = sf::Color::Black;
             lvl->addCycleEndListener(strike);
             lvl->getMap()->addEntity(strike);
             std::vector<std::shared_ptr<Entity>> ents;
-            if(lvl->getMap()->getEntities(pos + direction, ents)) {
-                for( auto & entity : ents) {
-                    if(entity->getType() == LivingEntity::EntityType) {
+            if (lvl->getMap()->getEntities(pos + direction, ents)) {
+                for (auto &entity: ents) {
+                    if (entity->getType() == LivingEntity::EntityType) {
                         auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
-                        if(livingEntity->hasHPBar()) {
+                        if (livingEntity->hasHPBar()) {
                             auto hpBar = livingEntity->getHPBar().lock();
-                            hpBar->setHP(hpBar->getHP()-1);
+                            hpBar->setHP(hpBar->getHP() - 1);
                         }
                     }
                 }
             }
         }
-        lvl->getMap()->getTile(pos)->m_walkable = false;
         lvl->addFrameBeginListener(shared_from_this());
         auto ap = std::make_shared<padi::AudioPlayback>(lvl->getApollo()->lookupAudio("chord_01"));
         ap->sound.setPitch(0.3);
@@ -139,26 +162,28 @@ namespace padi::content {
         auto lvl = level.lock();
         if (frame < 8) {
             auto pos = m_user->getPosition();
-            for(auto & dir : Neighborhood) {
+            for (auto &dir: Neighborhood) {
                 auto tile = lvl->getMap()->getTile(pos + dir);
-                auto color = tile->getColor();
-                color = sf::Color(std::max(32, color.r - 32), std::max(32, color.g - 32), std::max(32, color.b - 32),
-                                  255);
-                tile->setColor(color);
+                auto col = tile->getColor();
+                uint16_t cSum = col.r + col.g + col.b;
+                if (cSum < 700) tile->lerpColor(sf::Color::Black, 0.2);
                 tile->setVerticalOffset(float(frame % 2));
             }
         } else if (frame == 8) {
             auto pos = m_user->getPosition();
-            for(auto & dir : Neighborhood) {
+            auto fireAnim = lvl->getApollo()->lookupAnim("fire");
+            for (auto &dir: Neighborhood) {
                 auto tile = lvl->getMap()->getTile(pos + dir);
                 tile->setVerticalOffset(0);
-                tile->m_walkable = false;
-                auto fire = std::make_shared<padi::StaticEntity>(pos + dir);
-                fire->m_animation = lvl->getApollo()->lookupAnim("fire");
+                auto fire = std::make_shared<padi::OneshotEntity>(pos + dir);
+                fire->m_animation = fireAnim;
                 fire->m_color = sf::Color::Black;
-                lvl->getMap()->addEntity(fire,~0);
+                lvl->addCycleEndListener(fire);
+                lvl->getMap()->addEntity(fire, ~0);
             }
-            lvl->getMap()->removeEntity(m_user);
+            if (m_user->hasHPBar() && m_user->getHPBar().lock()->getHP() == 0) {
+                lvl->getMap()->removeEntity(m_user);
+            }
         } else if (frame == 11) {
             m_complete = true;
             return false;

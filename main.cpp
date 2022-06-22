@@ -15,13 +15,13 @@ int main() {
     // Ambient sounds
     sf::Music ambient;
     //ambient.openFromFile("../media/audio/rain_hell/youfoundaclue - rain hell - OST -openjam 2020- - 03 charred.flac");
-    ambient.openFromFile("../media/audio/shadydave/snowfall.ogg");
-    //ambient.openFromFile("../media/audio/kelewin/ambient-intro-layered.ogg");
+    //ambient.openFromFile("../media/audio/shadydave/snowfall.ogg");
+    ambient.openFromFile("../media/audio/kelewin/ambient-intro-layered.ogg");
     ambient.setLoop(true);
     //ambient.setLoopPoints(sf::Music::TimeSpan(sf::Time(), ambient.getDuration() - sf::seconds(0.8)));
     //ambient.setPitch(120.f / 125.8f);
-    ambient.setPitch(120.f / 88.f);
-    //ambient.setPitch(90.f / 91.7f);
+    //ambient.setPitch(120.f / 88.f);
+    ambient.setPitch(90.f / 91.7f);
 
     ambient.setVolume(0);
     ambient.play();

@@ -42,6 +42,8 @@ namespace padi::content {
 
         virtual void broadcast(sf::Packet &packet, const uint32_t* ignore, uint32_t num_ignored) = 0;
 
+        size_t getSeed() const;
+
     protected:
 
         void synchronize(std::string const &ownName);
@@ -101,7 +103,6 @@ namespace padi::content {
 
         void broadcast(sf::Packet &packet) override;
         void broadcast(sf::Packet &packet, const uint32_t *ignore, uint32_t num_ignored) override;
-    protected:
         uint32_t spawnCharacter(Character const& c, uint32_t owner = 0);
     private:
         std::queue<uint32_t> m_turnQueue;

@@ -13,9 +13,8 @@
 
 namespace padi {
 
-    struct compair { // xd
-        bool
-        operator()(std::pair<size_t, sf::Vector2i> const &left, std::pair<size_t, sf::Vector2i> const &right) const {
+    struct less {
+        bool operator()(std::pair<size_t, sf::Vector2i> const &left, std::pair<size_t, sf::Vector2i> const &right) const {
             return left.first > right.first;
         }
 
@@ -24,7 +23,8 @@ namespace padi {
         }
     };
 
-    std::map<sf::Vector2i, sf::Vector2i, compair> Crawl(padi::Map *map, sf::Vector2i const &from, size_t range);
 
-    std::vector<sf::Vector2i> FindPath(padi::Map *map, sf::Vector2i const &from, sf::Vector2i const &to);
-    }
+    std::vector<sf::Vector2i> Crawl(padi::Map *map, sf::Vector2i const &from, size_t range, const std::function<bool(const Map* map, std::shared_ptr<Tile> const&)>& walkable);
+
+    std::vector<sf::Vector2i> FindPath(padi::Map *map, const sf::Vector2i &from, const sf::Vector2i &to, const std::function<bool(const Map* map, std::shared_ptr<Tile> const &)>& walkable);
+}

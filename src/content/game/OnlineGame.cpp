@@ -60,9 +60,13 @@ namespace padi::content {
                payload.cid);
         switch (payload.abilityType) {
             case AbilityType::Walk: {
+                uint8_t range = payload.abilityProps[0];
+                int16_t walkable = *reinterpret_cast<int16_t *>(payload.abilityProps + 1);
                 abilities[payload.abilitySlot] = std::make_shared<padi::content::Walk>(
                         chr->entity,
-                        payload.abilityProps[0]);
+                        range,
+                        Walk::Walkable{walkable}
+                );
                 break;
             }
             case AbilityType::Teleport: {
@@ -131,10 +135,10 @@ namespace padi::content {
         };
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
         initializeCharacters();
+    }
 
-        /*auto ent = std::make_shared<StaticEntity>(sf::Vector2i{5,5}, 5);
-        ent->m_animation = m_level->getApollo()->lookupAnim("q_mark");
-        m_level->getMap()->addEntity(ent);*/
+    size_t OnlineGame::getSeed() const {
+        return m_seed;
     }
 
 } // content

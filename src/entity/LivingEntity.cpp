@@ -194,6 +194,12 @@ void padi::LivingEntity::initHPBar(int maxHP, padi::AnimationSet const *sprites,
     }
 }
 
+void padi::LivingEntity::initHPBar(const std::weak_ptr<HPBar>& copyFrom) {
+    if(!m_hp) {
+        m_hp = std::make_shared<padi::HPBar>(copyFrom);
+    }
+}
+
 
 int padi::HPBar::getMaxHP() const {
     return m_maxHP;
@@ -246,4 +252,13 @@ padi::HPBar::HPBar(padi::AnimationSet const *sprites, int maxHP, sf::Color const
         : m_apolloCtx(sprites), m_maxHP(std::max(1, std::min(5, maxHP))), m_overrideColor(overrideColor) {
     m_HP = m_maxHP;
 
+}
+
+padi::HPBar::HPBar(const std::weak_ptr<HPBar>& copy) {
+    auto bar = copy.lock();
+    m_maxHP = bar->m_maxHP;
+    m_HP = m_maxHP;
+    m_overrideColor = bar->m_overrideColor;
+    m_apolloCtx = bar->m_apolloCtx;
+    m_verticalOffset = bar->m_verticalOffset;
 }

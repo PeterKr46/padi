@@ -64,12 +64,10 @@ namespace padi {
                 auto tile = level->getMap()->getTile(pos.x + x, pos.y + y);
                 if (tile) {
                     float power = 0.2f * (1 - std::min<float>(1.f, std::sqrt(x * x + y * y) / radius));
-                    if (tile->getColor().r + tile->getColor().g + tile->getColor().b < 100) {
-
-                    } else {
-                        if(eDark) tile->lerpColor(eColor, power);
-                        else tile->lerpAdditiveColor(eColor, power);
-                    }
+                    auto col = tile->getColor();
+                    uint16_t cSum = col.r + col.g + col.b;
+                    if (eDark && cSum < 700) tile->lerpColor(eColor, power);
+                    else if (!eDark && cSum > 100) tile->lerpAdditiveColor(eColor, power);
                 }
             }
 

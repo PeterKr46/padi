@@ -90,7 +90,7 @@ namespace padi {
             for (pos.y = -halfSize.y; pos.y < halfSize.y; pos.y++) {
                 double dsqr = std::sqrt(pos.x*pos.x + pos.y*pos.y);
                 if (dsqr < safeRadius) {
-                    auto z = float(m_perlin.octave2D_01(pos.x * zScale, pos.y * zScale, 5)) * (1 - dsqr / safeRadius);
+                    auto z = float(m_perlin.octave2D_01(pos.x * zScale, pos.y * zScale, 5)) * (dsqr / safeRadius);
                     auto t = std::make_shared<padi::Tile>(pos);
                     int r = int(16 * (m_perlin.normalizedOctave2D_01(234 + pos.x * cScale, pos.y * cScale, 2))) * 90;
                     float m = (z * m_perlin.normalizedOctave2D_01(pos.x * mScale, pos.y * mScale, 7));

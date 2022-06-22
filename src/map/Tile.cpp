@@ -10,7 +10,7 @@
 
 namespace padi {
     Tile::Tile(const sf::Vector2i &pos) : GridObject(pos) {
-
+        m_detail = size_t(getPosition().x + getPosition().y) % 2;
     }
 
     size_t Tile::populate(const padi::Map *context, sf::VertexArray &array, size_t vertexOffset, uint8_t frame,
@@ -24,7 +24,6 @@ namespace padi {
         quad[2].position = anchor + sf::Vector2f(tileSize.x / 2, tileSize.y / 2);
         quad[3].position = anchor + sf::Vector2f(-tileSize.x / 2, tileSize.y / 2);
         quad[0].color = quad[1].color = quad[2].color = quad[3].color = m_color;
-
         // TODO hardcoded lol
         quad[0].texCoords = sf::Vector2f(992 + 0, 0 + m_detail * tileSize.y);
         quad[1].texCoords = sf::Vector2f(992 + 32, 0 + m_detail * tileSize.y);
