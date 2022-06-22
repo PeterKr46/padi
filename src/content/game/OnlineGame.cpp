@@ -151,5 +151,9 @@ namespace padi::content {
     size_t OnlineGame::getSeed() const {
         return m_seed;
     }
+    const std::map<uint32_t, std::shared_ptr<Character>, std::less<>> & OnlineGame::getCharacters() const {
+        return m_characters;
+    }
+
 
 } // content

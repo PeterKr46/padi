@@ -12,6 +12,7 @@
 #include "../npc/ExplosiveMob.h"
 #include "../menu/MainMenu.h"
 #include "../npc/SlugMob.h"
+#include "../npc/EndGate.h"
 
 namespace padi::content {
     void HostGame::synchronizeSeed() {
@@ -62,9 +63,15 @@ namespace padi::content {
         }
         {
             auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
-                                                      sf::Vector2i{2, 2});
+                                                 sf::Vector2i{2, 2});
             mob->initHPBar(5, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
 
+            auto cr = mob->asCharacter(0);
+            spawnCharacter(cr, m_lobby.size - 1);
+        }
+        {
+            auto mob = std::make_shared<EndGate>("gate", m_level->getApollo()->lookupAnimContext("gate"),
+                                                 sf::Vector2i{-3, -3});
             auto cr = mob->asCharacter(0);
             spawnCharacter(cr, m_lobby.size - 1);
         }

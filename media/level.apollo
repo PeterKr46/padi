@@ -36,6 +36,7 @@ anim pillars            32 32   992 352
 
 # end gate
 anim end_gate           32 48   960 0
+anim open_gate          32 32   992 288
 
 # ui
 anim cursor             32 32   960 648     0 32    6  1
@@ -65,6 +66,11 @@ anim move_y_to      32 32   48 8    0 48    12
 anim idle           32 32   0  568  0 32    12
 anim spawn          32 32   32 568  0 32    12
 anim spawn_ray      32 32   64 568  0 32    12
+
+block gate
+anim idle           0 0  0 0 0 0 12
+anim spawn          0 0  0 0 0 0 12
+anim spawn_ray      0 0  0 0 0 0 12
 
 block tetrahedron
 anim move_x_from    32 32   96  0   0 48    12

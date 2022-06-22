@@ -26,7 +26,8 @@ namespace padi::content {
             Dash,
             Darken,
             SelfDestruct,
-            SlugWalk
+            SlugWalk,
+            GateUnlock
         };
     }
 

@@ -43,10 +43,9 @@ namespace padi::content {
                 CharacterCastPayload payload;
                 payload.ability = uint8_t(0);
                 payload.pos = *target;
-                printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
+                printf("[SlugMob] Walking to (%i, %i)\n", payload.pos.x, payload.pos.y);
                 packet.append(&payload, sizeof(payload));
                 game->broadcast(packet);
-
             }
             m_turnStarted = true;
         }
@@ -64,7 +63,7 @@ namespace padi::content {
         return Character{id,
                          shared_from_this(),
                          {
-                                 std::make_shared<SlugWalk>(shared_from_this(), 2, Walk::Walkable{-999}),
+                                 std::make_shared<SlugWalk>(shared_from_this(), 2, Walk::Walkable{-700}),
                          },
                          [=](const std::shared_ptr<OnlineGame> &l, const std::shared_ptr<Character> &c) {
                              return takeTurn(l, c);

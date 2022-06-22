@@ -32,6 +32,10 @@ namespace padi::content {
         auto level = game->getLevel().lock();
         CharacterCastPayload payload;
         RemoteTurnState state = IDLE;
+        if(!chr->entity) {
+            printf("Non-Player turn.");
+            return true;
+        }
         if (m_activeAbility != -1) {
             state = CASTING;
             if (!chr->entity->hasCastIntent()) {

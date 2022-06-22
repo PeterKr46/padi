@@ -40,7 +40,10 @@ namespace padi::content {
 
         virtual void broadcast(sf::Packet &packet) = 0;
 
-        virtual void broadcast(sf::Packet &packet, const uint32_t* ignore, uint32_t num_ignored) = 0;
+        virtual void broadcast(sf::Packet &packet, const uint32_t *ignore, uint32_t num_ignored) = 0;
+
+        const std::map<uint32_t, std::shared_ptr<Character>, std::less<>> & getCharacters() const;
+
 
         size_t getSeed() const;
 
@@ -97,14 +100,19 @@ namespace padi::content {
         void takeTurn();
 
         void advanceTurn();
+
         size_t getLobbySize() const;
 
         void sendChatMessage(const std::string &msg) override;
+
         void sendChatGeneric(const std::string &msg, uint32_t from = -1);
 
         void broadcast(sf::Packet &packet) override;
+
         void broadcast(sf::Packet &packet, const uint32_t *ignore, uint32_t num_ignored) override;
-        uint32_t spawnCharacter(Character const& c, uint32_t owner = 0);
+
+        uint32_t spawnCharacter(Character const &c, uint32_t owner = 0);
+
     private:
         std::queue<uint32_t> m_turnQueue;
         struct {
@@ -136,6 +144,7 @@ namespace padi::content {
         void takeTurn();
 
         void broadcast(sf::Packet &packet) override;
+
         void broadcast(sf::Packet &packet, const uint32_t *ignore, uint32_t num_ignored) override;
 
         void sendChatMessage(const std::string &msg) override;
@@ -148,6 +157,7 @@ namespace padi::content {
         } m_lobby;
 
         void spawnNewCharacter(CharacterSpawnPayload payload);
+
         void spawnNewEntity(EntitySpawnPayload payload);
     };
 } // content
