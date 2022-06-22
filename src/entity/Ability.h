@@ -5,6 +5,7 @@
 #pragma once
 
 
+#include <string>
 #include <memory>
 #include <vector>
 #include "SFML/System/Vector2.hpp"

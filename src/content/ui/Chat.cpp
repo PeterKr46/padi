@@ -4,8 +4,6 @@
 
 #include "Chat.h"
 
-#include <format>
-
 #include "../../ui/Immediate.h"
 #include "../../Constants.h"
 #include "../../Controls.h"

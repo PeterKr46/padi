@@ -3,7 +3,6 @@
 //
 
 #include "Ability.h"
-
 #include <utility>
 #include "LivingEntity.h"
 #include "../level/Level.h"

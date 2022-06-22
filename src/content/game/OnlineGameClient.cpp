@@ -59,7 +59,7 @@ namespace padi::content {
         m_lobby.size = lobbySizePL.numPlayers;
         m_lobby.names.resize(m_lobby.size, "");
         printf("[OnlineGame|Client] Sending own name!\n");
-        std::memcpy(&namePL.name, ownName.c_str(), std::min(8ull, ownName.length()));
+        std::memcpy(&namePL.name, ownName.c_str(), std::min<size_t>(8ull, ownName.length()));
         PackagePayload(packet, namePL);
         m_lobby.host.send(packet);
         printf("[OnlineGame|Client] Sent own name!\n");
@@ -68,7 +68,7 @@ namespace padi::content {
                 exit(-1);
             }
             printf("[OnlineGame|Client] Received name %u: %.*s!\n", namePL.cid, 8, namePL.name);
-            m_lobby.names[namePL.cid] = std::string(namePL.name, std::min(strlen(namePL.name), 8ull));
+            m_lobby.names[namePL.cid] = std::string(namePL.name, std::min<size_t>(strlen(namePL.name), 8ull));
         }
         printf("[OnlineGame|Client] Received all names!\n");
     }

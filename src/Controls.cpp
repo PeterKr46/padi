@@ -4,6 +4,7 @@
 
 #include "Controls.h"
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <cstring>
 
 namespace padi {
 
@@ -69,7 +70,7 @@ namespace padi {
                 if (chr == '\b') {
                     if (!out.empty()) out.pop_back();
                 } else {
-                    if (std::strchr(whitelist, chr)) {
+                    if (strchr(whitelist, chr)) {
                         if (out.size() < max_len)
                             out += chr;
                     }

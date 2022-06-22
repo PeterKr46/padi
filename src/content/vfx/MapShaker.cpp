@@ -3,6 +3,7 @@
 //
 
 #include "MapShaker.h"
+#include <cmath>
 
 #include "../../level/Level.h"
 #include "../../map/Tile.h"
