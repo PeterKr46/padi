@@ -51,10 +51,7 @@ namespace padi {
         std::vector<sf::Vector2i> result;
         result.reserve(geodesicDistance.size());
         for(auto const& [t, cost] : geodesicDistance) {
-            if (std::find(result.begin(), result.end(), t->getPosition()) != result.end()) {
-                printf("Duplicate tile!!!\n");
-            }
-            result.emplace_back(t->getPosition());
+            if (cost > 0) result.emplace_back(t->getPosition());
         }
         return result;
     }

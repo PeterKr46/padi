@@ -2,7 +2,7 @@
 // Created by Peter on 13/06/2022.
 //
 
-#include "Mob.h"
+#include "ExplosiveMob.h"
 #include "../../entity/OneshotEntity.h"
 #include "../game/OnlineGame.h"
 #include "SFML/Network/Packet.hpp"
@@ -12,12 +12,12 @@
 
 namespace padi::content {
 
-    Mob::Mob(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos)
+    ExplosiveMob::ExplosiveMob(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos)
             : LivingEntity(std::move(name), moveset, pos) {
         setColor(sf::Color(32, 32, 32));
     }
 
-    bool Mob::takeTurn(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr) {
+    bool ExplosiveMob::takeTurn(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr) {
         auto level = game->getLevel().lock();
         if (!m_turnStarted) {
             bool explode = false;
@@ -27,27 +27,53 @@ namespace padi::content {
                 }
             }
             if (explode) {
-                chr->entity->intentCast(chr->abilities[1], chr->entity->getPosition());
+                usedAbility = 1;
+                chr->entity->intentCast(chr->abilities[usedAbility], chr->entity->getPosition());
                 {
                     CharacterCastPayload payload;
                     payload.ability = uint8_t(1);
-                    payload.pos = level->getCursorLocation();
+                    payload.pos = chr->entity->getPosition(); // ?
                     sf::Packet packet = PackagePayload(payload);
                     printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
                     game->broadcast(packet);
 
-                    auto child1 = std::make_shared<Mob>(chr->entity->getName(), chr->entity->getAnimationSet(), chr->entity->getPosition());
-                    child1->initHPBar(chr->entity->getHPBar());
+                    auto rand = std::mt19937(game->getSeed() + chr->id * 45689);
                     auto host = std::static_pointer_cast<HostGame>(game);
-                    host->spawnCharacter(child1->asCharacter(0));
+                    size_t dir_id = rand() % 4;
+                    sf::Vector2i dir = AllDirections[dir_id];
+                    auto tile = level->getMap()->getTile(chr->entity->getPosition() + dir);
+                    if (tile && tile->m_walkable) {
+                        auto child1 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
+                                                                     chr->entity->getAnimationSet(),
+                                                                     tile->getPosition());
+                        child1->initHPBar(chr->entity->getHPBar());
+                        host->spawnCharacter(child1->asCharacter(0),host->getLobbySize()-1);
+                    }
 
-                    auto child2 = std::make_shared<Mob>(chr->entity->getName(), chr->entity->getAnimationSet(), chr->entity->getPosition());
-                    child2->initHPBar(chr->entity->getHPBar());
-                    host->spawnCharacter(child2->asCharacter(0));
+                    dir = AllDirections[(dir_id + 1) % 4];
+                    tile = level->getMap()->getTile(chr->entity->getPosition() + dir);
+                    if (tile && tile->m_walkable) {
+                        auto child2 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
+                                                                     chr->entity->getAnimationSet(),
+                                                                     tile->getPosition());
+                        child2->initHPBar(chr->entity->getHPBar());
+                        host->spawnCharacter(child2->asCharacter(0), host->getLobbySize()-1);
+                    }
+
+                    dir = AllDirections[(dir_id + 2) % 4];
+                    tile = level->getMap()->getTile(chr->entity->getPosition() + dir);
+                    if (tile && tile->m_walkable) {
+                        auto child2 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
+                                                                     chr->entity->getAnimationSet(),
+                                                                     tile->getPosition());
+                        child2->initHPBar(chr->entity->getHPBar());
+                        host->spawnCharacter(child2->asCharacter(0), host->getLobbySize()-1);
+                    }
                 }
                 chr->alive = false;
             } else {
-                auto walk = std::static_pointer_cast<Walk>(chr->abilities[0]);
+                usedAbility = 0;
+                auto walk = std::static_pointer_cast<Walk>(chr->abilities[usedAbility]);
                 walk->castIndicator(level);
                 walk->recalculateRange(level);
                 std::vector<sf::Vector2i> targets = walk->getPossibleTargets();
@@ -62,12 +88,12 @@ namespace padi::content {
                 for (auto pos: targets) {
                     for (auto dir: AllDirections) {
                         auto neighborPos = pos + dir;
-                        if(neighborPos != chr->entity->getPosition()) {
-                            if(level->getMap()->getEntities(pos + dir, ents)) {
-                                for(auto & ent : ents) {
-                                    if(ent->getType() == LivingEntity::EntityType) {
+                        if (neighborPos != chr->entity->getPosition()) {
+                            if (level->getMap()->getEntities(pos + dir, ents)) {
+                                for (auto &ent: ents) {
+                                    if (ent->getType() == LivingEntity::EntityType) {
                                         auto livingEnt = std::static_pointer_cast<LivingEntity>(ent);
-                                        if(livingEnt->hasHPBar() && livingEnt->getHPBar().lock()->getHP() > 0) {
+                                        if (livingEnt->hasHPBar() && livingEnt->getHPBar().lock()->getMaxHP() > 1) {
                                             target = pos;
                                         }
                                     }
@@ -91,19 +117,20 @@ namespace padi::content {
             m_turnStarted = true;
         }
         if (chr->entity) {
-            if (!chr->entity->hasCastIntent() && chr->abilities[0]->isCastComplete()) {
+            if (!chr->entity->hasCastIntent() && chr->abilities[usedAbility]->isCastComplete()) {
                 m_turnStarted = false;
             }
-            return !chr->entity->hasCastIntent() && chr->abilities[0]->isCastComplete();
+            return !chr->entity->hasCastIntent() && chr->abilities[usedAbility]->isCastComplete();
         } else {
             return true;
         }
     }
 
-    Character Mob::asCharacter(uint32_t id) {
+    Character ExplosiveMob::asCharacter(uint32_t id) {
         return {id,
                 shared_from_this(),
-                {std::make_shared<Walk>(shared_from_this(), 5, Walk::Walkable{-700}), std::make_shared<SelfDestruct>(shared_from_this())},
+                {std::make_shared<Walk>(shared_from_this(), 5, Walk::Walkable{-700}),
+                 std::make_shared<SelfDestruct>(shared_from_this())},
                 [=](const std::shared_ptr<OnlineGame> &l, const std::shared_ptr<Character> &c) {
                     return takeTurn(l, c);
                 }
@@ -166,7 +193,7 @@ namespace padi::content {
                 auto tile = lvl->getMap()->getTile(pos + dir);
                 auto col = tile->getColor();
                 uint16_t cSum = col.r + col.g + col.b;
-                if (cSum < 700) tile->lerpColor(sf::Color::Black, 0.2);
+                if (cSum < 700) tile->lerpColor(sf::Color::Black, 0.5);
                 tile->setVerticalOffset(float(frame % 2));
             }
         } else if (frame == 8) {

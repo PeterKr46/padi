@@ -26,6 +26,7 @@ namespace padi::content {
             Dash,
             Darken,
             SelfDestruct,
+            SlugWalk
         };
     }
 
@@ -125,6 +126,8 @@ namespace padi::content {
         bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;
 
         bool onCycleBegin(std::weak_ptr<padi::Level> const &lvl) override;
+
+        bool onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) override;
 
         void recalculateRange(const std::weak_ptr<Level> &level) override;
 

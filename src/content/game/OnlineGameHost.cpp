@@ -9,8 +9,9 @@
 #include "RemotePlayerTurn.h"
 #include "../../level/SpawnEvent.h"
 #include "Character.h"
-#include "../npc/Mob.h"
+#include "../npc/ExplosiveMob.h"
 #include "../menu/MainMenu.h"
+#include "../npc/SlugMob.h"
 
 namespace padi::content {
     void HostGame::synchronizeSeed() {
@@ -50,6 +51,22 @@ namespace padi::content {
                     std::make_shared<SelfDestruct>(playerCharacter.entity)
             };
             spawnCharacter(playerCharacter, id);
+        }
+        {
+            auto mob = std::make_shared<ExplosiveMob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
+                                                      sf::Vector2i{3, 3});
+            mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+
+            auto cr = mob->asCharacter(0);
+            spawnCharacter(cr, m_lobby.size - 1);
+        }
+        {
+            auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
+                                                      sf::Vector2i{2, 2});
+            mob->initHPBar(5, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+
+            auto cr = mob->asCharacter(0);
+            spawnCharacter(cr, m_lobby.size - 1);
         }
     }
 
@@ -140,7 +157,7 @@ namespace padi::content {
         }
 
         if(m_turnQueue.empty()) {
-            if (m_roundCooldown.getElapsedTime().asMilliseconds() < 2000) {
+            if (m_roundCooldown.getElapsedTime().asMilliseconds() < 1000) {
                 return;
             }
             // End of Round fun!
@@ -332,11 +349,9 @@ namespace padi::content {
 
     void HostGame::endOfRound() {
         printf("[OnlineGame|Server] Round ended.\n");
-        auto mob = std::make_shared<Mob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
-                                         sf::Vector2i{3, 3});
-        mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+    }
 
-        auto cr = mob->asCharacter(0);
-        spawnCharacter(cr, m_lobby.size-1);
+    size_t HostGame::getLobbySize() const {
+        return m_lobby.size;
     }
 }

@@ -33,14 +33,15 @@ namespace padi::content {
         bool m_complete = false;
     };
 
-    class Mob : public padi::LivingEntity {
+    class ExplosiveMob : public padi::LivingEntity {
     public:
-        Mob(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos);
+        ExplosiveMob(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos);
         bool takeTurn(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 
         Character asCharacter(uint32_t id);
 
     private:
+        size_t usedAbility = 0;
         bool m_turnStarted = false;
     };
 

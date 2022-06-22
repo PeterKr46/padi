@@ -12,7 +12,8 @@
 #include "Character.h"
 #include "SFML/Window/Keyboard.hpp"
 #include "../../media/AudioPlayback.h"
-#include "../npc/Mob.h"
+#include "../npc/ExplosiveMob.h"
+#include "../npc/SlugMob.h"
 
 
 namespace padi::content {
@@ -93,6 +94,16 @@ namespace padi::content {
             }
             case AbilityType::SelfDestruct: {
                 abilities[payload.abilitySlot] = std::make_shared<padi::content::SelfDestruct>(chr->entity);
+                break;
+            }
+            case AbilityType::SlugWalk: {
+                uint8_t range = payload.abilityProps[0];
+                int16_t walkable = *reinterpret_cast<int16_t *>(payload.abilityProps + 1);
+                abilities[payload.abilitySlot] = std::make_shared<padi::content::SlugWalk>(
+                        chr->entity,
+                        range,
+                        Walk::Walkable{walkable}
+                );
                 break;
             }
             default: {

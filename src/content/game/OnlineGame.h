@@ -97,6 +97,7 @@ namespace padi::content {
         void takeTurn();
 
         void advanceTurn();
+        size_t getLobbySize() const;
 
         void sendChatMessage(const std::string &msg) override;
         void sendChatGeneric(const std::string &msg, uint32_t from = -1);

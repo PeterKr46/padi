@@ -308,6 +308,10 @@ namespace padi {
         }
     }
 
+    bool content::Walk::onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) {
+        return CycleListener::onFrameBegin(lvl, frame);
+    }
+
 
     content::Dash::Dash(std::shared_ptr<padi::LivingEntity> user, size_t range)
             : padi::LimitedRangeAbility(std::move(user), range) {
