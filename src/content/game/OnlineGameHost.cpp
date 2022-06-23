@@ -51,6 +51,13 @@ namespace padi::content {
             };
             spawnCharacter(playerCharacter, id);
         }
+        {
+            auto mob = std::make_shared<EndGate>("gate", m_level->getApollo()->lookupAnimContext("gate"),
+                                                 sf::Vector2i{-3, -3});
+            mob->m_requiredKills = m_lobby.size * 5;
+            auto cr = mob->asCharacter(0);
+            m_turnQueue.push(spawnCharacter(cr, m_lobby.size - 1));
+        }
         for (int i = 0; i < m_lobby.size * 2; ++i) {
             auto refPos = m_characters[i % m_lobby.size]->entity->getPosition();
             std::shared_ptr<Tile> target = nullptr;
@@ -74,13 +81,6 @@ namespace padi::content {
 
             auto cr = mob->asCharacter(0);
             spawnCharacter(cr, m_lobby.size - 1);
-        }
-        {
-            auto mob = std::make_shared<EndGate>("gate", m_level->getApollo()->lookupAnimContext("gate"),
-                                                 sf::Vector2i{-3, -3});
-            mob->m_requiredKills = m_lobby.size * 3;
-            auto cr = mob->asCharacter(0);
-            m_turnQueue.push(spawnCharacter(cr, m_lobby.size - 1));
         }
     }
 

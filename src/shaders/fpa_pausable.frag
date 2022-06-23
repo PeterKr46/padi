@@ -41,6 +41,7 @@ float noise(vec2 n) {
 
 #define res (vec2(453, 255))
 #define halfpx (vec2(0.5) / res)
+#define curvature (vec2(4.8, 3.5))
 
 // Hardness of scanline.
 //  -8.0 = soft
@@ -122,12 +123,12 @@ vec3 Tri(vec2 pos){
     return a*wa+b*wb+c*wc;
 }
 
-vec2 curvature = vec2(4.8, 3.5);
+
 vec2 curveRemapUV(vec2 uv)
 {
     // as we near the edge of our screen apply greater distortion using a cubic function
     uv = uv * vec2(2.0) - vec2(1.0);
-    vec2 offset = abs(uv.yx) / vec2(curvature.x, curvature.y);
+    vec2 offset = abs(uv.yx) / curvature;
     uv = uv + uv * offset * offset;
     uv = uv * 0.5 + 0.5;
     return uv;

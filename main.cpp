@@ -50,6 +50,10 @@ int main() {
                 padi::Controls::textEntered(event.text.unicode);
             } else if (event.type == sf::Event::Resized) {
                 activity->handleResize(int(event.size.width), int(event.size.height));
+            } else if (event.type == sf::Event::MouseMoved) {
+                sf::Vector2i pxPos{event.mouseMove.x, event.mouseMove.y};
+                sf::Vector2f relPos{float(pxPos.x) / float(window.getSize().x), float(float(pxPos.y) / window.getSize().y)};
+                padi::Controls::mouseMoved(relPos, pxPos);
             }
         }
         window.clear();

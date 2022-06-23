@@ -39,11 +39,19 @@ namespace padi {
         static void keyDown(sf::Keyboard::Key key);
         static void keyReleased(sf::Keyboard::Key key);
         static void textEntered(uint32_t unicode);
+        static void mouseMoved(sf::Vector2f const& rel, sf::Vector2i const& px);
 
         static void resetKeyStates();
+
+        static sf::Vector2f getRelativeMousePosition();
+        static sf::Vector2i getPixelMousePosition();
 
     protected:
         inline static std::map<sf::Keyboard::Key, uint8_t> s_state;
         inline static std::string s_text;
+        inline static struct {
+            sf::Vector2f relative;
+            sf::Vector2i pixels;
+        } s_mouse;
     };
 }

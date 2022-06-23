@@ -93,7 +93,7 @@ namespace padi::content {
                                 for (auto &ent: ents) {
                                     if (ent->getType() == LivingEntity::EntityType) {
                                         auto livingEnt = std::static_pointer_cast<LivingEntity>(ent);
-                                        if (livingEnt->hasHPBar() && livingEnt->getHPBar().lock()->getMaxHP() > 1) {
+                                        if (livingEnt->hasHPBar() && livingEnt->getHPBar().lock()->getHP() > 0) {
                                             target = pos;
                                         }
                                     }

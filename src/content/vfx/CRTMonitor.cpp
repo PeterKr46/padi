@@ -3,7 +3,7 @@
 //
 
 #include "CRTMonitor.h"
-
+#include <cmath>
 
 namespace padi::content {
 #define CRT_WIDTH   int(453)
@@ -62,6 +62,18 @@ namespace padi::content {
 
     void CRTMonitor::handleResize(sf::Vector2u const& d) {
         handleResize(int(d.x), int(d.y));
+    }
+
+    sf::Vector2f CRTMonitor::mapWindowtoCRTPosition(const sf::Vector2f &window) {
+        static const sf::Vector2f curvature{4.8, 3.5};
+        sf::Vector2f uv = window * 2.0f - sf::Vector2f(1,1);
+        sf::Vector2f offset = sf::Vector2f (
+                uv.x * std::pow(std::abs(uv.y) / curvature.x, 2.f),
+                uv.y * std::pow(std::abs(uv.x) / curvature.y, 2.f)
+                );
+        uv += offset;
+        uv = uv * 0.5f + sf::Vector2f(0.5f, 0.5f);
+        return uv;
     }
 
 }

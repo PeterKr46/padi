@@ -76,7 +76,20 @@ namespace padi {
                     }
                 }
             }
-            return !s_text.empty();
         }
+        return !s_text.empty();
+    }
+
+    sf::Vector2f Controls::getRelativeMousePosition() {
+        return s_mouse.relative;
+    }
+
+    sf::Vector2i Controls::getPixelMousePosition() {
+        return s_mouse.pixels;
+    }
+
+    void Controls::mouseMoved(const sf::Vector2f &rel, sf::Vector2i const& px) {
+        s_mouse.relative = rel;
+        s_mouse.pixels = px;
     }
 }

@@ -8,6 +8,7 @@
 #include "../Controls.h"
 #include "../entity/OneshotEntity.h"
 #include "../media/AudioPlayback.h"
+#include "../content/vfx/CRTMonitor.h"
 
 namespace padi {
 
@@ -35,6 +36,8 @@ namespace padi {
 
         sf::Color color = sf::Color::White;
         size_t frame = 0;
+
+
         if (ctx->isFocused(id)) {
             // Tab to cycle... for now
             checkFocusSwitch(ctx);
@@ -42,6 +45,13 @@ namespace padi {
             color = sf::Color::Yellow;
             frame = padi::Controls::pollKeyState(sf::Keyboard::Space);
         } else {
+            auto mPos = padi::content::CRTMonitor::mapWindowtoCRTPosition(padi::Controls::getRelativeMousePosition());
+            mPos.x *= 453;
+            mPos.y *= 255;
+            mPos = ctx->topTransform().getInverse().transformPoint(mPos);
+            if(size.contains(mPos)) {
+                ctx->setFocus(id);
+            }
             if (ctx->m_focused == 0)
                 ctx->m_focused = id;
         }
@@ -80,6 +90,13 @@ namespace padi {
             color = sf::Color::Yellow;
         } else {
             color = sf::Color::White;
+            auto mPos = padi::content::CRTMonitor::mapWindowtoCRTPosition(padi::Controls::getRelativeMousePosition());
+            mPos.x *= 453;
+            mPos.y *= 255;
+            mPos = ctx->topTransform().getInverse().transformPoint(mPos);
+            if(size.contains(mPos)) {
+                ctx->setFocus(id);
+            }
             if (ctx->m_focused == 0)
                 ctx->m_focused = id;
         }

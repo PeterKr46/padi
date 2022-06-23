@@ -66,7 +66,6 @@ namespace padi::content {
         m_crt.asTarget()->draw(m_background, states);
 
         m_uiContext.nextFrame();
-
         {
             m_uiContext.pushTransform().translate(16, 32);
             if (!(hostRole.active || clientRole.client)) {
