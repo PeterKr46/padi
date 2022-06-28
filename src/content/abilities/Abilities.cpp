@@ -122,7 +122,7 @@ namespace padi {
             std::vector<std::shared_ptr<Entity>> ents;
             if (lvl->getMap()->getEntities(strikePos, ents)) {
                 for (auto &entity: ents) {
-                    if (entity->getType() == LivingEntity::EntityType) {
+                    if (entity->getType() & LivingEntity::EntityType) {
                         auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
                         if (livingEntity->hasHPBar()) {
                             auto hpBar = livingEntity->getHPBar().lock();
@@ -335,11 +335,6 @@ namespace padi {
             }
         }
 
-        /*if (delta.x < 0) m_direction = Left;
-        else if (delta.x > 0) m_direction = Right;
-        else if (delta.y > 0) m_direction = Down;
-        else if (delta.y < 0) m_direction = Up;*/
-
         if ((m_direction.x == 0 && m_direction.y == 0) || !lvl->getMap()->getTile(pos)->m_walkable) {
             castCancel(lvl);
             return false;
@@ -356,13 +351,13 @@ namespace padi {
 
             auto col = tile->getColor();
             uint16_t cSum = col.r + col.g + col.b;
-            if (cSum > 100) tile->lerpAdditiveColor(m_user->getColor(), 0.3);
+            if (cSum > 100) tile->lerpAdditiveColor(m_user->getColor(), 0.7);
 
             lvl->addCycleEndListener(laserPart);
             std::vector<std::shared_ptr<Entity>> ents;
             if (lvl->getMap()->getEntities(iPos, ents)) {
                 for (auto &entity: ents) {
-                    if (entity->getType() == LivingEntity::EntityType) {
+                    if (entity->getType() & LivingEntity::EntityType) {
                         auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
                         if (livingEntity->hasHPBar()) {
                             auto hpBar = livingEntity->getHPBar().lock();
@@ -372,8 +367,15 @@ namespace padi {
                 }
             }
         }
+        auto strike = std::make_shared<padi::OneshotEntity>(m_user->getPosition());
+        strike->m_animation = lvl->getApollo()->lookupAnim("bubble");
+        strike->m_color = m_user->getColor();
+        lvl->getMap()->addEntity(strike);
+        lvl->addCycleEndListener(strike);
+        lvl->centerView(pos);
         lvl->getMap()->moveEntity(m_user, pos);
-        auto strike = std::make_shared<padi::OneshotEntity>(pos);
+
+        strike = std::make_shared<padi::OneshotEntity>(pos);
         strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
         strike->m_color = m_user->getColor();
         lvl->getMap()->addEntity(strike);
@@ -487,7 +489,7 @@ namespace padi {
         std::vector<std::shared_ptr<padi::Entity>> entities;
         if (level->getMap()->getEntities(pos, entities)) {
             for (auto &entity: entities) {
-                if (entity->getType() == 5) {
+                if (entity->getType() & 5 /* TODO different type... */) {
                     return true;
                 }
             }

@@ -16,7 +16,7 @@ namespace padi {
             : public CycleListener, public padi::StaticEntity, public std::enable_shared_from_this<Cursor> {
     public:
 
-        static const uint32_t EntityType = 7;
+        static const uint32_t EntityType = 4;
 
         explicit Cursor(std::shared_ptr<padi::Animation> anim);
 

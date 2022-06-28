@@ -99,7 +99,7 @@ namespace padi::content {
         }
         auto tile = level->getMap()->getTile(target);
 
-        tile->lerpColor(sf::Color::Black, 0.1);
+        tile->lerpColor(sf::Color(0x1e1e1eff), 0.5);
         return !Walk::isCastComplete();
     }
 

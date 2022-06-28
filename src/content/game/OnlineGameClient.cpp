@@ -185,7 +185,7 @@ namespace padi::content {
             chr->entity = std::make_shared<padi::LivingEntity>(
                     "TODO",
                     m_level->getApollo()->lookupAnimContext(payload.animations),
-                    payload.pos);
+                    payload.pos, payload.entitytype);
             chr->entity->setColor(payload.color);
             auto spawnEvent = std::make_shared<SpawnEvent>(chr->entity);
             spawnEvent->dispatch(m_level);

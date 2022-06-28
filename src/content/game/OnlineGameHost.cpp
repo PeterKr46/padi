@@ -47,7 +47,8 @@ namespace padi::content {
             playerCharacter.abilities = {
                     std::make_shared<Peep>(playerCharacter.entity),
                     std::make_shared<Walk>(playerCharacter.entity, 5),
-                    std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100})
+                    std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100}),
+                    std::make_shared<Lighten>(playerCharacter.entity),
             };
             spawnCharacter(playerCharacter, id);
         }
@@ -313,6 +314,7 @@ namespace padi::content {
             spawnEvent->dispatch(m_level);
             EntitySpawnPayload payload;
             payload.cid = cid;
+            payload.entitytype = c.entity->getType();
             payload.pos = c.entity->getPosition();
             payload.color = c.entity->getColor();
             auto & animSet = c.entity->getAnimationSet()->getName();

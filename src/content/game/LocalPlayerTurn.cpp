@@ -12,7 +12,7 @@
 #include "../../entity/Ability.h"
 #include "../../ui/Immediate.h"
 #include "../../media/AudioPlayback.h"
-#include "../../level/Level.h"
+#include "../../level/Cursor.h"
 
 
 namespace padi::content {
@@ -88,6 +88,7 @@ namespace padi::content {
                     m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),{8, 24});
                 }
             } else {
+                level->getCursor()->lock();
                 if (padi::Controls::wasKeyPressed(sf::Keyboard::Enter)) {
                     level->play();
                     m_uiContext->removeText("ability");

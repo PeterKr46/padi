@@ -25,9 +25,15 @@ void main(){
 
     vec4 fragColor = texture2D(texture, fragCoord);
     vec3 colorShift = gl_Color.rgb;
+
+    float csum = colorShift.r + colorShift.g + colorShift.b;
+    float dark = (step(csum, 0.5));
+    //colorShift.rgb = (1.0-step(fragColor.rrr, vec3(0.95))*(1.0-colorShift.rgb));
     // colorShift = rgb2hsv(gl_Color.rgb);
     // colorShift.r += fragColor.g;
     // colorShift = hsv2rgb(colorShift);
+    //gl_FragColor.rgb = dark * (1-step(fragColor.r, 0.9)) + (1-(dark*step(fragColor.r, 0.9))) * (fragColor.rrr * colorShift.rgb);
+                     //+ (step(fragColor.rrr, vec3(0.98))*(fragColor.rrr * colorShift.rgb));
 
     gl_FragColor.rgb = colorShift * fragColor.rrr;
     gl_FragColor.a = (1.0 - step(fragColor.a, 0.1)) * gl_Color.a;

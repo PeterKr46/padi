@@ -6,8 +6,10 @@
 
 #include <cstring>
 #include <cmath>
-#include "SFML/Network.hpp"
-#include "SFML/Graphics/Color.hpp"
+
+#include <SFML/Network.hpp>
+#include <SFML/Graphics/Color.hpp>
+#include "../entity/LivingEntity.h"
 
 namespace padi::content {
 
@@ -19,6 +21,7 @@ namespace padi::content {
         packet.append(&t, sizeof(t));
         return packet;
     }
+
     template<typename T>
     sf::Packet PackagePayload(T const& t) {
         sf::Packet packet;
@@ -39,7 +42,8 @@ namespace padi::content {
         CharacterTurnBegin,
         PlayerDespawn,
         NextLevel,
-        InitHP
+        InitHP,
+        ModifyHP
     };
 
     struct alignas(64) ChatMessagePayload {
@@ -94,6 +98,7 @@ namespace padi::content {
     struct alignas(64) EntitySpawnPayload {
         const PayloadType type = EntitySpawn;
         uint32_t        cid{};
+        uint32_t        entitytype{LivingEntity::EntityType};
         sf::Vector2i    pos;
         sf::Color       color;
         char            animations[12] = "\0";
@@ -134,7 +139,7 @@ namespace padi::content {
     struct alignas(64) InitHPPayload {
         const PayloadType type = InitHP;
         uint32_t cid{};
-        uint32_t maxHP{};
+        uint16_t maxHP{};
         sf::Color color{0x0};
     };
 

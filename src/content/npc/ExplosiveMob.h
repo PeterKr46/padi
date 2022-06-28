@@ -35,6 +35,7 @@ namespace padi::content {
 
     class ExplosiveMob : public padi::LivingEntity {
     public:
+        static const uint32_t EntityType = 1u << 31;
         ExplosiveMob(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos);
         bool takeTurn(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 

@@ -207,7 +207,7 @@ namespace padi {
         auto iter = m_tiles.find(pos);
         if (iter != m_tiles.end()) {
             auto entities = iter->second.second;
-            return std::any_of(entities.begin(), entities.end(), [t](std::shared_ptr<Entity> const& e) { return e->getType() == t;});
+            return std::any_of(entities.begin(), entities.end(), [t](std::shared_ptr<Entity> const& e) { return e->getType() & t;});
         }
         return false;
     }

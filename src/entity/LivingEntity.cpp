@@ -11,8 +11,8 @@
 #include "Ability.h"
 #include "StaticEntity.h"
 
-padi::LivingEntity::LivingEntity(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos)
-        : Entity(pos, EntityType),
+padi::LivingEntity::LivingEntity(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos, uint32_t typeFlags)
+        : Entity(pos, EntityType | typeFlags),
           m_name(std::move(name)),
           m_apolloCtx(moveset) {
     m_animation = m_apolloCtx->at("idle");

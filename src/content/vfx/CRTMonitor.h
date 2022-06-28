@@ -27,7 +27,7 @@ namespace padi::content {
 
         sf::RenderTarget* asTarget();
 
-        static sf::Vector2f mapWindowtoCRTPosition(sf::Vector2f const& window);
+        static sf::Vector2f mapWindowToCRTPosition(sf::Vector2f const& window);
 
     public:
         bool paused{false};

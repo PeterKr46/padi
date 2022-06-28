@@ -45,6 +45,7 @@ namespace padi {
 
         static sf::Vector2f getRelativeMousePosition();
         static sf::Vector2i getPixelMousePosition();
+        static bool didMouseMove();
 
     protected:
         inline static std::map<sf::Keyboard::Key, uint8_t> s_state;
@@ -52,6 +53,7 @@ namespace padi {
         inline static struct {
             sf::Vector2f relative;
             sf::Vector2i pixels;
+            bool moved;
         } s_mouse;
     };
 }

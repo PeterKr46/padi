@@ -64,7 +64,7 @@ namespace padi::content {
         handleResize(int(d.x), int(d.y));
     }
 
-    sf::Vector2f CRTMonitor::mapWindowtoCRTPosition(const sf::Vector2f &window) {
+    sf::Vector2f CRTMonitor::mapWindowToCRTPosition(const sf::Vector2f &window) {
         static const sf::Vector2f curvature{4.8, 3.5};
         sf::Vector2f uv = window * 2.0f - sf::Vector2f(1,1);
         sf::Vector2f offset = sf::Vector2f (

@@ -94,6 +94,9 @@ namespace padi::content {
                 //gate->setVerticalOffset(-8);
                 map->addEntity(gate);
                 map->removeEntity(m_user);
+                for(auto & d : Neighborhood) {
+                    map->getTile(pos + d)->setColor(sf::Color::White);
+                }
             }
             return true;
         }

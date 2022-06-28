@@ -18,6 +18,12 @@ namespace padi {
         sf::Vertex *quad = &array[vertexOffset];
         sf::Vector2f anchor = padi::Map::mapTilePosToWorld(getPosition());
         anchor.y += m_verticalOffset;
+
+        auto detail = float(m_detail);
+        uint16_t csum = m_color.r + m_color.g + m_color.b;
+        if  (csum <= 96) detail = 2;
+        else if(csum >= 700) detail = 3;
+
         sf::Vector2f tileSize(padi::TileSize);
         quad[0].position = anchor + sf::Vector2f(-tileSize.x / 2, -tileSize.y / 2);
         quad[1].position = anchor + sf::Vector2f(tileSize.x / 2, -tileSize.y / 2);
@@ -25,10 +31,10 @@ namespace padi {
         quad[3].position = anchor + sf::Vector2f(-tileSize.x / 2, tileSize.y / 2);
         quad[0].color = quad[1].color = quad[2].color = quad[3].color = m_color;
         // TODO hardcoded lol
-        quad[0].texCoords = sf::Vector2f(992 + 0, 0 + m_detail * tileSize.y);
-        quad[1].texCoords = sf::Vector2f(992 + 32, 0 + m_detail * tileSize.y);
-        quad[2].texCoords = sf::Vector2f(992 + 32, 32 + m_detail * tileSize.y);
-        quad[3].texCoords = sf::Vector2f(992 + 0, 32 + m_detail * tileSize.y);
+        quad[0].texCoords = sf::Vector2f(992 + 0, 0     + detail * tileSize.y);
+        quad[1].texCoords = sf::Vector2f(992 + 32, 0    + detail * tileSize.y);
+        quad[2].texCoords = sf::Vector2f(992 + 32, 32   + detail * tileSize.y);
+        quad[3].texCoords = sf::Vector2f(992 + 0, 32    + detail * tileSize.y);
 
         size_t offset = 0;
         if (m_decoration) {
@@ -67,27 +73,28 @@ namespace padi {
         return m_decoration ? 2 : 1;
     }
 
-    Tile::Tile(int x, int y) : GridObject({x, y}) {
+    Tile::Tile(int x, int y)
+            : GridObject({x, y}) {
 
     }
 
     void Tile::lerpColor(const sf::Color &c, float power) {
-        const auto* rawTarget = reinterpret_cast<const uint8_t *>(&c);
-        auto* rawStatus = reinterpret_cast<uint8_t *>(&m_color);
-        int delta;
-        for(int i = 0; i < 3; ++i) {
-            delta = rawTarget[i] - rawStatus[i];
-            rawStatus[i] = rawStatus[i] + int16_t(delta * power);
+        const auto *rawTarget = reinterpret_cast<const uint8_t *>(&c);
+        auto *rawStatus = reinterpret_cast<uint8_t *>(&m_color);
+        float delta;
+        for (int i = 0; i < 3; ++i) {
+            delta = float(rawTarget[i] - rawStatus[i]);
+            rawStatus[i] += int16_t(ceil(delta * power));
         }
     }
 
     void Tile::lerpAdditiveColor(const sf::Color &c, float power) {
-        const auto* rawTarget = reinterpret_cast<const uint8_t *>(&c);
-        auto* rawStatus = reinterpret_cast<uint8_t *>(&m_color);
-        int delta;
-        for(int i = 0; i < 3; ++i) {
-            delta = std::max(0, rawTarget[i] - rawStatus[i]);
-            rawStatus[i] = rawStatus[i] + int16_t(delta * power);
+        const auto *rawTarget = reinterpret_cast<const uint8_t *>(&c);
+        auto *rawStatus = reinterpret_cast<uint8_t *>(&m_color);
+        float delta;
+        for (int i = 0; i < 3; ++i) {
+            delta = std::max(0.0f, float(rawTarget[i] - rawStatus[i]));
+            rawStatus[i] += int16_t(ceil(delta * power));
         }
     }
 } // padi

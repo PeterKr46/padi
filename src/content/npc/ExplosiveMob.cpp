@@ -13,7 +13,7 @@
 namespace padi::content {
 
     ExplosiveMob::ExplosiveMob(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos)
-            : LivingEntity(std::move(name), moveset, pos) {
+            : LivingEntity(std::move(name), moveset, pos, EntityType) {
         setColor(sf::Color(32, 32, 32));
     }
 
@@ -40,34 +40,19 @@ namespace padi::content {
                     auto rand = std::mt19937(game->getSeed() + chr->id * 45689);
                     auto host = std::static_pointer_cast<HostGame>(game);
                     size_t dir_id = rand() % 4;
-                    sf::Vector2i dir = AllDirections[dir_id];
-                    auto tile = level->getMap()->getTile(chr->entity->getPosition() + dir);
-                    if (tile && tile->m_walkable && !level->getMap()->hasEntities(tile->getPosition(), LivingEntity::EntityType)) {
-                        auto child1 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
-                                                                     chr->entity->getAnimationSet(),
-                                                                     tile->getPosition());
-                        child1->initHPBar(chr->entity->getHPBar());
-                        host->spawnCharacter(child1->asCharacter(0),host->getLobbySize()-1);
-                    }
-
-                    dir = AllDirections[(dir_id + 1) % 4];
-                    tile = level->getMap()->getTile(chr->entity->getPosition() + dir);
-                    if (tile && tile->m_walkable && !level->getMap()->hasEntities(tile->getPosition(), LivingEntity::EntityType)) {
-                        auto child2 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
-                                                                     chr->entity->getAnimationSet(),
-                                                                     tile->getPosition());
-                        child2->initHPBar(chr->entity->getHPBar());
-                        host->spawnCharacter(child2->asCharacter(0), host->getLobbySize()-1);
-                    }
-
-                    dir = AllDirections[(dir_id + 2) % 4];
-                    tile = level->getMap()->getTile(chr->entity->getPosition() + dir);
-                    if (tile && tile->m_walkable && !level->getMap()->hasEntities(tile->getPosition(), LivingEntity::EntityType)) {
-                        auto child2 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
-                                                                     chr->entity->getAnimationSet(),
-                                                                     tile->getPosition());
-                        child2->initHPBar(chr->entity->getHPBar());
-                        host->spawnCharacter(child2->asCharacter(0), host->getLobbySize()-1);
+                    std::shared_ptr<Tile> tile;
+                    size_t placed = 0;
+                    for(int i = 0; i < 5 && placed < 4; ++i) {
+                        tile = level->getMap()->getTile(chr->entity->getPosition() + AllDirections[(dir_id+i) % 4]);
+                        if (tile && tile->m_walkable &&
+                            !level->getMap()->hasEntities(tile->getPosition(), LivingEntity::EntityType)) {
+                            auto child1 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
+                                                                         chr->entity->getAnimationSet(),
+                                                                         tile->getPosition());
+                            child1->initHPBar(chr->entity->getHPBar());
+                            host->spawnCharacter(child1->asCharacter(0), host->getLobbySize() - 1);
+                            placed++;
+                        }
                     }
                 }
                 chr->alive = false;
@@ -91,7 +76,7 @@ namespace padi::content {
                         if (neighborPos != chr->entity->getPosition()) {
                             if (level->getMap()->getEntities(pos + dir, ents)) {
                                 for (auto &ent: ents) {
-                                    if (ent->getType() == LivingEntity::EntityType) {
+                                    if (ent->getType() & LivingEntity::EntityType) {
                                         auto livingEnt = std::static_pointer_cast<LivingEntity>(ent);
                                         if (livingEnt->hasHPBar() && livingEnt->getHPBar().lock()->getHP() > 0) {
                                             target = pos;
@@ -145,6 +130,7 @@ namespace padi::content {
 
     bool SelfDestruct::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
         auto lvl = level.lock();
+        m_user->getHPBar().lock()->setHP(0);
         for (auto &direction: Neighborhood) {
             auto strike = std::make_shared<padi::OneshotEntity>(pos + direction);
             strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
@@ -154,7 +140,7 @@ namespace padi::content {
             std::vector<std::shared_ptr<Entity>> ents;
             if (lvl->getMap()->getEntities(pos + direction, ents)) {
                 for (auto &entity: ents) {
-                    if (entity->getType() == LivingEntity::EntityType) {
+                    if ((entity->getType() & (LivingEntity::EntityType | ExplosiveMob::EntityType)) == LivingEntity::EntityType) {
                         auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
                         if (livingEntity->hasHPBar()) {
                             auto hpBar = livingEntity->getHPBar().lock();
@@ -193,7 +179,7 @@ namespace padi::content {
                 auto tile = lvl->getMap()->getTile(pos + dir);
                 auto col = tile->getColor();
                 uint16_t cSum = col.r + col.g + col.b;
-                if (cSum < 700) tile->lerpColor(sf::Color::Black, 0.5);
+                if (cSum < 700) tile->lerpColor(sf::Color(0x1e1e1eff), 0.5);
                 tile->setVerticalOffset(float(frame % 2));
             }
         } else if (frame == 8) {

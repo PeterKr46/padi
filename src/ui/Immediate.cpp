@@ -6,7 +6,6 @@
 #include "UIContext.h"
 #include "../Constants.h"
 #include "../Controls.h"
-#include "../entity/OneshotEntity.h"
 #include "../media/AudioPlayback.h"
 #include "../content/vfx/CRTMonitor.h"
 
@@ -45,12 +44,15 @@ namespace padi {
             color = sf::Color::Yellow;
             frame = padi::Controls::pollKeyState(sf::Keyboard::Space);
         } else {
-            auto mPos = padi::content::CRTMonitor::mapWindowtoCRTPosition(padi::Controls::getRelativeMousePosition());
-            mPos.x *= 453;
-            mPos.y *= 255;
-            mPos = ctx->topTransform().getInverse().transformPoint(mPos);
-            if(size.contains(mPos)) {
-                ctx->setFocus(id);
+            if(padi::Controls::didMouseMove()) {
+                auto mPos = padi::content::CRTMonitor::mapWindowToCRTPosition(
+                        padi::Controls::getRelativeMousePosition());
+                mPos.x *= 453;
+                mPos.y *= 255;
+                mPos = ctx->topTransform().getInverse().transformPoint(mPos);
+                if (size.contains(mPos)) {
+                    ctx->setFocus(id);
+                }
             }
             if (ctx->m_focused == 0)
                 ctx->m_focused = id;
@@ -90,12 +92,15 @@ namespace padi {
             color = sf::Color::Yellow;
         } else {
             color = sf::Color::White;
-            auto mPos = padi::content::CRTMonitor::mapWindowtoCRTPosition(padi::Controls::getRelativeMousePosition());
-            mPos.x *= 453;
-            mPos.y *= 255;
-            mPos = ctx->topTransform().getInverse().transformPoint(mPos);
-            if(size.contains(mPos)) {
-                ctx->setFocus(id);
+            if(padi::Controls::didMouseMove()) {
+                auto mPos = padi::content::CRTMonitor::mapWindowToCRTPosition(
+                        padi::Controls::getRelativeMousePosition());
+                mPos.x *= 453;
+                mPos.y *= 255;
+                mPos = ctx->topTransform().getInverse().transformPoint(mPos);
+                if (size.contains(mPos)) {
+                    ctx->setFocus(id);
+                }
             }
             if (ctx->m_focused == 0)
                 ctx->m_focused = id;

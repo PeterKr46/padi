@@ -25,6 +25,7 @@ namespace padi {
             if (i.second == 0) i.second++;
         }
         s_text.clear();
+        s_mouse.moved = false;
     }
 
     bool Controls::wasKeyPressed(sf::Keyboard::Key key) {
@@ -91,5 +92,10 @@ namespace padi {
     void Controls::mouseMoved(const sf::Vector2f &rel, sf::Vector2i const& px) {
         s_mouse.relative = rel;
         s_mouse.pixels = px;
+        s_mouse.moved = true;
+    }
+
+    bool Controls::didMouseMove() {
+        return s_mouse.moved;
     }
 }
