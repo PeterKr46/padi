@@ -22,7 +22,7 @@ namespace padi {
         auto detail = float(m_detail);
         uint16_t csum = m_color.r + m_color.g + m_color.b;
         if  (csum <= 96) detail = 2;
-        else if(csum >= 700) detail = 3;
+        else if(csum >= 732) detail = 3;
 
         sf::Vector2f tileSize(padi::TileSize);
         quad[0].position = anchor + sf::Vector2f(-tileSize.x / 2, -tileSize.y / 2);

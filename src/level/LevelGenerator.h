@@ -13,6 +13,7 @@ namespace padi {
 
     class LevelGenerator {
     public:
+        static const uint64_t TutorialSeed = 8008135;
 
         LevelGenerator& withSpritesheet(std::string const& path);
         LevelGenerator& withApollo(std::string const& path);

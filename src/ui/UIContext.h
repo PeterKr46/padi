@@ -29,6 +29,7 @@ namespace padi {
         bool isFocused(size_t elemID) const;
 
         void setFocus(size_t elemID);
+        void resetFocus();
 
         bool isFocusActive() const;
         void setFocusActive(bool active);

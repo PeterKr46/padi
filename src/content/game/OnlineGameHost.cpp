@@ -13,6 +13,7 @@
 #include "../menu/MainMenu.h"
 #include "../npc/SlugMob.h"
 #include "../npc/EndGate.h"
+#include "Narrator.h"
 
 namespace padi::content {
     void HostGame::synchronizeSeed() {
@@ -174,6 +175,10 @@ namespace padi::content {
             m_roundCooldown.restart();
         }
 
+        if(!(*m_narrator)(shared_from_this(), nullptr)) {
+            return;
+        }
+
         if(m_turnQueue.empty()) {
             if (m_roundCooldown.getElapsedTime().asMilliseconds() < 1000) {
                 return;
@@ -197,7 +202,8 @@ namespace padi::content {
                     m_turnQueue.push(cid);
                 }
             }
-        } else {
+        }
+        {
             printf("[OnlineGame|Server] Character %i is starting their turn.\n", m_turnQueue.front());
             m_activeChar = m_characters.at(m_turnQueue.front());
             m_turnQueue.pop();
@@ -266,6 +272,7 @@ namespace padi::content {
             : m_lobby({clients}) {
         m_seed = seed;
         m_rand = std::mt19937(seed);
+        m_narrator = std::make_shared<LocalNarrator>();
         synchronize(name);
     }
 

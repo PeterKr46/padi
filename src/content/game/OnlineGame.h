@@ -21,6 +21,7 @@ namespace padi {
     class AudioPlayback;
     namespace content {
         struct Character;
+        class Narrator;
     }
 }
 
@@ -37,6 +38,8 @@ namespace padi::content {
         void close() override = 0;
 
         std::weak_ptr<Level> getLevel() const;
+
+        UIContext* getUIContext();
 
         virtual void broadcast(sf::Packet &packet) = 0;
 
@@ -67,6 +70,7 @@ namespace padi::content {
 
     protected:
         padi::content::CRTMonitor m_crt;
+
         padi::UIContext m_uiContext;
         struct {
             Chat ui{{250, 194, 200, 60}};
@@ -76,6 +80,8 @@ namespace padi::content {
         uint32_t m_seed;
         std::mt19937 m_rand;
         std::shared_ptr<Level> m_level;
+
+        std::shared_ptr<Narrator> m_narrator;
 
         std::map<uint32_t, std::shared_ptr<Character>, std::less<>> m_characters;
         std::shared_ptr<Character> m_activeChar;

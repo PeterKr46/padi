@@ -5,19 +5,41 @@
 #pragma once
 
 #include <memory>
-#include "OnlineGame.h"
+#include <queue>
+#include <string>
+
+namespace padi {
+    class UIContext;
+    namespace content {
+        class OnlineGame;
+        struct Character;
+    }
+}
 
 namespace padi::content {
 
     class Narrator {
     public:
-        explicit Narrator(UIContext *uiContext);
 
-        void displayText(std::string const& txt);
+        virtual bool operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &) = 0;
 
-        bool operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
-    private:
-        padi::UIContext *m_uiContext;
+    protected:
+        void displayText(std::string const& txt, UIContext* ctx);
+        void clear(UIContext* ui);
+
+    };
+
+    class LocalNarrator : public Narrator {
+    public:
+        LocalNarrator();
+        bool operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &) override;
+
+        std::queue<std::string> m_promptQueue;
+    };
+
+    class RemoteNarrator : public Narrator {
+    public:
+        bool operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &) override;
     };
 
 } // content

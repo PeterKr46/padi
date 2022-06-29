@@ -193,4 +193,8 @@ namespace padi {
     bool UIContext::isFocusActive() const {
         return m_focusActive;
     }
+
+    void UIContext::resetFocus() {
+        m_focused = 0;
+    }
 } // padi

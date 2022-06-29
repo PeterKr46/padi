@@ -6,9 +6,9 @@
 #include "LocalPlayerTurn.h"
 #include "Character.h"
 #include "RemotePlayerTurn.h"
-#include "../../entity/LivingEntity.h"
 #include "../../level/SpawnEvent.h"
 #include "../menu/MainMenu.h"
+#include "Narrator.h"
 
 namespace padi::content {
 
@@ -170,8 +170,9 @@ namespace padi::content {
     }
 
     ClientGame::ClientGame(InOutBox &host, const std::string &name)
-            : m_lobby({host}) {
+            : m_lobby({host}){
         synchronize(name);
+        m_narrator = std::make_shared<RemoteNarrator>();
     }
 
     void ClientGame::broadcast(sf::Packet &packet) {

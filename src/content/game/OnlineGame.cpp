@@ -165,5 +165,9 @@ namespace padi::content {
         return m_characters;
     }
 
+    padi::UIContext* OnlineGame::getUIContext() {
+        return &m_uiContext;
+    }
+
 
 } // content
