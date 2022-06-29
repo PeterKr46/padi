@@ -6,35 +6,83 @@
 
 #include <memory>
 #include <queue>
+#include <stack>
 #include <string>
+#include "SFML/Graphics/Rect.hpp"
+#include "SFML/System/Clock.hpp"
 
 namespace padi {
     class UIContext;
     namespace content {
         class OnlineGame;
+
         struct Character;
     }
 }
 
 namespace padi::content {
 
-    class Narrator {
+    struct NarratorEvent {
     public:
+        enum : unsigned int {
+            ShowText    = 1,
+            ShowFrame   = 2,
+            CenterView    = 4,
+            Confirm     = 8,
+            Sleep       = 16
+        } type;
 
-        virtual bool operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &) = 0;
+        struct ShowText {
+            bool center{true};
+            char text[128]{};
+        };
 
-    protected:
-        void displayText(std::string const& txt, UIContext* ctx);
-        void clear(UIContext* ui);
+        struct Sleep {
+            float duration{2};
+        };
 
+        struct ShowFrame {
+            sf::FloatRect rect;
+        };
+
+        struct CenterView {
+            sf::Vector2i center;
+        };
+
+        union {
+            struct ShowText showText;
+            struct ShowFrame showFrame;
+            struct CenterView centerView;
+            struct Sleep sleep;
+        } data;
     };
 
-    class LocalNarrator : public Narrator {
+    class Narrator {
     public:
-        LocalNarrator();
-        bool operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &) override;
+        virtual bool operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 
-        std::queue<std::string> m_promptQueue;
+
+        float speed = 2.0f;
+
+    protected:
+        void displayText(std::string const &txt, UIContext *ctx, bool center = true);
+
+        void clear(UIContext *ui);
+
+        void queueText(const char* msg, bool center = true);
+        void queueFrame(sf::FloatRect const& rect);
+        void queueCenter(sf::Vector2i const& p);
+        void queueConfirm();
+        void queueSleep(float duration);
+
+        std::vector<NarratorEvent> m_active;
+        std::queue<NarratorEvent> m_promptQueue;
+        sf::Clock m_timer;
+    };
+
+    class Tutorial : public Narrator {
+    public:
+        Tutorial();
     };
 
     class RemoteNarrator : public Narrator {

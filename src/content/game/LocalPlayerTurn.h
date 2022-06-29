@@ -31,6 +31,15 @@ namespace padi::content {
         padi::UIContext *m_uiContext;
         int64_t m_activeAbility = -1;
         bool m_hasCast = false;
+    private:
+        enum LocalTurnState : int {
+            START = -1,
+            IDLE = 0,
+            SELECTING = 1,
+            CASTING = 2,
+            DONE = 3,
+        };
+        void transitionUI(LocalTurnState from, LocalTurnState to, sf::Color emphColor = sf::Color::Yellow);
     };
 
 } // content

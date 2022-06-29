@@ -7,6 +7,7 @@
 #include "../../ui/Immediate.h"
 #include "../../Constants.h"
 #include "../../Controls.h"
+#include "../../net/Packets.h"
 
 namespace padi::content {
     void Chat::draw(padi::UIContext *context) {
@@ -73,7 +74,7 @@ namespace padi::content {
     void Chat::init(padi::UIContext *context) {
         if (!m_hidden) {
             m_logBuf.resize(size_t(m_bounds.height / CHAR_H), '\n');
-            m_lineLength = size_t(m_bounds.width / CHAR_W);
+            m_lineLength = std::min(sizeof(ChatMessagePayload::message), size_t(m_bounds.width / CHAR_W));
             context->pushTransform().translate(m_bounds.left, m_bounds.top);
             context->setText("chat_title", "", {0, -12});
             context->setText("chat_input", "", {0, m_bounds.height - 11});

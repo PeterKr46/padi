@@ -276,7 +276,8 @@ namespace padi {
 
     content::Walk::Walk(std::shared_ptr<padi::LivingEntity> user, size_t range, Walkable w)
             : padi::LimitedRangeAbility(std::move(user), range) {
-        m_description = "WALK\n\n  Travel to a location of your choice - the old-fashioned way.";
+        m_description = "Walk a short distance.\n"
+                        "Can't cross cursed tiles.";
         m_iconId = "walk";
         walkable = w;
     }
@@ -318,10 +319,8 @@ namespace padi {
             : padi::LimitedRangeAbility(std::move(user), range)
             , m_walkable(walkable) {
         m_iconId = "dash";
-        m_description = "DASH\n\n"
-                        " Dash for a fixed number of tiles to a walkable position.\n"
-                        " Tiles that you dash over will be brightened unless cursed.\n"
-                        " Enemies that you dash through will take one point of damage.";
+        m_description = "Dash to a walkable position.\n"
+                        "Deals damage and lights uncursed tiles.";
     }
 
     bool content::Dash::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
@@ -351,7 +350,7 @@ namespace padi {
 
             auto col = tile->getColor();
             uint16_t cSum = col.r + col.g + col.b;
-            if (cSum > 100) tile->lerpAdditiveColor(m_user->getColor(), 0.7);
+            if (cSum > 100) tile->lerpAdditiveColor(m_user->getColor(), 0.9);
 
             lvl->addCycleEndListener(laserPart);
             std::vector<std::shared_ptr<Entity>> ents;
@@ -386,6 +385,9 @@ namespace padi {
         lvl->addCycleEndListener(shared_from_this());
         lvl->getCursor()->unlock();
         m_complete = false;
+
+        auto ap = std::make_shared<AudioPlayback>(lvl->getApollo()->lookupAudio("zap"));
+        ap->start(level);
         return true;
     }
 
@@ -499,7 +501,8 @@ namespace padi {
 
     content::Peep::Peep(std::shared_ptr<LivingEntity> user) : Ability(std::move(user)) {
         m_iconId = "view";
-        m_description = "LOOK AROUND\n\n  Just look around - cannot be cast.";
+        m_description = "Just look around.\n"
+                        "Can be cast to ping other players.";
     }
 
     uint32_t content::Peep::getAbilityType() const {

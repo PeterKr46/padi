@@ -50,6 +50,7 @@ audio attention_ping    ../media/audio/the_sample_workshop/high_clack.ogg
 audio chord_01          ../media/audio/jorgesbcomposer/chord_01.ogg
 audio guitar_01         ../media/audio/jorgesbcomposer/string_01.ogg
 audio deep_beep         ../media/audio/kenneth_cooney/one-beeper.ogg
+audio zap               ../media/audio/egomassive/zap.ogg
 
 block hp_bars
 anim 1              32 8   896 640 0 40    2
@@ -68,7 +69,8 @@ anim spawn          32 32   32 568  0 32    12
 anim spawn_ray      32 32   64 568  0 32    12
 
 block gate
-anim idle           0 0  0 0 0 0 12
+anim idle           32 32   960 0   0 32    12
+#anim idle           0 0  0 0 0 0 12
 anim spawn          0 0  0 0 0 0 12
 anim spawn_ray      0 0  0 0 0 0 12
 

@@ -53,7 +53,7 @@ namespace padi::content {
         }
         const PayloadType type = ChatMessage;
         uint32_t cid{};
-        char message[22] = "\0";
+        char message[16] = "\0";
     };
 
     struct alignas(64) GameStartPayload {

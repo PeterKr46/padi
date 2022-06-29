@@ -25,7 +25,7 @@ namespace padi::content {
 
     private:
         bool m_hidden{false};
-        const sf::FloatRect m_bounds{0, 0, 208, 60};
+        const sf::FloatRect m_bounds{0, 0, 128, 60};
         std::string m_inputBuf{};
         std::string m_logBuf{};
         uint8_t     m_lineLength{8};

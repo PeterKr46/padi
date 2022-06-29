@@ -73,7 +73,7 @@ namespace padi::content {
 
         padi::UIContext m_uiContext;
         struct {
-            Chat ui{{250, 194, 200, 60}};
+            Chat ui{{300, 194, 150, 60}};
             std::shared_ptr<padi::AudioPlayback> notification{nullptr};
         } m_chat;
 

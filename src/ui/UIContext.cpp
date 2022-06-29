@@ -105,6 +105,7 @@ namespace padi {
             found->second.text.setPosition(m_transformStack.back().transformPoint(pos) -
                                            (centered ? (found->second.text.getGlobalBounds().getSize() / 2.f)
                                                      : sf::Vector2f(0, 0)));
+            found->second.centered = centered;
         } else {
             Text &t = m_text[idHash];
             t.text = sf::Text(text, m_font, 7);

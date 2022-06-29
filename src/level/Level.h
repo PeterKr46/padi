@@ -32,7 +32,7 @@ namespace padi {
 
         bool isViewLocked() const;
 
-        bool centerView(sf::Vector2i const &position);
+        bool centerView(sf::Vector2i const &position, bool force = false);
 
         padi::Map *getMap();
 

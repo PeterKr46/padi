@@ -70,7 +70,7 @@ namespace padi {
     }
 
     std::shared_ptr<Level> LevelGenerator::generate() {
-        if(m_seed == 8008135) {
+        if(m_seed == TutorialSeed) {
             return generateTutorial();
         }
 
@@ -113,12 +113,6 @@ namespace padi {
             }
         }
         auto center = level->getMap()->getTile(0,0);
-        auto endGate = center->getDecoration();
-        if(!endGate) {
-            endGate = std::make_shared<padi::TileDecoration>(center->getPosition());
-            center->setDecoration(endGate);
-        }
-        endGate->m_animation = level->m_apollo.lookupAnim("end_gate");
 
         level->centerView(m_targetArea / 2);
         level->initCursor("cursor");

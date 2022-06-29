@@ -15,7 +15,8 @@
 
 namespace padi {
 
-    void handleFrameBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level>& lvl, uint8_t frame) {
+    void handleFrameBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level> &lvl,
+                          uint8_t frame) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onFrameBegin(lvl, frame)) i = listeners.erase(i);
@@ -23,7 +24,8 @@ namespace padi {
         }
     }
 
-    void handleFrameEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level>& lvl, uint8_t frame) {
+    void handleFrameEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level> &lvl,
+                        uint8_t frame) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onFrameEnd(lvl, frame)) i = listeners.erase(i);
@@ -31,7 +33,7 @@ namespace padi {
         }
     }
 
-    void handleCycleBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level>& lvl) {
+    void handleCycleBegin(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level> &lvl) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onCycleBegin(lvl)) i = listeners.erase(i);
@@ -39,7 +41,7 @@ namespace padi {
         }
     }
 
-    void handleCycleEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level>& lvl) {
+    void handleCycleEnd(std::vector<std::shared_ptr<CycleListener>> &listeners, const std::weak_ptr<Level> &lvl) {
         auto i = listeners.begin();
         while (i != listeners.end()) {
             if (!(*i)->onCycleEnd(lvl))
@@ -69,12 +71,12 @@ namespace padi {
             m_view.setSize(m_viewTarget.getSize());
             auto delta = m_viewTarget.getCenter() - m_view.getCenter();
             float deltaMag = abs(delta.x) + abs(delta.y);
-            if(deltaMag > float(TileSize.x * 8)) {
+            if (deltaMag > float(TileSize.x * 8)) {
                 sf::Vector2f target = m_viewTarget.getCenter();
                 target.x = floor(target.x) + 0.5f;
                 target.y = floor(target.y) + 0.5f;
                 m_view.setCenter(target);
-            } else if(deltaMag > float(TileSize.x * 3)){
+            } else if (deltaMag > float(TileSize.x * 3)) {
                 sf::Vector2f target = m_view.getCenter() + delta * 0.8f * (1 - float(TileSize.x * 3) / deltaMag);
                 target.x = floor(target.x) + 0.5f;
                 target.y = floor(target.y) + 0.5f;
@@ -115,9 +117,12 @@ namespace padi {
         sf::Listener::setDirection(0, 2, 1);
     }
 
-    bool Level::centerView(const sf::Vector2i &position) {
+    bool Level::centerView(const sf::Vector2i &position, bool force) {
         if (!m_viewLocked) {
             m_viewTarget.setCenter(padi::Map::mapTilePosToWorld(position));
+            if (force) {
+                m_view.setCenter(m_viewTarget.getCenter());
+            }
         }
         return m_viewLocked;
     }

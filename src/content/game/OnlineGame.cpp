@@ -48,6 +48,7 @@ namespace padi::content {
             m_uiContext.setFocusActive(false);
         }
 
+        m_crt.paused = m_level->isPaused();
         m_crt.asTarget()->draw(m_uiContext);
         target->draw(m_crt);
     }

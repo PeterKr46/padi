@@ -14,6 +14,7 @@
 #include "../npc/SlugMob.h"
 #include "../npc/EndGate.h"
 #include "Narrator.h"
+#include "../../level/LevelGenerator.h"
 
 namespace padi::content {
     void HostGame::synchronizeSeed() {
@@ -272,7 +273,7 @@ namespace padi::content {
             : m_lobby({clients}) {
         m_seed = seed;
         m_rand = std::mt19937(seed);
-        m_narrator = std::make_shared<LocalNarrator>();
+        m_narrator = seed == LevelGenerator::TutorialSeed ? std::make_shared<Tutorial>() : std::make_shared<Narrator>();
         synchronize(name);
     }
 
