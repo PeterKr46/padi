@@ -41,6 +41,7 @@ namespace padi::content {
         while(!m_turnQueue.empty()) m_turnQueue.pop();
 
         auto apollo = m_level->getApollo();
+        auto map = m_level->getMap();
 
         Character playerCharacter;
         sf::Color playerColor;
@@ -48,12 +49,14 @@ namespace padi::content {
         for (size_t id = 0; id < m_lobby.size; ++id) {
             if (id - 4 * (offset - 1) >= 4) offset++;
             if (savedCharacters.size() > id) {
-                playerCharacter.entity = std::make_shared<LivingEntity>(
-                        *savedCharacters[id].entity,
-                        apollo,
-                        AllDirections[id % 4] * offset
-                        );
-                playerCharacter.entity->getHPBar().lock()->setHP(INT_MAX); // auto-capped, don't worry.
+                playerCharacter.entity = savedCharacters[id].entity;
+                playerCharacter.entity->switchApollo(apollo);
+                playerCharacter.entity->getHPBar().lock()->setHP(INT_MAX);
+
+                // A really ugly hack to reposition...
+                map->moveEntity(playerCharacter.entity,
+                                              AllDirections[id % 4] * offset);
+
                 playerCharacter.abilities = savedCharacters[id].abilities;
                 playerCharacter.alive = true;
             } else {
@@ -95,6 +98,7 @@ namespace padi::content {
                                                       target->getPosition());
             mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
 
+            map->moveEntity(mob, target->getPosition());
             auto cr = mob->asCharacter(0);
             spawnCharacter(cr, m_lobby.size - 1);
         }
@@ -105,6 +109,9 @@ namespace padi::content {
 
             auto cr = mob->asCharacter(0);
             spawnCharacter(cr, m_lobby.size - 1);
+        }
+        for(auto & [id, chr] : m_characters) {
+            if(chr->entity) map->removeEntity(chr->entity);
         }
     }
 
@@ -403,6 +410,7 @@ namespace padi::content {
             auto packet = PackagePayload(NextLevelPayload{});
             broadcast(packet);
             synchronize(m_lobby.names[m_lobby.size-1]);
+            m_levelComplete = false;
         }
     }
 

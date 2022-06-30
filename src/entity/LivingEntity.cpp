@@ -209,6 +209,16 @@ padi::LivingEntity::LivingEntity(const LivingEntity & copy, const padi::Apollo* 
     }
 }
 
+void padi::LivingEntity::switchApollo(const Apollo *apollo) {
+    m_apolloCtx = apollo->lookupAnimContext(m_apolloCtx->getName());
+    if(m_hp) {
+        auto hp = m_hp;
+        m_hp.reset();
+        initHPBar(hp->getMaxHP(), apollo->lookupAnimContext(hp->getSprites()->getName()), hp->m_overrideColor);
+        m_hp->setHP(hp->getHP());
+    }
+}
+
 
 int padi::HPBar::getMaxHP() const {
     return m_maxHP;

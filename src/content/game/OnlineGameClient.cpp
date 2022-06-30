@@ -182,7 +182,7 @@ namespace padi::content {
         if(charIter != m_characters.end()) {
             auto & chr = charIter->second;
             chr->entity = std::make_shared<padi::LivingEntity>(
-                    "TODO",
+                    payload.cid < m_lobby.size ? m_lobby.names[payload.cid] : "_LivingEntity",
                     m_level->getApollo()->lookupAnimContext(payload.animations),
                     payload.pos, payload.entitytype);
             chr->entity->setColor(payload.color);

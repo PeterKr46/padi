@@ -29,7 +29,7 @@ namespace padi {
 
         [[nodiscard]] int getMaxHP() const;
 
-        padi::AnimationSet const* getSprites() const;
+        [[nodiscard]] padi::AnimationSet const* getSprites() const;
         float m_verticalOffset = -32;
         sf::Color m_overrideColor{0x0};
 
@@ -66,6 +66,7 @@ namespace padi {
         bool hasFailedCast() const;
         bool isCasting() const;
 
+        void switchApollo(const Apollo* apollo);
         padi::AnimationSet const* getAnimationSet() const;
         void trySetAnimation(std::string const& anim);
 
