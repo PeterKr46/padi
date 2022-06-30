@@ -12,7 +12,7 @@
 namespace padi::content {
 
     class GateUnlock
-            : public padi::Ability,public std::enable_shared_from_this<GateUnlock> {
+            : public padi::Ability, public CycleListener, public std::enable_shared_from_this<GateUnlock> {
     public:
         explicit GateUnlock(std::shared_ptr<padi::LivingEntity> user);
 
@@ -26,6 +26,9 @@ namespace padi::content {
 
         uint32_t getAbilityType() const override;
 
+        bool onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) override;
+    private:
+        bool m_open = false;
     };
 
     class EndGate : public padi::LivingEntity {

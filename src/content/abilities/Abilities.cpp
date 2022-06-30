@@ -126,7 +126,9 @@ namespace padi {
                         auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
                         if (livingEntity->hasHPBar()) {
                             auto hpBar = livingEntity->getHPBar().lock();
-                            hpBar->setHP(hpBar->getHP() - 1);
+                            auto hp = hpBar->getHP();
+                            hpBar->setHP(hp - 1);
+                            if(hp == 1) m_user->enemiesSlain++;
                         }
                     }
                 }
@@ -180,13 +182,15 @@ namespace padi {
     bool content::Darken::onFrameBegin(std::weak_ptr<padi::Level> const &level, uint8_t frame) {
         auto lvl = level.lock();
         auto tile = lvl->getMap()->getTile(strikePos);
+        auto col = tile->getColor();
+        uint16_t cSum = col.r + col.g + col.b;
         if (frame < 8) {
-            auto col = tile->getColor();
-            uint16_t cSum = col.r + col.g + col.b;
-            if (cSum < 700) tile->lerpColor(sf::Color::Black, 0.2);
-            tile->setVerticalOffset(frame % 2);
+            if (cSum < 700) {
+                tile->lerpColor(sf::Color::Black, 0.2);
+                tile->setVerticalOffset(frame % 2);
+            }
         } else if (frame == 8) {
-            tile->setVerticalOffset(0);
+            if(cSum < 700) tile->setVerticalOffset(0);
             auto fire = std::make_shared<padi::StaticEntity>(strikePos);
             fire->m_animation = lvl->getApollo()->lookupAnim("fire");
             fire->m_color = sf::Color::Black;
@@ -360,7 +364,9 @@ namespace padi {
                         auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
                         if (livingEntity->hasHPBar()) {
                             auto hpBar = livingEntity->getHPBar().lock();
-                            hpBar->setHP(hpBar->getHP() - 1);
+                            auto hp = hpBar->getHP();
+                            hpBar->setHP(hp - 1);
+                            if(hp == 1) m_user->enemiesSlain++;
                         }
                     }
                 }

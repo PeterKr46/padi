@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include "../../net/InOutBox.h"
+#include "../../media/AudioPlayback.h"
 
 
 namespace padi {
@@ -31,15 +32,18 @@ namespace padi::content {
         padi::UIContext *m_uiContext;
         int64_t m_activeAbility = -1;
         bool m_hasCast = false;
+        std::shared_ptr<padi::AudioPlayback> m_selectSound;
     private:
         enum LocalTurnState : int {
             START = -1,
             IDLE = 0,
             SELECTING = 1,
             CASTING = 2,
-            DONE = 3,
+            TARGETING = 3,
+            DONE = 4,
         };
         void transitionUI(LocalTurnState from, LocalTurnState to, sf::Color emphColor = sf::Color::Yellow);
+        void playSelectSound(const std::shared_ptr<Level> &level);
     };
 
 } // content

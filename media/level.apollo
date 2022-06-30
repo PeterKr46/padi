@@ -73,6 +73,7 @@ anim idle           32 32   960 0   0 32    12
 #anim idle           0 0  0 0 0 0 12
 anim spawn          0 0  0 0 0 0 12
 anim spawn_ray      0 0  0 0 0 0 12
+audio beacon_activate     ../media/audio/funwithsound/music-dramatic-orchestral-ending-3.ogg
 
 block tetrahedron
 anim move_x_from    32 32   96  0   0 48    12

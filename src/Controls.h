@@ -25,14 +25,25 @@ namespace padi {
         static uint8_t pollKeyState(sf::Keyboard::Key key);
 
         template<class iterator_type>
-        static bool isAnyKeyPressed(iterator_type it, iterator_type end) {
+        static bool wasAnyKeyPressed(iterator_type it, iterator_type end) {
             while(it != end) {
                 auto itr = s_state.find(*it);
-                if(itr != s_state.cend() && itr->second < 2) return true;
+                if(itr != s_state.cend() && itr->second == 0) return true;
                 ++it;
             }
             return false;
         }
+
+        template<class iterator_type>
+        static bool wasAnyKeyReleased(iterator_type it, iterator_type end) {
+            while(it != end) {
+                auto itr = s_state.find(*it);
+                if(itr != s_state.cend() && itr->second == 2) return true;
+                ++it;
+            }
+            return false;
+        }
+
         static std::string const& textInput();
         static bool textInput(std::string & out, size_t max_len = ~0u, const char* whitelist = nullptr);
 

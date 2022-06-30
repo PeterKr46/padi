@@ -22,6 +22,13 @@ namespace padi::content {
 
     }
 
+    void LocalPlayerTurn::playSelectSound(std::shared_ptr<Level> const& level) {
+        if(!m_selectSound) {
+            m_selectSound = std::make_shared<AudioPlayback>(m_uiContext->getApollo()->lookupAudio("select"));
+        }
+        m_selectSound->restart(level);
+    }
+
     bool
     LocalPlayerTurn::operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &character) {
         auto level = game->getLevel().lock();
@@ -34,12 +41,15 @@ namespace padi::content {
         LocalTurnState state = IDLE;
         if (m_activeAbility != -1) {
             state = SELECTING;
-            if (m_hasCast) {
-                state = CASTING;
-                if (!character->entity->hasCastIntent()) {
-                    if (!character->entity->hasFailedCast() &&
-                        character->abilities[m_activeAbility]->isCastComplete()) {
-                        state = DONE;
+            if (!level->isPaused()) {
+                state = TARGETING;
+                if (m_hasCast) {
+                    state = CASTING;
+                    if (!character->entity->hasCastIntent()) {
+                        if (!character->entity->hasFailedCast() &&
+                            character->abilities[m_activeAbility]->isCastComplete()) {
+                            state = DONE;
+                        }
                     }
                 }
             }
@@ -47,7 +57,7 @@ namespace padi::content {
         if (state == IDLE) {
             transitionUI(START, IDLE, emphColor);
             padi::Immediate::ScalableSprite(m_uiContext,
-                                            sf::FloatRect{0,0, 453, 255},
+                                            sf::FloatRect{0, 0, 453, 255},
                                             0,
                                             m_uiContext->getApollo()->lookupAnim("scalable_border"),
                                             character->entity->getColor());
@@ -55,96 +65,98 @@ namespace padi::content {
                 level->pause();
                 m_activeAbility = 0;
                 transitionUI(IDLE, SELECTING);
-                m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(), {8, 24 + 128 + float(character->abilities.size()) * 20});
-                auto ap = std::make_shared<AudioPlayback>(m_uiContext->getApollo()->lookupAudio("select"));
-                ap->start(level);
+                m_uiContext->updateTextString("ability",
+                                              character->abilities[m_activeAbility]->getDescription());
+                playSelectSound(level);
             }
         } else if (state == SELECTING) {
-            if (!level->isPaused()) {
-                character->abilities[m_activeAbility]->castIndicator(level);
-                if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
-                    character->entity->intentCast(character->abilities[m_activeAbility], level->getCursorLocation());
-                    {
-                        sf::Packet packet;
-                        CharacterCastPayload payload;
-                        payload.ability = uint8_t(m_activeAbility);
-                        payload.pos = level->getCursorLocation();
-                        printf("[LocalPlayerTurn] Casting %lld at (%i, %i)\n", m_activeAbility, payload.pos.x,
-                               payload.pos.y);
-                        packet.append(&payload, sizeof(payload));
-                        game->broadcast(packet);
-                    }
+            level->getCursor()->lock();
+            if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
+                level->play();
 
-                    m_hasCast = true;
-                    level->hideCursor();
-                    transitionUI(SELECTING, CASTING);
-                } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
-                    character->abilities[m_activeAbility]->castCancel(level);
-                    level->pause();
-                    m_uiContext->setText("ability", character->abilities[m_activeAbility]->getDescription(),{8, 24+128 + float(character->abilities.size()) * 20});
-                }
+                transitionUI(SELECTING, TARGETING, emphColor);
+                playSelectSound(level);
+            } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
+                m_activeAbility = -1;
+                level->play();
+
+                transitionUI(SELECTING, IDLE, emphColor);
+                playSelectSound(level);
             } else {
-                level->getCursor()->lock();
-                if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
-                    level->play();
-                    transitionUI(SELECTING, CASTING);
-                    auto ap = std::make_shared<AudioPlayback>(m_uiContext->getApollo()->lookupAudio("select"));
-                    ap->start(level);
-                } else {
-                    if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
-                        transitionUI(SELECTING, IDLE, emphColor);
-                        level->play();
-                        m_activeAbility = -1;
-                    } else {
-                        int dir = 0;
-                        if (padi::Controls::wasKeyReleased(sf::Keyboard::Up)) {
-                            dir = -1;
-                            m_activeAbility = (int64_t(character->abilities.size()) + m_activeAbility - 1) % int64_t(character->abilities.size());
-                        } else if (padi::Controls::wasKeyReleased(sf::Keyboard::Down)) {
-                            dir = 1;
-                            m_activeAbility = (m_activeAbility + 1) % int64_t(character->abilities.size());
-                        }
-                        if(dir != 0) {
-                            m_uiContext->updateTextString("ability", character->abilities[m_activeAbility]->getDescription());
-                            auto ap = std::make_shared<AudioPlayback>(m_uiContext->getApollo()->lookupAudio("select"));
-                            ap->start(level);
-                        }
-                        auto numAbilities = character->abilities.size();
-                        sf::FloatRect bounds{4, 128 - 20 * float(numAbilities), 32, 40 * float(numAbilities) - 8};
-                        padi::Immediate::ScalableSprite(m_uiContext,
-                                                        sf::FloatRect{
-                                                                bounds.left - 4, bounds.top - 4,
-                                                                bounds.width + 8, bounds.height + 8
-                                                        },
-                                                        0,
-                                                        m_uiContext->getApollo()->lookupAnim("scalable_window"),
-                                                        sf::Color(168, 168, 168, 255));
-                        for(size_t i = 0; i < numAbilities; ++i) {
-                            padi::Immediate::Sprite(m_uiContext, sf::FloatRect{bounds.left, bounds.top + 40 * i, 32, 32}, 0,
-                                                    m_uiContext->getApollo()->lookupAnim(character->abilities[i]->getIconId()));
-                        }
-                        padi::Immediate::ScalableSprite(m_uiContext,
-                                                        sf::FloatRect{bounds.left - 4, bounds.top-4 + float(m_activeAbility * 40), 40, 40},
-                                                        0,
-                                                        m_uiContext->getApollo()->lookupAnim("scalable_border"),
-                                                        emphColor);
-                        Immediate::Sprite(m_uiContext,
-                                          sf::FloatRect{bounds.left, bounds.top - 24, 32, 32},
-                                          0,
-                                          m_uiContext->getApollo()->lookupAnim("arrow_up"),
-                                          padi::Controls::isKeyDown(sf::Keyboard::Up) ? emphColor : sf::Color::White);
-                        Immediate::Sprite(m_uiContext,
-                                          sf::FloatRect{bounds.left, bounds.top + bounds.height - 8, 32, 32},
-                                          0,
-                                          m_uiContext->getApollo()->lookupAnim("arrow_down"),
-                                          padi::Controls::isKeyDown(sf::Keyboard::Down) ? emphColor : sf::Color::White);
-                    }
+                static sf::Keyboard::Key updown[2] = {sf::Keyboard::Up, sf::Keyboard::Down};
+                if (padi::Controls::wasKeyReleased(sf::Keyboard::Up)) {
+                    m_activeAbility = (int64_t(character->abilities.size()) + m_activeAbility - 1) %
+                                      int64_t(character->abilities.size());
+                } else if (padi::Controls::wasKeyReleased(sf::Keyboard::Down)) {
+                    m_activeAbility = (m_activeAbility + 1) % int64_t(character->abilities.size());
                 }
+                if (padi::Controls::wasAnyKeyReleased(updown, updown + 2)) {
+                    m_uiContext->updateTextString("ability",
+                                                  character->abilities[m_activeAbility]->getDescription());
+                    playSelectSound(level);
+                }
+
+                auto numAbilities = character->abilities.size();
+                sf::FloatRect bounds{4, 128 - 20 * float(numAbilities), 32, 40 * float(numAbilities) - 8};
+                padi::Immediate::ScalableSprite(m_uiContext,
+                                                sf::FloatRect{
+                                                        bounds.left - 4, bounds.top - 4,
+                                                        bounds.width + 8, bounds.height + 8
+                                                },
+                                                0,
+                                                m_uiContext->getApollo()->lookupAnim("scalable_window"),
+                                                sf::Color(168, 168, 168, 255));
+                for (size_t i = 0; i < numAbilities; ++i) {
+                    padi::Immediate::Sprite(m_uiContext, sf::FloatRect{bounds.left, bounds.top + 40 * i, 32, 32}, 0,
+                                            m_uiContext->getApollo()->lookupAnim(
+                                                    character->abilities[i]->getIconId()));
+                }
+                padi::Immediate::ScalableSprite(m_uiContext,
+                                                sf::FloatRect{bounds.left - 4,
+                                                              bounds.top - 4 + float(m_activeAbility * 40), 40, 40},
+                                                0,
+                                                m_uiContext->getApollo()->lookupAnim("scalable_border"),
+                                                emphColor);
+                Immediate::Sprite(m_uiContext,
+                                  sf::FloatRect{bounds.left, bounds.top - 24, 32, 32},
+                                  0,
+                                  m_uiContext->getApollo()->lookupAnim("arrow_up"),
+                                  padi::Controls::isKeyDown(sf::Keyboard::Up) ? emphColor : sf::Color::White);
+                Immediate::Sprite(m_uiContext,
+                                  sf::FloatRect{bounds.left, bounds.top + bounds.height - 8, 32, 32},
+                                  0,
+                                  m_uiContext->getApollo()->lookupAnim("arrow_down"),
+                                  padi::Controls::isKeyDown(sf::Keyboard::Down) ? emphColor : sf::Color::White);
+            }
+        } else if (state == TARGETING) {
+            if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
+                character->entity->intentCast(character->abilities[m_activeAbility], level->getCursorLocation());
+                {
+                    sf::Packet packet;
+                    CharacterCastPayload payload;
+                    payload.ability = uint8_t(m_activeAbility);
+                    payload.pos = level->getCursorLocation();
+                    printf("[LocalPlayerTurn] Casting %lld at (%i, %i)\n", m_activeAbility, payload.pos.x,
+                           payload.pos.y);
+                    packet.append(&payload, sizeof(payload));
+                    game->broadcast(packet);
+                }
+
+                m_hasCast = true;
+                level->hideCursor();
+                transitionUI(TARGETING, CASTING);
+            } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
+                transitionUI(TARGETING, SELECTING);
+                character->abilities[m_activeAbility]->castCancel(level);
+                level->pause();
+                m_uiContext->updateTextString("ability", character->abilities[m_activeAbility]->getDescription());
+            } else {
+                character->abilities[m_activeAbility]->castIndicator(level);
             }
         } else if (state == CASTING) {
             if (!character->entity->hasCastIntent()) {
                 if (character->entity->hasFailedCast()) {
-                    transitionUI(CASTING, SELECTING);
+                    transitionUI(CASTING, TARGETING);
                     printf("[LocalPlayerTurn] Miscast - retrying.\n");
                     m_hasCast = false;
                 } else {
@@ -160,7 +172,8 @@ namespace padi::content {
         return state == DONE;
     }
 
-    void LocalPlayerTurn::transitionUI(LocalPlayerTurn::LocalTurnState from, LocalPlayerTurn::LocalTurnState to, sf::Color emphColor) {
+    void LocalPlayerTurn::transitionUI(LocalPlayerTurn::LocalTurnState from, LocalPlayerTurn::LocalTurnState to,
+                                       sf::Color emphColor) {
         switch (from) {
             case START:
             case CASTING:
@@ -172,18 +185,28 @@ namespace padi::content {
             case IDLE:
                 m_uiContext->removeText("press_space");
                 break;
+            case TARGETING:
+                m_uiContext->removeText("cast_or_cancel");
+                break;
         }
         switch (to) {
             case START:
             case DONE:
                 break;
             case IDLE:
-                m_uiContext->setText("press_space", "PRESS SPACE", {8,8}, false);
+                m_uiContext->setText("press_space", "PRESS SPACE", {8, 8}, false);
                 m_uiContext->updateTextOutline("press_space", sf::Color::Black, 1);
                 m_uiContext->updateTextColor("press_space", emphColor);
                 break;
             case SELECTING:
+                m_uiContext->setText("ability", "",{8, 230});
+                break;
             case CASTING:
+                break;
+            case TARGETING:
+                m_uiContext->setText("cast_or_cancel", "SPACE TO CONFIRM\nESCAPE TO ABORT", {8, 8}, false);
+                m_uiContext->updateTextOutline("cast_or_cancel", sf::Color::Black, 1);
+                m_uiContext->updateTextColor("cast_or_cancel", emphColor);
                 break;
         }
 

@@ -78,6 +78,7 @@ namespace padi {
         void initHPBar(int maxHP, padi::AnimationSet const *sprites, sf::Color overrideColor = sf::Color{0x0});
         void initHPBar(const std::weak_ptr<HPBar>& copyFrom);
 
+        size_t enemiesSlain = 0;
     private:
 
         padi::AnimationSet const*  m_apolloCtx;

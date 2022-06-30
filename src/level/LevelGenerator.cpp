@@ -69,7 +69,7 @@ namespace padi {
         }
     }
 
-    std::shared_ptr<Level> LevelGenerator::generate() {
+    std::shared_ptr<Level> LevelGenerator::generateLevel() {
         if(m_seed == TutorialSeed) {
             return generateTutorial();
         }

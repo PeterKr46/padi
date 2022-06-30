@@ -192,7 +192,6 @@ namespace padi {
     }
 
     void Level::moveCursor(sf::Vector2i const &pos) {
-        m_map.getTile(m_cursor->getPosition())->setVerticalOffset(0);
         m_map.moveEntity(m_cursor, pos, ~0u);
         m_cursor->moved(shared_from_this());
     }

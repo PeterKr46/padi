@@ -26,14 +26,12 @@ namespace padi {
     }
 
     void AudioPlayback::restart(const std::weak_ptr<Level> &lvl) {
-        if (m_frames < 1 + (m_buffer->getDuration().asMicroseconds() / (padi::FrameTime_uS))) {
-            sound.play();
-            if (m_hasTerminated) {
-                lvl.lock()->addFrameEndListener(shared_from_this());
-                m_hasTerminated = false;
-            }
-            m_frames = 1 + (m_buffer->getDuration().asMicroseconds() / (padi::FrameTime_uS));
+        sound.play();
+        if (m_hasTerminated) {
+            lvl.lock()->addFrameEndListener(shared_from_this());
+            m_hasTerminated = false;
         }
+        m_frames = 1 + (m_buffer->getDuration().asMicroseconds() / (padi::FrameTime_uS));
     }
 
     bool AudioPlayback::onFrameEnd(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) {

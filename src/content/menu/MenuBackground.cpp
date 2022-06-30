@@ -106,7 +106,7 @@ namespace padi::content {
                 .withApollo("../media/level.apollo")
                 .withSeed(6774586)
                 .withArea({20, 20})
-                .generate();
+                .generateLevel();
         std::vector<std::shared_ptr<LivingEntity>> cubes = {
                 std::make_shared<padi::LivingEntity>("r", m_level->getApollo()->lookupAnimContext("cube"),
                                                      sf::Vector2i{-2, -5}),

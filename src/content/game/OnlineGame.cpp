@@ -144,7 +144,7 @@ namespace padi::content {
         m_level = LevelGenerator().withSeed(m_seed).withArea({32, 32})
                 .withSpritesheet("../media/level_sheet.png")    // TODO
                 .withApollo("../media/level.apollo")            // TODO
-                .generate();
+                .generateLevel();
         m_level->centerView({0, 0});
         m_uiContext.init("../media/ui.apollo", "../media/ui_sheet.png");
         m_uiContext.setFocusActive(false);

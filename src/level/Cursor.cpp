@@ -30,7 +30,7 @@ namespace padi {
                 auto down = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 1 ? padi::Right : padi::Down;
                 level->moveCursor(getPosition() + down);
             }
-            if (padi::Controls::isAnyKeyPressed<sf::Keyboard::Key *>(&arrows[0], &arrows[4])) {
+            if (padi::Controls::wasAnyKeyPressed<sf::Keyboard::Key *>(&arrows[0], &arrows[4])) {
                 m_color = sf::Color::Yellow;
                 level->centerView(getPosition());
             } else {

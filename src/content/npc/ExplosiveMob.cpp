@@ -42,7 +42,7 @@ namespace padi::content {
                     size_t dir_id = rand() % 4;
                     std::shared_ptr<Tile> tile;
                     size_t placed = 0;
-                    for(int i = 0; i < 5 && placed < 4; ++i) {
+                    for(int i = 0; i < 4 && placed < 3; ++i) {
                         tile = level->getMap()->getTile(chr->entity->getPosition() + AllDirections[(dir_id+i) % 4]);
                         if (tile && tile->m_walkable &&
                             !level->getMap()->hasEntities(tile->getPosition(), LivingEntity::EntityType)) {
@@ -179,15 +179,21 @@ namespace padi::content {
                 auto tile = lvl->getMap()->getTile(pos + dir);
                 auto col = tile->getColor();
                 uint16_t cSum = col.r + col.g + col.b;
-                if (cSum < 700) tile->lerpColor(sf::Color(0x1e1e1eff), 0.5);
-                tile->setVerticalOffset(float(frame % 2));
+                if (cSum < 700) {
+                    tile->lerpColor(sf::Color(0x1e1e1eff), 0.5);
+                    tile->setVerticalOffset(float(frame % 2));
+                }
             }
         } else if (frame == 8) {
             auto pos = m_user->getPosition();
             auto fireAnim = lvl->getApollo()->lookupAnim("fire");
             for (auto &dir: Neighborhood) {
                 auto tile = lvl->getMap()->getTile(pos + dir);
-                tile->setVerticalOffset(0);
+                auto col = tile->getColor();
+                uint16_t cSum = col.r + col.g + col.b;
+                if(cSum < 700) {
+                    tile->setVerticalOffset(0);
+                }
                 auto fire = std::make_shared<padi::OneshotEntity>(pos + dir);
                 fire->m_animation = fireAnim;
                 fire->m_color = sf::Color::Black;
