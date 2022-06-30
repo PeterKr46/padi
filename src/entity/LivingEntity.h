@@ -29,8 +29,10 @@ namespace padi {
 
         [[nodiscard]] int getMaxHP() const;
 
+        padi::AnimationSet const* getSprites() const;
         float m_verticalOffset = -32;
         sf::Color m_overrideColor{0x0};
+
     private:
         int m_HP, m_maxHP;
         padi::AnimationSet const*  m_apolloCtx;
@@ -42,9 +44,11 @@ namespace padi {
             , public CycleListener {
 
     public:
+
         static const uint32_t EntityType = 2;
 
         explicit LivingEntity(std::string  name, padi::AnimationSet const* moveset, const sf::Vector2i &pos, uint32_t typeFlags = 0);
+        LivingEntity(const LivingEntity &copy, const Apollo *apollo, const sf::Vector2i &pos);
 
         [[nodiscard]] sf::Vector2i getSize() const override;
 

@@ -77,4 +77,8 @@ namespace padi::content {
         }
     }
 
+    void InOutBox::clearInbox() {
+        m_inbox->clear();
+    }
+
 } // content

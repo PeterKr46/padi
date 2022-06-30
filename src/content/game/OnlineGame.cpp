@@ -141,6 +141,9 @@ namespace padi::content {
     void OnlineGame::synchronize(std::string const &ownName) {
         synchronizeLobby(ownName);
         synchronizeSeed();
+        // This glorious copy prevents Apollo from going out of scope
+        auto tmpCopy = m_level;
+
         m_level = LevelGenerator().withSeed(m_seed).withArea({32, 32})
                 .withSpritesheet("../media/level_sheet.png")    // TODO
                 .withApollo("../media/level.apollo")            // TODO

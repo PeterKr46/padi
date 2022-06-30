@@ -200,6 +200,15 @@ void padi::LivingEntity::initHPBar(const std::weak_ptr<HPBar>& copyFrom) {
     }
 }
 
+padi::LivingEntity::LivingEntity(const LivingEntity & copy, const padi::Apollo* apollo, const sf::Vector2i &pos)
+ : Entity(pos, copy.getType()), m_name(copy.m_name){
+    m_apolloCtx = apollo->lookupAnimContext(copy.m_apolloCtx->getName());
+    m_color = copy.m_color;
+    if(copy.m_hp) {
+        initHPBar(copy.m_hp->getMaxHP(), apollo->lookupAnimContext(copy.m_hp->getSprites()->getName()), copy.m_hp->m_overrideColor);
+    }
+}
+
 
 int padi::HPBar::getMaxHP() const {
     return m_maxHP;
@@ -261,4 +270,8 @@ padi::HPBar::HPBar(const std::weak_ptr<HPBar>& copy) {
     m_overrideColor = bar->m_overrideColor;
     m_apolloCtx = bar->m_apolloCtx;
     m_verticalOffset = bar->m_verticalOffset;
+}
+
+padi::AnimationSet const *padi::HPBar::getSprites() const {
+    return m_apolloCtx;
 }

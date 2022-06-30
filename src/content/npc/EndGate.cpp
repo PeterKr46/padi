@@ -66,6 +66,7 @@ namespace padi::content {
             if (safe) {
                 game->sendChatGeneric("Everyone has made it.");
                 game->sendChatGeneric("(Level Over)");
+                game->signalLevelAdvance();
             }
         }
         return true;

@@ -28,6 +28,9 @@ namespace padi::content {
     }
 
     void ClientGame::initializeCharacters() {
+        m_characters.clear();
+        m_activeChar.reset();
+
         CharacterSpawnPayload characterPL;
         EntitySpawnPayload entityPL;
         std::shared_ptr<Character> chr;
@@ -132,13 +135,6 @@ namespace padi::content {
             chr->alive = false;
             m_level->getMap()->removeEntity(chr->entity);
         }
-        if (host.has(PayloadType::NextLevel)) {
-            m_next = std::make_shared<MainMenu>(
-                    "../media/ui.apollo",
-                    "../media/ui_sheet.png"
-            );
-            return;
-        }
         takeTurn();
     }
 
@@ -158,6 +154,8 @@ namespace padi::content {
                     m_level->centerView(m_activeChar->entity->getPosition());
                     m_level->moveCursor(m_activeChar->entity->getPosition());
                 }
+            } else if (host.has(PayloadType::NextLevel)) {
+                synchronize("iForgot"); // TODO
             }
         }
     }

@@ -30,28 +30,49 @@ namespace padi::content {
     }
 
     void HostGame::initializeCharacters() {
+        std::vector<Character> savedCharacters;
+        auto iter = m_characters.begin();
+        while(iter != m_characters.end()) {
+            if(iter->first < m_lobby.size) {
+                savedCharacters.emplace_back(* iter->second.get());
+            }
+            iter = m_characters.erase(iter);
+        }
+        while(!m_turnQueue.empty()) m_turnQueue.pop();
+
         auto apollo = m_level->getApollo();
 
         Character playerCharacter;
         sf::Color playerColor;
         int offset = 1;
         for (size_t id = 0; id < m_lobby.size; ++id) {
-            if(id - 4*(offset-1) >= 4) offset++;
-            playerCharacter.entity = std::make_shared<padi::LivingEntity>(
-                    m_lobby.names[id],
-                    apollo->lookupAnimContext("cube"),
-                    AllDirections[id%4] * offset
-            );
-            playerColor = sf::Color(std::hash<std::string>()(m_lobby.names[id]));
-            playerColor.a = 0xFF;
-            playerCharacter.entity->setColor(playerColor);
-            playerCharacter.entity->initHPBar(2, apollo->lookupAnimContext("hp_bars"));
-            playerCharacter.abilities = {
-                    std::make_shared<Peep>(playerCharacter.entity),
-                    std::make_shared<Walk>(playerCharacter.entity, 5),
-                    std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100}),
-                    std::make_shared<Lighten>(playerCharacter.entity),
-            };
+            if (id - 4 * (offset - 1) >= 4) offset++;
+            if (savedCharacters.size() > id) {
+                playerCharacter.entity = std::make_shared<LivingEntity>(
+                        *savedCharacters[id].entity,
+                        apollo,
+                        AllDirections[id % 4] * offset
+                        );
+                playerCharacter.entity->getHPBar().lock()->setHP(INT_MAX); // auto-capped, don't worry.
+                playerCharacter.abilities = savedCharacters[id].abilities;
+                playerCharacter.alive = true;
+            } else {
+                playerCharacter.entity = std::make_shared<padi::LivingEntity>(
+                        m_lobby.names[id],
+                        apollo->lookupAnimContext("cube"),
+                        AllDirections[id % 4] * offset
+                );
+                playerColor = sf::Color(std::hash<std::string>()(m_lobby.names[id]));
+                playerColor.a = 0xFF;
+                playerCharacter.entity->setColor(playerColor);
+                playerCharacter.entity->initHPBar(2, apollo->lookupAnimContext("hp_bars"));
+                playerCharacter.abilities = {
+                        std::make_shared<Peep>(playerCharacter.entity),
+                        std::make_shared<Walk>(playerCharacter.entity, 5),
+                        std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100}),
+                        std::make_shared<Lighten>(playerCharacter.entity),
+                };
+            }
             spawnCharacter(playerCharacter, id);
         }
         {
@@ -101,9 +122,7 @@ namespace padi::content {
         printf("[OnlineGame|Server] Propagating lobby size!\n");
         lobbySizePL.numPlayers = m_lobby.size;
         PackagePayload(packet, lobbySizePL);
-        for (auto &remote: m_lobby.remotes) {
-            remote.send(packet);
-        }
+        broadcast(packet);
 
         printf("[OnlineGame|Server] Receiving lobby names!\n");
         for (size_t id = 0; id < m_lobby.remotes.size(); ++id) {
@@ -252,6 +271,10 @@ namespace padi::content {
                     "../media/ui.apollo",
                     "../media/ui_sheet.png"
             );
+        } else if(msg == "restart") {
+            signalLevelAdvance();
+            sendChatGeneric("Restarting after this round.");
+            return;
         }
         msgPayload.cid = from;
         std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), sizeof(msgPayload.message)));
@@ -376,9 +399,18 @@ namespace padi::content {
 
     void HostGame::endOfRound() {
         printf("[OnlineGame|Server] Round ended.\n");
+        if(m_levelComplete) {
+            auto packet = PackagePayload(NextLevelPayload{});
+            broadcast(packet);
+            synchronize(m_lobby.names[m_lobby.size-1]);
+        }
     }
 
     size_t HostGame::getLobbySize() const {
         return m_lobby.size;
+    }
+
+    void HostGame::signalLevelAdvance() {
+        m_levelComplete = true;
     }
 }

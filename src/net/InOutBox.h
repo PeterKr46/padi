@@ -51,6 +51,8 @@ namespace padi::content {
 
         [[nodiscard]] size_t count(PayloadType payloadType) const;
 
+        void clearInbox();
+
         std::weak_ptr<sf::TcpSocket> getSocket();
 
         explicit operator bool();

@@ -119,6 +119,7 @@ namespace padi::content {
 
         uint32_t spawnCharacter(Character const &c, uint32_t owner = 0);
 
+        void signalLevelAdvance();
     private:
         std::queue<uint32_t> m_turnQueue;
         struct {
@@ -131,6 +132,8 @@ namespace padi::content {
         void advanceLevel();
 
         void endOfRound();
+
+        bool m_levelComplete = false;
     };
 
     class ClientGame : public OnlineGame {
