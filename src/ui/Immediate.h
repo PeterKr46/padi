@@ -16,7 +16,7 @@ namespace padi {
 
     class Immediate {
     public:
-        static bool Button(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size);
+        static bool Button(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size, bool disabled = false);
 
         static bool Switch(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size, bool *ptr = nullptr);
 

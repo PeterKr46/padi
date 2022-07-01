@@ -49,11 +49,11 @@ namespace padi::content {
     struct alignas(64) ChatMessagePayload {
         ChatMessagePayload() = default;
         explicit ChatMessagePayload(uint32_t origin, const char* msg) : cid(origin) {
-            memcpy(message, msg, std::min<size_t>(strlen(msg), 32ull));
+            memcpy(message, msg, std::min<size_t>(strlen(msg), sizeof(message) / sizeof(char)));
         }
         const PayloadType type = ChatMessage;
         uint32_t cid{};
-        char message[16] = "\0";
+        char message[22] = "\0";
     };
 
     struct alignas(64) GameStartPayload {

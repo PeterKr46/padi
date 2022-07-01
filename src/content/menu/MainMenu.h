@@ -17,6 +17,15 @@
 
 namespace padi::content {
 
+    enum TargetMode : int {
+        PlayTutorial    = 0,
+        PlayAlone       = 1,
+        PlayCoop        = 2,
+        OnlineHost      = 3,
+        OnlineClient    = 4,
+        NUM_MODES       = 5
+    };
+
     class MainMenu : public padi::Activity, public std::enable_shared_from_this<Activity> {
     public:
         MainMenu(std::string const &apollo, std::string const &spritesheet);
@@ -36,6 +45,10 @@ namespace padi::content {
 
         padi::content::MenuBackground m_background;
         std::shared_ptr<padi::Activity> m_next{nullptr};
+
+        TargetMode m_target;
+
+        void switchMode(TargetMode from, TargetMode to);
 
         struct {
             bool active{false};
@@ -68,6 +81,16 @@ namespace padi::content {
         void clientHandleGameStart(GameStartPayload const& payload);
 
         void closeClientSession();
+
+        void drawTutorialUI();
+
+        void drawSPUI();
+
+        void drawCoopUI();
+
+        void drawHostUI();
+
+        void drawClientUI();
     };
 
 } // content

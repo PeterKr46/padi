@@ -15,6 +15,7 @@
 #include "../npc/EndGate.h"
 #include "Narrator.h"
 #include "../../level/LevelGenerator.h"
+#include "../../Utils.h"
 
 namespace padi::content {
     void HostGame::synchronizeSeed() {
@@ -65,8 +66,7 @@ namespace padi::content {
                         apollo->lookupAnimContext("cube"),
                         AllDirections[id % 4] * offset
                 );
-                playerColor = sf::Color(std::hash<std::string>()(m_lobby.names[id]));
-                playerColor.a = 0xFF;
+                playerColor = sf::Color(hsv(int(hash_c_string(m_lobby.names[id].c_str(), m_lobby.names[id].length())), 1.f, 0.8f));
                 playerCharacter.entity->setColor(playerColor);
                 playerCharacter.entity->initHPBar(2, apollo->lookupAnimContext("hp_bars"));
                 playerCharacter.abilities = {
@@ -181,11 +181,8 @@ namespace padi::content {
                 } else {
                     if (client.has(PayloadType::ChatMessage)) {
                         ChatMessagePayload payload;
-                        payload.cid = cid;
                         client.fetch(payload);
-                        sf::Packet chatPacket = PackagePayload(payload);
-                        broadcast(chatPacket);
-                        printChatMessage(m_lobby.names[cid] + ": " + std::string(payload.message, std::min(sizeof(payload.message), strlen(payload.message))));
+                        sendChatGeneric(std::string(payload.message, std::min(sizeof(payload.message), strlen(payload.message))), cid);
                     }
                 }
             }
@@ -273,6 +270,7 @@ namespace padi::content {
         if(msg.empty()) return;
 
         ChatMessagePayload msgPayload;
+        msgPayload.cid = ~0u;
         if(msg == "exit") {
             m_next = std::make_shared<MainMenu>(
                     "../media/ui.apollo",
@@ -283,15 +281,26 @@ namespace padi::content {
             sendChatGeneric("Restarting after this round.");
             return;
         }
-        msgPayload.cid = from;
-        std::memcpy(msgPayload.message, msg.c_str(), std::min(msg.size(), sizeof(msgPayload.message)));
-        sf::Packet packet = PackagePayload(msgPayload);
-        broadcast(packet);
+        std::string buf;
         if(from < m_lobby.size) {
-            printChatMessage(m_lobby.names[m_lobby.size - 1] + ": " + msg.substr(0, sizeof(msgPayload.message)), true);
-        } else {
-            printChatMessage(msg, true);
+            buf = m_lobby.names[from] + ": " + msg;
         }
+        else {
+            buf = msg;
+        }
+
+        std::string_view view = buf;
+        do {
+            std::memcpy(msgPayload.message, view.data(), sizeof(char) * std::min(view.length(), sizeof(msgPayload.message)));
+            if(view.length() < sizeof(msgPayload.message) / sizeof(char)) {
+                msgPayload.message[view.length()] = '\0';
+            }
+            sf::Packet packet = PackagePayload(msgPayload);
+            broadcast(packet);
+            printChatMessage(std::string(view.substr(0,std::min(view.length(), sizeof(msgPayload.message)))), msgPayload.cid != ~0u);
+
+            view.remove_prefix(std::min(view.length(), sizeof(msgPayload.message)));
+        } while(view.length() > 0);
     }
 
     void HostGame::sendChatMessage(const std::string &msg) {

@@ -5,6 +5,7 @@
 #include <cstring>
 #include "UIContext.h"
 #include "../Controls.h"
+#include "../Utils.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -14,7 +15,7 @@ namespace padi {
 
         states.transform.translate(target.getView().getCenter() - target.getView().getSize() / 2.f);
         // TODO
-        states.transform.scale(sf::Vector2f(target.getView().getSize().y / 256, target.getView().getSize().y / 256));
+        states.transform.scale(sf::Vector2f(target.getView().getSize().y / 255, target.getView().getSize().y / 255));
 
         // draw the vertex array
         target.draw(&m_vbo[0], m_numVerts, sf::PrimitiveType::Quads, states);
@@ -80,15 +81,6 @@ namespace padi {
         //return m_transformStack.back();
     }
 
-    size_t hash_c_string(const char *p, size_t s) {
-        size_t result = 0;
-        const size_t prime = 31;
-        for (size_t i = 0; i < s; ++i) {
-            result = p[i] + (result * prime);
-        }
-        return result;
-    }
-
     void UIContext::removeText(const char *id) {
         auto idHash = hash_c_string(id, strlen(id));
         auto found = m_text.find(idHash);
@@ -102,17 +94,17 @@ namespace padi {
         auto found = m_text.find(idHash);
         if (found != m_text.end()) {
             found->second.text.setString(text);
-            found->second.text.setPosition(m_transformStack.back().transformPoint(pos) -
+            found->second.text.setPosition(round(m_transformStack.back().transformPoint(pos) -
                                            (centered ? (found->second.text.getGlobalBounds().getSize() / 2.f)
-                                                     : sf::Vector2f(0, 0)));
+                                                     : sf::Vector2f(0, 0))));
             found->second.centered = centered;
         } else {
             Text &t = m_text[idHash];
             t.text = sf::Text(text, m_font, 7);
             t.text.setLineSpacing(1.25);
-            t.text.setPosition(topTransform().transformPoint(pos) -
+            t.text.setPosition(round(topTransform().transformPoint(pos) -
                                (centered ? (t.text.getGlobalBounds().getSize() / 2.f)
-                                         : sf::Vector2f(0, 0)));
+                                         : sf::Vector2f(0, 0))));
             t.centered = centered;
         }
     }
@@ -148,7 +140,7 @@ namespace padi {
                 p += (text.getGlobalBounds().getSize() / 2.f);
             }
             text.setString(str);
-            text.setPosition(p - (centered ? (text.getGlobalBounds().getSize() / 2.f) : sf::Vector2f(0, 0)));
+            text.setPosition(round(p - (centered ? (text.getGlobalBounds().getSize() / 2.f) : sf::Vector2f(0, 0))));
         }
     }
 
@@ -180,7 +172,7 @@ namespace padi {
                 p += (text.getGlobalBounds().getSize() / 2.f);
             }
             text.setCharacterSize(char(7 * size));
-            text.setPosition(p - (centered ? (text.getGlobalBounds().getSize() / 2.f) : sf::Vector2f(0, 0)));
+            text.setPosition(round(p - (centered ? (text.getGlobalBounds().getSize() / 2.f) : sf::Vector2f(0, 0))));
         }
     }
 

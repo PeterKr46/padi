@@ -99,6 +99,7 @@ namespace padi::content {
                 ui->setFocusActive(false);
             }
         } else if (terminator == NarratorEvent::Sleep) {
+            ui->setFocusActive(false);
             if (m_timer.getElapsedTime().asSeconds() * speed >= m_active.back().data.sleep.duration) {
                 clear(ui);
             }

@@ -9,7 +9,7 @@
 #include "../entity/StaticEntity.h"
 #include "../map/Tile.h"
 #include "../Constants.h"
-#include "../map/TileDecoration.h"
+#include "../Utils.h"
 #include "../content/vfx/MapShaker.h"
 
 namespace padi {
@@ -35,39 +35,6 @@ namespace padi {
         return *this;
     }
 
-    sf::Color hsv(int hue, float sat, float val) {
-        hue %= 360;
-        while (hue < 0) hue += 360;
-
-        if (sat < 0.f) sat = 0.f;
-        if (sat > 1.f) sat = 1.f;
-
-        if (val < 0.f) val = 0.f;
-        if (val > 1.f) val = 1.f;
-
-        int h = hue / 60;
-        float f = float(hue) / 60 - h;
-        float p = val * (1.f - sat);
-        float q = val * (1.f - sat * f);
-        float t = val * (1.f - sat * (1 - f));
-
-        switch (h) {
-            default:
-            case 0:
-            case 6:
-                return sf::Color(val * 255, t * 255, p * 255);
-            case 1:
-                return sf::Color(q * 255, val * 255, p * 255);
-            case 2:
-                return sf::Color(p * 255, val * 255, t * 255);
-            case 3:
-                return sf::Color(p * 255, q * 255, val * 255);
-            case 4:
-                return sf::Color(t * 255, p * 255, val * 255);
-            case 5:
-                return sf::Color(val * 255, p * 255, q * 255);
-        }
-    }
 
     std::shared_ptr<Level> LevelGenerator::generateLevel() {
         if(m_seed == TutorialSeed) {
@@ -94,7 +61,7 @@ namespace padi {
                     auto t = std::make_shared<padi::Tile>(pos);
                     int r = int(16 * (m_perlin.normalizedOctave2D_01(234 + pos.x * cScale, pos.y * cScale, 2))) * 90;
                     float m = (z * m_perlin.normalizedOctave2D_01(pos.x * mScale, pos.y * mScale, 7));
-                    t->setColor(hsv(r, 0.2f,  m * 0.5 + 0.5));
+                    t->setColor(sf::Color(hsv(r, 0.2f,  m * 0.5 + 0.5)));
                     //t->setVerticalOffset(int(z * 4));
                     level->getMap()->addTile(t);
                     if (m > 0.25) {

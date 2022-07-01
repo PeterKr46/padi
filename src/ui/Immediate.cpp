@@ -28,7 +28,7 @@ namespace padi {
         return false;
     }
 
-    bool Immediate::Button(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size) {
+    bool Immediate::Button(padi::UIContext *ctx, std::string const &label, sf::FloatRect const &size, bool disabled) {
         static auto hash = std::hash<std::string>();
 
         size_t id = hash(label);
@@ -41,8 +41,8 @@ namespace padi {
             // Tab to cycle... for now
             checkFocusSwitch(ctx);
 
-            color = sf::Color::Yellow;
-            frame = padi::Controls::pollKeyState(sf::Keyboard::Space);
+            color = disabled ? sf::Color(0xffff88ff) : sf::Color::Yellow;
+            frame = disabled ? 0 : padi::Controls::pollKeyState(sf::Keyboard::Space);
         } else {
             if(padi::Controls::didMouseMove()) {
                 auto mPos = padi::content::CRTMonitor::mapWindowToCRTPosition(
