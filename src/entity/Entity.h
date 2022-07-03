@@ -32,4 +32,14 @@ namespace padi {
     private:
         float m_verticalOffset{0};
     };
+
+    enum EntityType : uint32_t {
+        BLANK = 0,
+        CURSOR = 1u,
+        LIVING = CURSOR << 1,
+        BEACON = LIVING << 1,
+        PLAYER = BEACON << 1,
+
+        EXPLOSIVE = PLAYER << 8,
+    };
 }

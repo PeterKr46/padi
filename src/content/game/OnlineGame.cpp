@@ -14,7 +14,7 @@
 #include "../../media/AudioPlayback.h"
 #include "../npc/ExplosiveMob.h"
 #include "../npc/SlugMob.h"
-#include "../npc/EndGate.h"
+#include "../npc/Beacon.h"
 
 
 namespace padi::content {

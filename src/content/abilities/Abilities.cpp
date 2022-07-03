@@ -122,7 +122,7 @@ namespace padi {
             std::vector<std::shared_ptr<Entity>> ents;
             if (lvl->getMap()->getEntities(strikePos, ents)) {
                 for (auto &entity: ents) {
-                    if (entity->getType() & LivingEntity::EntityType) {
+                    if (entity->getType() & LIVING) {
                         auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
                         if (livingEntity->hasHPBar()) {
                             auto hpBar = livingEntity->getHPBar().lock();
@@ -392,7 +392,7 @@ namespace padi {
             std::vector<std::shared_ptr<Entity>> ents;
             if (lvl->getMap()->getEntities(iPos, ents)) {
                 for (auto &entity: ents) {
-                    if (entity->getType() & LivingEntity::EntityType) {
+                    if (entity->getType() & LIVING) {
                         auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
                         if (livingEntity->hasHPBar()) {
                             auto hpBar = livingEntity->getHPBar().lock();
@@ -565,7 +565,7 @@ namespace padi {
     }
 
     bool content::Walk::Walkable::operator()(const Map* map, const std::shared_ptr<Tile> &t) {
-        if (t && t->m_walkable && !map->hasEntities(t->getPosition(), LivingEntity::EntityType)) {
+        if (t && t->m_walkable && !map->hasEntities(t->getPosition(), LIVING)) {
             auto col = t->getColor();
             if(cutOff < 0) {
                 return col.r + col.g + col.b < -cutOff;

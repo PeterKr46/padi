@@ -8,6 +8,7 @@
 #include "RemotePlayerTurn.h"
 #include "../../level/SpawnEvent.h"
 #include "../menu/MainMenu.h"
+#include "../npc/Beacon.h"
 #include "Narrator.h"
 
 namespace padi::content {
@@ -181,10 +182,16 @@ namespace padi::content {
         auto charIter = m_characters.find(payload.cid);
         if(charIter != m_characters.end()) {
             auto & chr = charIter->second;
-            chr->entity = std::make_shared<padi::LivingEntity>(
-                    payload.cid < m_lobby.size ? m_lobby.names[payload.cid] : "_LivingEntity",
-                    m_level->getApollo()->lookupAnimContext(payload.animations),
-                    payload.pos, payload.entitytype);
+            if(payload.entitytype & BEACON) {
+                chr->entity = std::make_shared<Beacon>("EndGate", m_level->getApollo()->lookupAnimContext(payload.animations),
+                                                       payload.pos);
+            } else {
+                // GENERIC LIVING ENTITY
+                chr->entity = std::make_shared<padi::LivingEntity>(
+                        payload.cid < m_lobby.size ? m_lobby.names[payload.cid] : "_LivingEntity",
+                        m_level->getApollo()->lookupAnimContext(payload.animations),
+                        payload.pos, payload.entitytype);
+            }
             chr->entity->setColor(payload.color);
             auto spawnEvent = std::make_shared<SpawnEvent>(chr->entity);
             spawnEvent->dispatch(m_level);

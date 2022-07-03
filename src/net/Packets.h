@@ -101,7 +101,7 @@ namespace padi::content {
     struct alignas(64) EntitySpawnPayload {
         const PayloadType type = EntitySpawn;
         uint32_t        cid{};
-        uint32_t        entitytype{LivingEntity::EntityType};
+        uint32_t        entitytype{EntityType::LIVING};
         sf::Vector2i    pos;
         sf::Color       color;
         char            animations[12] = "\0";

@@ -2,30 +2,28 @@
 // Created by Peter on 22/06/2022.
 //
 
-#include "EndGate.h"
+#include "Beacon.h"
 #include "../game/OnlineGame.h"
 #include "../../media/AudioPlayback.h"
 
 #include <utility>
 
 namespace padi::content {
-    EndGate::EndGate(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos) : LivingEntity(
-            std::move(name), moveset, pos) {
+    Beacon::Beacon(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos) : LivingEntity(
+            std::move(name), moveset, pos, BEACON) {
         setColor(sf::Color(0xffffffff));
         setVerticalOffset(-8);
     }
 
-    bool EndGate::takeTurn(const std::shared_ptr<OnlineGame> &g, const std::shared_ptr<Character> &chr) {
+    bool Beacon::takeTurn(const std::shared_ptr<OnlineGame> &g, const std::shared_ptr<Character> &chr) {
         if(!m_started) {
             auto game = std::static_pointer_cast<HostGame>(g);
             auto level = game->getLevel().lock();
 
             sf::Vector2i target = chr->entity->getPosition();
             if (!m_open) {
-                size_t slain = 0;
-                for (int cid = 0; cid < game->getLobbySize(); cid++) {
-                    slain += game->getCharacters().at(cid)->entity->enemiesSlain;
-                }
+                size_t slain = countSlainEnemies(g);
+
                 if (slain < m_requiredKills) {
                     game->sendChatGeneric("Clear " + std::to_string(m_requiredKills - slain) + " enemies!");
                     target.x++;
@@ -72,7 +70,7 @@ namespace padi::content {
                     game->signalLevelAdvance();
                     auto ents = level->getMap()->allEntities();
                     for(auto & ent : ents) {
-                        if(ent->getType() & LivingEntity::EntityType) {
+                        if(ent->getType() & LIVING) {
                             level->getMap()->removeEntity(ent);
                             auto living = std::static_pointer_cast<LivingEntity>(ent);
                             if(living->hasHPBar()) {
@@ -88,8 +86,8 @@ namespace padi::content {
         return !m_started;
     }
 
-    Character EndGate::asCharacter(uint32_t id) {
-        return Character{id,
+    Character Beacon::asCharacter() {
+        return Character{0,
                          shared_from_this(),
                          {
                                  std::make_shared<GateUnlock>(shared_from_this())
@@ -100,9 +98,18 @@ namespace padi::content {
         };
     }
 
-    size_t EndGate::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame,
-                             float tileVerticalOffset) const {
+    size_t Beacon::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame,
+                            float tileVerticalOffset) const {
         return LivingEntity::populate(map, array, vertexOffset, uint8_t(abs(tileVerticalOffset)) % 7, tileVerticalOffset);
+    }
+
+    size_t Beacon::countSlainEnemies(const std::shared_ptr<OnlineGame> & g) const {
+        size_t slain = 0;
+        auto game = std::static_pointer_cast<HostGame>(g);
+        for (int cid = 0; cid < game->getLobbySize(); cid++) {
+            slain += game->getCharacters().at(cid)->entity->enemiesSlain;
+        }
+        return slain;
     }
 
     bool GateUnlock::cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) {

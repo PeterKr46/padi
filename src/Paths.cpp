@@ -84,9 +84,6 @@ namespace padi {
                 if(tileCost < geodesicDistance[tileTo]) {
                     for (auto &dir: AllDirections) {
                         neighborTile = map->getTile(tile->getPosition() + dir);
-                        if (neighborTile == tileTo) {
-                            printf("Reached goal!\n");
-                        }
                         if (neighborTile && walkable(map,neighborTile)) {
                             auto costIter = geodesicDistance.find(neighborTile);
                             if (costIter == geodesicDistance.end()) {
@@ -103,7 +100,7 @@ namespace padi {
                 }
             }
         } else {
-            printf("Start or Target tile does not exist, or target not walkable.\n");
+            printf("[Paths] ERROR: Start or Target tile does not exist, or target not walkable.\n");
         }
         std::vector<sf::Vector2i> result;
         if (cameFrom.find(tileTo) != cameFrom.end()) {
@@ -113,11 +110,8 @@ namespace padi {
                 p = cameFrom.at(p);
             }
             std::reverse(result.begin(), result.end());
-            for (auto n: result) {
-                std::cout << n.x << "," << n.y << std::endl;
-            }
         } else {
-            printf("Failed to find a path to target!\n");
+            printf("[Paths] ERROR: Failed to find a path to target!\n");
         }
         return result;
     }

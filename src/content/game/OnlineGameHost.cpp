@@ -4,7 +4,6 @@
 
 #include "OnlineGame.h"
 #include "LocalPlayerTurn.h"
-#include "../../entity/LivingEntity.h"
 #include "../abilities/Abilities.h"
 #include "RemotePlayerTurn.h"
 #include "../../level/SpawnEvent.h"
@@ -12,7 +11,7 @@
 #include "../npc/ExplosiveMob.h"
 #include "../menu/MainMenu.h"
 #include "../npc/SlugMob.h"
-#include "../npc/EndGate.h"
+#include "../npc/Beacon.h"
 #include "Narrator.h"
 #include "../../level/LevelGenerator.h"
 #include "../../Utils.h"
@@ -35,7 +34,7 @@ namespace padi::content {
         auto iter = m_characters.begin();
         while(iter != m_characters.end()) {
             if(iter->first < m_lobby.size) {
-                savedCharacters.emplace_back(* iter->second.get());
+                savedCharacters.emplace_back(* iter->second);
             }
             iter = m_characters.erase(iter);
         }
@@ -64,7 +63,7 @@ namespace padi::content {
                 playerCharacter.entity = std::make_shared<padi::LivingEntity>(
                         m_lobby.names[id],
                         apollo->lookupAnimContext("cube"),
-                        AllDirections[id % 4] * offset
+                        AllDirections[id % 4] * offset, PLAYER
                 );
                 playerColor = sf::Color(hsv(int(hash_c_string(m_lobby.names[id].c_str(), m_lobby.names[id].length())), 1.f, 1.f));
                 playerCharacter.entity->setColor(playerColor);
@@ -79,21 +78,25 @@ namespace padi::content {
             spawnCharacter(playerCharacter, id);
         }
         {
-            auto mob = std::make_shared<EndGate>(
+            auto mob = std::make_shared<Beacon>(
                     "gate",
                     m_level->getApollo()->lookupAnimContext("gate"),
                     sf::Vector2i{-3, -3}
             );
-            mob->m_requiredKills = m_lobby.size * 2;
-            auto cr = mob->asCharacter(0);
-            m_turnQueue.push(spawnCharacter(cr, m_lobby.size - 1));
+            size_t slain = 0;
+            for (int cid = 0; cid < m_lobby.size; cid++) {
+                slain += m_characters.at(cid)->entity->enemiesSlain;
+            }
+            mob->m_requiredKills = std::max<unsigned int>(slain, m_lobby.size) * 2;
+            auto cr = mob->asCharacter();
+            m_turnQueue.push(spawnCharacter(cr, ~0u));
         }
         for (int i = 0; i < m_lobby.size * 2; ++i) {
             auto refPos = m_characters[i % m_lobby.size]->entity->getPosition();
             std::shared_ptr<Tile> target = nullptr;
             while(!target) {
                 target = m_level->getMap()->getTile(refPos + AllDirections[m_rand() % 4] + AllDirections[m_rand() % 4] +AllDirections[m_rand() % 4] + AllDirections[m_rand() % 4]);
-                if(target && (!target->m_walkable || m_level->getMap()->hasEntities(target->getPosition(), LivingEntity::EntityType))) {
+                if(target && (!target->m_walkable || m_level->getMap()->hasEntities(target->getPosition(), LIVING))) {
                     target.reset();
                 }
             }
@@ -102,8 +105,8 @@ namespace padi::content {
             mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
 
             map->moveEntity(mob, target->getPosition());
-            auto cr = mob->asCharacter(0);
-            spawnCharacter(cr, m_lobby.size - 1);
+            auto cr = mob->asCharacter();
+            spawnCharacter(cr, ~0u);
         }
         {
             auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
@@ -111,7 +114,7 @@ namespace padi::content {
             mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
 
             auto cr = mob->asCharacter(0);
-            spawnCharacter(cr, m_lobby.size - 1);
+            spawnCharacter(cr, ~0u);
         }
         for(auto & [id, chr] : m_characters) {
             if(chr->entity) map->removeEntity(chr->entity);
@@ -350,9 +353,9 @@ namespace padi::content {
                         c.alive
                 });
 
-        if(cid < m_lobby.size - 1) {
+        if(owner < m_lobby.size - 1) {
             newChar->controller = RemotePlayerTurn(m_lobby.remotes[owner], true, cid);
-        } else if (cid == m_lobby.size - 1) {
+        } else if (owner == m_lobby.size - 1) {
             newChar->controller = LocalPlayerTurn(&m_uiContext);
         }
 

@@ -39,7 +39,7 @@ namespace padi {
         }
     }
 
-    Cursor::Cursor(std::shared_ptr<padi::Animation> anim) : padi::StaticEntity({0, 0}, EntityType) {
+    Cursor::Cursor(std::shared_ptr<padi::Animation> anim) : padi::StaticEntity({0, 0}, CURSOR) {
         m_animation = std::move(anim);
     }
 

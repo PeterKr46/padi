@@ -13,7 +13,7 @@
 namespace padi::content {
 
     ExplosiveMob::ExplosiveMob(std::string name, const padi::AnimationSet *moveset, const sf::Vector2i &pos)
-            : LivingEntity(std::move(name), moveset, pos, EntityType) {
+            : LivingEntity(std::move(name), moveset, pos, EntityType::EXPLOSIVE) {
         setColor(sf::Color(32, 32, 32));
     }
 
@@ -22,7 +22,7 @@ namespace padi::content {
         if (!m_turnStarted) {
             bool explode = false;
             for (auto dir: AllDirections) {
-                if (level->getMap()->hasEntities(chr->entity->getPosition() + dir, LivingEntity::EntityType)) {
+                if (level->getMap()->hasEntities(chr->entity->getPosition() + dir, LIVING)) {
                     explode = true;
                 }
             }
@@ -45,12 +45,12 @@ namespace padi::content {
                     for(int i = 0; i < 4 && placed < 3; ++i) {
                         tile = level->getMap()->getTile(chr->entity->getPosition() + AllDirections[(dir_id+i) % 4]);
                         if (tile && tile->m_walkable &&
-                            !level->getMap()->hasEntities(tile->getPosition(), LivingEntity::EntityType)) {
+                            !level->getMap()->hasEntities(tile->getPosition(), LIVING)) {
                             auto child1 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
                                                                          chr->entity->getAnimationSet(),
                                                                          tile->getPosition());
                             child1->initHPBar(chr->entity->getHPBar());
-                            host->spawnCharacter(child1->asCharacter(0), host->getLobbySize() - 1);
+                            host->spawnCharacter(child1->asCharacter(), ~0u);
                             placed++;
                         }
                     }
@@ -76,7 +76,7 @@ namespace padi::content {
                         if (neighborPos != chr->entity->getPosition()) {
                             if (level->getMap()->getEntities(pos + dir, ents)) {
                                 for (auto &ent: ents) {
-                                    if (ent->getType() & LivingEntity::EntityType) {
+                                    if (ent->getType() & LIVING) {
                                         auto livingEnt = std::static_pointer_cast<LivingEntity>(ent);
                                         if (livingEnt->hasHPBar() && livingEnt->getHPBar().lock()->getHP() > 0) {
                                             target = pos;
@@ -111,8 +111,8 @@ namespace padi::content {
         }
     }
 
-    Character ExplosiveMob::asCharacter(uint32_t id) {
-        return {id,
+    Character ExplosiveMob::asCharacter() {
+        return {0,
                 shared_from_this(),
                 {std::make_shared<Walk>(shared_from_this(), 5, Walk::Walkable{-700}),
                  std::make_shared<SelfDestruct>(shared_from_this())},
@@ -140,7 +140,7 @@ namespace padi::content {
             std::vector<std::shared_ptr<Entity>> ents;
             if (lvl->getMap()->getEntities(pos + direction, ents)) {
                 for (auto &entity: ents) {
-                    if ((entity->getType() & (LivingEntity::EntityType | ExplosiveMob::EntityType)) == LivingEntity::EntityType) {
+                    if ((entity->getType() & (LIVING | EXPLOSIVE)) == LIVING) {
                         auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
                         if (livingEntity->hasHPBar()) {
                             auto hpBar = livingEntity->getHPBar().lock();
