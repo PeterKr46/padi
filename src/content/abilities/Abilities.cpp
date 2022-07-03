@@ -171,6 +171,7 @@ namespace padi {
         m_description = "Bless an UNCURSED Tile.\n"
                         " Heals LIGHT, Damages DARK Occupants.";
         m_iconId = "strike";
+        numUses = 3;
     }
 
     bool content::Lighten::isCastComplete() {

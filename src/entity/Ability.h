@@ -44,6 +44,8 @@ namespace padi {
          */
         void reassign(std::weak_ptr<padi::LivingEntity> const& user);
 
+        int8_t numUses = -1;
+
     protected:
         std::shared_ptr<padi::LivingEntity> m_user; // TODO weak_ptr instead
         std::string m_description;

@@ -42,7 +42,7 @@ namespace padi::content {
             TARGETING = 3,
             DONE = 4,
         };
-        void transitionUI(LocalTurnState from, LocalTurnState to, sf::Color emphColor = sf::Color::Yellow);
+        void transitionUI(LocalTurnState from, LocalTurnState to, const std::shared_ptr<Character> &character);
         void playSelectSound(const std::shared_ptr<Level> &level);
     };
 

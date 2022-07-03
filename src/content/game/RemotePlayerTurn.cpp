@@ -65,7 +65,15 @@ namespace padi::content {
                 printf("[RemotePlayerTurn] Miscast - waiting.\n");
             }
         }
-        if (state == DONE) {
+        else /* if (state == DONE) */ {
+            auto ability = chr->abilities[m_activeAbility];
+            if (ability->numUses > 0) {
+                ability->numUses--;
+            }
+            if (ability->numUses == 0) {
+                chr->abilities.erase(std::remove(chr->abilities.begin(), chr->abilities.end(), ability));
+                printf("[RemotePlayerTurn] Used up ability %i.\n", m_activeAbility);
+            }
             m_activeAbility = -1;
         }
         if(chr->entity->hasHPBar() && chr->entity->getHPBar().lock()->getHP() == 0) {

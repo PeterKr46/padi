@@ -56,7 +56,7 @@ namespace padi::content {
             }
         }
         if (state == IDLE) {
-            transitionUI(START, IDLE, emphColor);
+            transitionUI(START, IDLE, character);
             padi::Immediate::ScalableSprite(m_uiContext,
                                             sf::FloatRect{0, 0, 453, 255},
                                             0,
@@ -65,7 +65,7 @@ namespace padi::content {
             if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
                 level->pause();
                 m_activeAbility = 0;
-                transitionUI(IDLE, SELECTING);
+                transitionUI(IDLE, SELECTING, character);
                 m_uiContext->updateTextString("ability",
                                               character->abilities[m_activeAbility]->getDescription());
                 playSelectSound(level);
@@ -75,13 +75,13 @@ namespace padi::content {
             if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
                 level->play();
 
-                transitionUI(SELECTING, TARGETING, emphColor);
+                transitionUI(SELECTING, TARGETING, character);
                 playSelectSound(level);
             } else if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
                 m_activeAbility = -1;
                 level->play();
 
-                transitionUI(SELECTING, IDLE, emphColor);
+                transitionUI(SELECTING, IDLE, character);
                 playSelectSound(level);
             } else {
                 static sf::Keyboard::Key updown[2] = {sf::Keyboard::Up, sf::Keyboard::Down};
@@ -108,9 +108,14 @@ namespace padi::content {
                                                 m_uiContext->getApollo()->lookupAnim("scalable_window"),
                                                 sf::Color(168, 168, 168, 255));
                 for (size_t i = 0; i < numAbilities; ++i) {
-                    padi::Immediate::Sprite(m_uiContext, sf::FloatRect{bounds.left, bounds.top + 40 * i, 32, 32}, 0,
+                    auto &ability = character->abilities[i];
+                    padi::Immediate::Sprite(m_uiContext, sf::FloatRect{bounds.left, bounds.top + 40.f * i, 32, 32}, 0,
                                             m_uiContext->getApollo()->lookupAnim(
-                                                    character->abilities[i]->getIconId()));
+                                                    ability->getIconId()));
+                    if (ability->numUses > 0) {
+                        auto id = "uses_left_" + std::to_string(i);
+                        m_uiContext->setText(id.c_str(), std::to_string(ability->numUses), {bounds.left + 3, bounds.top + 40.f * i});
+                    }
                 }
                 padi::Immediate::ScalableSprite(m_uiContext,
                                                 sf::FloatRect{bounds.left - 4,
@@ -145,9 +150,9 @@ namespace padi::content {
 
                 m_hasCast = true;
                 level->hideCursor();
-                transitionUI(TARGETING, CASTING);
+                transitionUI(TARGETING, CASTING, character);
             } else if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
-                transitionUI(TARGETING, SELECTING);
+                transitionUI(TARGETING, SELECTING, character);
                 character->abilities[m_activeAbility]->castCancel(level);
                 level->pause();
                 m_uiContext->updateTextString("ability", character->abilities[m_activeAbility]->getDescription());
@@ -157,24 +162,34 @@ namespace padi::content {
         } else if (state == CASTING) {
             if (!character->entity->hasCastIntent()) {
                 if (character->entity->hasFailedCast()) {
-                    transitionUI(CASTING, TARGETING);
+                    transitionUI(CASTING, TARGETING, character);
                     printf("[LocalPlayerTurn] Miscast - retrying.\n");
                     m_hasCast = false;
                 } else {
-                    transitionUI(CASTING, DONE);
+                    transitionUI(CASTING, DONE, character);
                 }
             }
         }
 
         if (state == DONE) {
             m_hasCast = false;
+            {
+                auto ability = character->abilities[m_activeAbility];
+                if (ability->numUses > 0) {
+                    ability->numUses--;
+                }
+                if (ability->numUses == 0) {
+                    character->abilities.erase(std::remove(character->abilities.begin(), character->abilities.end(), ability));
+                    printf("[LocalPlayerTurn] Used up ability %i.\n", m_activeAbility);
+                }
+            }
             m_activeAbility = -1;
         }
         return state == DONE;
     }
 
     void LocalPlayerTurn::transitionUI(LocalPlayerTurn::LocalTurnState from, LocalPlayerTurn::LocalTurnState to,
-                                       sf::Color emphColor) {
+                                       const std::shared_ptr<Character> &character) {
         switch (from) {
             case START:
             case CASTING:
@@ -182,6 +197,12 @@ namespace padi::content {
                 break;
             case SELECTING:
                 m_uiContext->removeText("ability");
+                for (size_t i = 0; i < character->abilities.size(); ++i) {
+                    if(character->abilities[i]->numUses > 0) {
+                        auto id = "uses_left_" + std::to_string(i);
+                        m_uiContext->removeText(id.c_str());
+                    }
+                }
                 break;
             case IDLE:
                 m_uiContext->removeText("press_space");
@@ -197,17 +218,24 @@ namespace padi::content {
             case IDLE:
                 m_uiContext->setText("press_space", "PRESS SPACE", {8, 8}, false);
                 m_uiContext->updateTextOutline("press_space", sf::Color::Black, 1);
-                m_uiContext->updateTextColor("press_space", emphColor);
+                m_uiContext->updateTextColor("press_space", character->entity->getColor());
                 break;
             case SELECTING:
                 m_uiContext->setText("ability", "",{8, 230});
+                for (size_t i = 0; i < character->abilities.size(); ++i) {
+                    if(character->abilities[i]->numUses > 0) {
+                        auto id = "uses_left_" + std::to_string(i);
+                        m_uiContext->setText(id.c_str(),"X", {0,0});
+                        m_uiContext->updateTextColor(id.c_str(), character->entity->getColor());
+                    }
+                }
                 break;
             case CASTING:
                 break;
             case TARGETING:
                 m_uiContext->setText("cast_or_cancel", "SPACE TO CONFIRM\nESCAPE TO ABORT", {8, 8}, false);
                 m_uiContext->updateTextOutline("cast_or_cancel", sf::Color::Black, 1);
-                m_uiContext->updateTextColor("cast_or_cancel", emphColor);
+                m_uiContext->updateTextColor("cast_or_cancel", character->entity->getColor());
                 break;
         }
 
