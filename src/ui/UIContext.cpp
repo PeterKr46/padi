@@ -94,14 +94,14 @@ namespace padi {
         auto found = m_text.find(idHash);
         if (found != m_text.end()) {
             found->second.text.setString(text);
-            found->second.text.setPosition(round(m_transformStack.back().transformPoint(pos) -
-                                           (centered ? (found->second.text.getGlobalBounds().getSize() / 2.f)
+            found->second.text.setPosition(m_transformStack.back().transformPoint(pos) -
+                                                   round((centered ? (found->second.text.getGlobalBounds().getSize() / 2.f)
                                                      : sf::Vector2f(0, 0))));
             found->second.centered = centered;
         } else {
             Text &t = m_text[idHash];
             t.text = sf::Text(text, m_font, 7);
-            t.text.setLineSpacing(1.25);
+            t.text.setLineSpacing(1 + 1.f/7);
             t.text.setPosition(round(topTransform().transformPoint(pos) -
                                (centered ? (t.text.getGlobalBounds().getSize() / 2.f)
                                          : sf::Vector2f(0, 0))));

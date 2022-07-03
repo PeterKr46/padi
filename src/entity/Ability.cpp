@@ -31,6 +31,10 @@ namespace padi {
         return m_iconId;
     }
 
+    void Ability::reassign(const std::weak_ptr<padi::LivingEntity> &user) {
+        m_user = user.lock();
+    }
+
     LimitedRangeAbility::LimitedRangeAbility(std::shared_ptr<padi::LivingEntity> user, size_t range)
             : Ability(std::move(user)), m_range(int(range)), m_rangeChanged(true) {
 

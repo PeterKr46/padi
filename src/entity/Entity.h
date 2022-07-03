@@ -11,12 +11,18 @@ namespace padi {
     public:
         explicit Entity(sf::Vector2i const &pos, uint32_t type);
 
-        size_t populate(padi::Map const* map, sf::VertexArray & array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const = 0;
+        size_t populate(padi::Map const *map,
+                        sf::VertexArray &array,
+                        size_t vertexOffset,
+                        uint8_t frame,
+                        float tileVerticalOffset) const override = 0;
+
         [[nodiscard]] size_t numQuads() const override;
 
         [[nodiscard]] virtual sf::Vector2i getSize() const = 0;
 
         void setVerticalOffset(float vo);
+
         [[nodiscard]] float getVerticalOffset() const;
 
         [[nodiscard]] uint32_t getType() const;

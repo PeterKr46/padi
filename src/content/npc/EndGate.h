@@ -29,6 +29,7 @@ namespace padi::content {
         bool onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) override;
     private:
         bool m_open = false;
+        bool m_complete;
     };
 
     class EndGate : public padi::LivingEntity {
@@ -37,11 +38,15 @@ namespace padi::content {
 
         bool takeTurn(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 
+        size_t populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame, float tileVerticalOffset) const override;
+
         Character asCharacter(uint32_t id);
 
         size_t m_requiredKills = 4;
     private:
         bool m_open = false;
+        bool m_started = false;
+        bool m_safe;
     };
 } // content
 

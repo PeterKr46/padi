@@ -27,10 +27,12 @@ namespace padi::content {
         enum : unsigned int {
             ShowText    = 1,
             ShowFrame   = 2,
-            CenterView    = 4,
+            CenterView  = 4,
             Confirm     = 8,
-            Sleep       = 16
-        } type;
+            Sleep       = 16,
+            ShowSprite  = 32,
+
+        } type{};
 
         struct ShowText {
             bool center{true};
@@ -45,12 +47,18 @@ namespace padi::content {
             sf::FloatRect rect;
         };
 
+        struct ShowSprite {
+            char id[32]{};
+            sf::Vector2f pos;
+        };
+
         struct CenterView {
             sf::Vector2i center;
         };
 
         union {
             struct ShowText showText;
+            struct ShowSprite showSprite;
             struct ShowFrame showFrame;
             struct CenterView centerView;
             struct Sleep sleep;
@@ -65,13 +73,14 @@ namespace padi::content {
         float speed = 2.0f;
 
     protected:
-        void displayText(std::string const &txt, UIContext *ctx, bool center = true);
+        static void displayText(std::string const &txt, UIContext *ctx, bool center = true);
 
         void clear(UIContext *ui);
 
         void queueText(const char* msg, bool center = true);
         void queueFrame(sf::FloatRect const& rect);
         void queueCenter(sf::Vector2i const& p);
+        void queueSprite(const char* id, sf::Vector2f const& center);
         void queueConfirm();
         void queueSleep(float duration);
 

@@ -54,6 +54,14 @@ namespace padi::content {
         m_promptQueue.emplace(event);
     }
 
+    void Narrator::queueSprite(const char* id, sf::Vector2f const& center) {
+        NarratorEvent event{NarratorEvent::ShowSprite};
+        event.data.showSprite.pos = center;
+        strncpy_s(event.data.showSprite.id, id, std::min(strlen(id), sizeof(event.data.showSprite.id) / sizeof(char) - 1));
+
+        m_promptQueue.emplace(event);
+    }
+
     bool Narrator::operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &) {
         auto ui = game->getUIContext();
         if (m_active.empty()) {
@@ -80,6 +88,7 @@ namespace padi::content {
                         m_timer.restart();
                         break;
                     case NarratorEvent::ShowFrame:
+                    case NarratorEvent::ShowSprite:
                         break;
                 }
             } while (!m_promptQueue.empty() && terminator == 0);
@@ -88,6 +97,10 @@ namespace padi::content {
             if (event.type == NarratorEvent::ShowFrame) {
                 Immediate::ScalableSprite(ui, event.data.showFrame.rect, 0,
                                           ui->getApollo()->lookupAnim("scalable_marker"), sf::Color::Red);
+            } else if(event.type == NarratorEvent::ShowSprite) {
+                auto sprite = ui->getApollo()->lookupAnim(event.data.showSprite.id);
+                auto size = sf::Vector2f(sprite->getResolution());
+                Immediate::Sprite(ui, {event.data.showSprite.pos - size / 2.f, size}, 0, sprite);
             }
         }
         unsigned int terminator = m_active.back().type;

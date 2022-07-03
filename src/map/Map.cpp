@@ -103,6 +103,9 @@ namespace padi {
         for (const auto &entity: m_entities) {
             total += entity->numQuads();
         }
+        for (const auto &ui: m_ui) {
+            total += ui.second->numQuads();
+        }
         return total;
     }
 
@@ -210,6 +213,19 @@ namespace padi {
             return std::any_of(entities.begin(), entities.end(), [t](std::shared_ptr<Entity> const& e) { return e->getType() & t;});
         }
         return false;
+    }
+
+    std::shared_ptr<Entity> Map::getEntity(const sf::Vector2i &pos, uint32_t t) {
+        auto iter = m_tiles.find(pos);
+        if (iter != m_tiles.end()) {
+            auto entities = iter->second.second;
+            for (auto & entity : entities) {
+                if (entity->getType() & t) {
+                    return entity;
+                }
+            }
+        }
+        return {nullptr};
     }
 
 

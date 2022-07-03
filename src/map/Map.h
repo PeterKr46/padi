@@ -67,6 +67,8 @@ namespace padi {
         [[nodiscard]] bool hasEntities(sf::Vector2i const &pos) const;
         [[nodiscard]] bool hasEntities(sf::Vector2i const &pos, uint32_t entityType) const;
 
+        std::shared_ptr<Entity> getEntity(const sf::Vector2i &pos, uint32_t t);
+
         [[nodiscard]] size_t numQuads() const;
 
         size_t populate(sf::VertexArray &array, size_t vertexOffset, uint8_t frame, sf::View const &viewport) const;

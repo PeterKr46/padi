@@ -188,6 +188,15 @@ namespace padi::content {
             chr->entity->setColor(payload.color);
             auto spawnEvent = std::make_shared<SpawnEvent>(chr->entity);
             spawnEvent->dispatch(m_level);
+        } else if(payload.cid == ~0u) {
+            printf("[OnlineGame|Client] Spawning detached Entity!");
+            auto entity = std::make_shared<padi::LivingEntity>(
+                    "_LivingEntity",
+                    m_level->getApollo()->lookupAnimContext(payload.animations),
+                    payload.pos, payload.entitytype);
+            entity->setColor(payload.color);
+            auto spawnEvent = std::make_shared<SpawnEvent>(entity);
+            spawnEvent->dispatch(m_level);
         }
     }
 

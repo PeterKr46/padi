@@ -79,7 +79,7 @@ namespace padi {
         m_ghost->m_animation = m_user->getAnimationSet()->at("idle");
         m_ghostFX = std::make_shared<EntityColumn>(sf::Vector2i{0, 0});
         m_ghostFX->m_stackSize = 8;
-        m_description = "TELEPORT\n\n  Instantly travel to a location of your choice!";
+        m_description = "Instantly teleport to a location of your choice.";
         m_iconId = "teleport";
     }
 
@@ -118,7 +118,7 @@ namespace padi {
     bool content::Lighten::onFrameBegin(std::weak_ptr<padi::Level> const &level, uint8_t frame) {
         auto lvl = level.lock();
         auto tile = lvl->getMap()->getTile(strikePos);
-        if (frame == 8) {
+        if (frame == 4) {
             std::vector<std::shared_ptr<Entity>> ents;
             if (lvl->getMap()->getEntities(strikePos, ents)) {
                 for (auto &entity: ents) {
@@ -127,8 +127,27 @@ namespace padi {
                         if (livingEntity->hasHPBar()) {
                             auto hpBar = livingEntity->getHPBar().lock();
                             auto hp = hpBar->getHP();
-                            hpBar->setHP(hp - 1);
-                            if(hp == 1) m_user->enemiesSlain++;
+                            if(livingEntity->isDark()) {
+                                hpBar->setHP(--hp);
+                                if (hp == 0) m_user->enemiesSlain++;
+                            } else if(livingEntity->isLight()) {
+                                hpBar->setHP(++hp);
+                                /*livingEntity->trySetAnimation("spawn");
+                                auto apolloCtx = livingEntity->getAnimationSet();
+                                if (apolloCtx->has("spawn_ray")) {
+                                    auto ray = std::make_shared<OneshotEntityStack>(strikePos);
+                                    ray->m_color = livingEntity->getColor();
+                                    ray->m_animation = apolloCtx->at("spawn_ray");
+                                    ray->m_stackSize = 16;
+                                    ray->m_verticalStep = -float(padi::TileSize.y);
+                                    ray->dispatchImmediate(lvl);
+                                }*/
+                                auto heal = std::make_shared<OneshotEntity>(strikePos);
+                                heal->setVerticalOffset(-16);
+                                heal->m_color = livingEntity->getColor();
+                                heal->m_animation = lvl->getApollo()->lookupAnim("heal");
+                                heal->dispatchImmediate(lvl);
+                            }
                         }
                     }
                 }
@@ -149,7 +168,8 @@ namespace padi {
     }
 
     content::Lighten::Lighten(std::shared_ptr<LivingEntity> user) : Ability(std::move(user)) {
-
+        m_description = "Bless an UNCURSED Tile.\n"
+                        " Heals LIGHT, Damages DARK Occupants.";
         m_iconId = "strike";
     }
 
@@ -235,6 +255,7 @@ namespace padi {
             return false;
         }
         lvl->addCycleEndListener(shared_from_this());
+        lvl->addFrameBeginListener(shared_from_this());
         m_complete = false;
         return true;
     }
@@ -280,8 +301,8 @@ namespace padi {
 
     content::Walk::Walk(std::shared_ptr<padi::LivingEntity> user, size_t range, Walkable w)
             : padi::LimitedRangeAbility(std::move(user), range) {
-        m_description = "Walk a short distance.\n"
-                        "Can't cross cursed tiles.";
+        m_description = "Walk a short distance, lighting the way.\n"
+                        "Can't cross CURSED tiles, but may BLESS.";
         m_iconId = "walk";
         walkable = w;
     }
@@ -315,7 +336,17 @@ namespace padi {
     }
 
     bool content::Walk::onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) {
-        return CycleListener::onFrameBegin(lvl, frame);
+        if(m_user->isLight()) {
+            auto level = lvl.lock();
+            auto target = m_user->getPosition();
+            if (m_user->isMoving() && frame >= CycleLength_F / 2) {
+                target += m_user->currentMoveDirection();
+            }
+            auto tile = level->getMap()->getTile(target);
+
+            tile->lerpAdditiveColor(m_user->getColor(), 0.3);
+        }
+        return !Walk::isCastComplete();
     }
 
 
@@ -324,7 +355,7 @@ namespace padi {
             , m_walkable(walkable) {
         m_iconId = "dash";
         m_description = "Dash to a walkable position.\n"
-                        "Deals damage and lights uncursed tiles.";
+                        "Deals damage and lights UNCURSED tiles.";
     }
 
     bool content::Dash::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
@@ -479,12 +510,25 @@ namespace padi {
         level.lock()->hideCursor();
     }
 
-    void content::Peep::castIndicator(const std::weak_ptr<Level> &level) {
-        level.lock()->showCursor();
+    void content::Peep::castIndicator(const std::weak_ptr<Level> &lvl) {
+        auto level = lvl.lock();
+        auto map = level->getMap();
+        auto cursor = level->getCursorLocation();
+        level->showCursor();
+        std::shared_ptr<LivingEntity> e = std::static_pointer_cast<LivingEntity>(map->getEntity(cursor, 8));
+        if (e) {
+            m_infoEntity->m_animation = level->getApollo()->lookupAnim("debug");
+            if(m_infoEntity->m_animation) {
+                map->moveEntity(m_infoEntity, cursor);
+            }
+        } else {
+            map->removeEntity(m_infoEntity);
+        }
     }
 
     bool content::Peep::cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) {
         auto level = lvl.lock();
+        auto map = level->getMap();
         auto blob = std::make_shared<OneshotEntity>(pos);
         blob->m_animation = level->getApollo()->lookupAnim("air_strike");
         blob->m_color = m_user->getColor();
@@ -493,6 +537,8 @@ namespace padi {
         auto ping = std::make_shared<AudioPlayback>(level->getApollo()->lookupAudio("attention_ping"));
         ping->setPosition(pos);
         ping->start(level);
+
+        map->removeEntity(m_infoEntity);
 
         std::vector<std::shared_ptr<padi::Entity>> entities;
         if (level->getMap()->getEntities(pos, entities)) {
@@ -509,6 +555,8 @@ namespace padi {
         m_iconId = "view";
         m_description = "Just look around.\n"
                         "Can be cast to ping other players.";
+        m_infoEntity = std::make_shared<StaticEntity>(sf::Vector2i {0,0});
+        m_infoEntity->setVerticalOffset(-32);
     }
 
     uint32_t content::Peep::getAbilityType() const {

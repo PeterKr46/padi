@@ -33,6 +33,7 @@ namespace padi::content {
     LocalPlayerTurn::operator()(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &character) {
         auto level = game->getLevel().lock();
         auto emphColor = character->entity->getColor();
+        auto ui = game->getUIContext();
 
         if (padi::Controls::wasKeyPressed(sf::Keyboard::Home)) {
             level->moveCursor(character->entity->getPosition());
@@ -71,12 +72,12 @@ namespace padi::content {
             }
         } else if (state == SELECTING) {
             level->getCursor()->lock();
-            if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
+            if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
                 level->play();
 
                 transitionUI(SELECTING, TARGETING, emphColor);
                 playSelectSound(level);
-            } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
+            } else if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
                 m_activeAbility = -1;
                 level->play();
 
@@ -84,13 +85,13 @@ namespace padi::content {
                 playSelectSound(level);
             } else {
                 static sf::Keyboard::Key updown[2] = {sf::Keyboard::Up, sf::Keyboard::Down};
-                if (padi::Controls::wasKeyReleased(sf::Keyboard::Up)) {
+                if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyReleased(sf::Keyboard::Up)) {
                     m_activeAbility = (int64_t(character->abilities.size()) + m_activeAbility - 1) %
                                       int64_t(character->abilities.size());
-                } else if (padi::Controls::wasKeyReleased(sf::Keyboard::Down)) {
+                } else if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyReleased(sf::Keyboard::Down)) {
                     m_activeAbility = (m_activeAbility + 1) % int64_t(character->abilities.size());
                 }
-                if (padi::Controls::wasAnyKeyReleased(updown, updown + 2)) {
+                if (!m_uiContext->isFocusActive() && padi::Controls::wasAnyKeyReleased(updown, updown + 2)) {
                     m_uiContext->updateTextString("ability",
                                                   character->abilities[m_activeAbility]->getDescription());
                     playSelectSound(level);
@@ -129,7 +130,7 @@ namespace padi::content {
                                   padi::Controls::isKeyDown(sf::Keyboard::Down) ? emphColor : sf::Color::White);
             }
         } else if (state == TARGETING) {
-            if (padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
+            if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
                 character->entity->intentCast(character->abilities[m_activeAbility], level->getCursorLocation());
                 {
                     sf::Packet packet;
@@ -145,7 +146,7 @@ namespace padi::content {
                 m_hasCast = true;
                 level->hideCursor();
                 transitionUI(TARGETING, CASTING);
-            } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
+            } else if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyPressed(sf::Keyboard::Escape)) {
                 transitionUI(TARGETING, SELECTING);
                 character->abilities[m_activeAbility]->castCancel(level);
                 level->pause();

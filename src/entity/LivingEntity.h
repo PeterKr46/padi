@@ -21,7 +21,7 @@ namespace padi {
         size_t populate(sf::VertexArray &array, size_t vertexOffset, float verticalOffset, const std::shared_ptr<const Entity> &entity,
                         sf::Color color = sf::Color::Green) const;
 
-        void setHP(int hp);
+        void setHP(int hp, bool expandPool = false);
 
         void setMaxHP(int hp);
 
@@ -82,6 +82,9 @@ namespace padi {
         bool hasHPBar() const;
         void initHPBar(int maxHP, padi::AnimationSet const *sprites, sf::Color overrideColor = sf::Color{0x0});
         void initHPBar(const std::weak_ptr<HPBar>& copyFrom);
+
+        bool isLight() const;
+        bool isDark() const;
 
         size_t enemiesSlain = 0;
     private:

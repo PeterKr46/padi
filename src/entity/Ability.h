@@ -39,6 +39,11 @@ namespace padi {
 
         [[nodiscard]] std::weak_ptr<padi::LivingEntity> getUser() const;
 
+        /*
+         * Use sparingly - this is very volatile if the ability is in use!
+         */
+        void reassign(std::weak_ptr<padi::LivingEntity> const& user);
+
     protected:
         std::shared_ptr<padi::LivingEntity> m_user; // TODO weak_ptr instead
         std::string m_description;

@@ -129,8 +129,6 @@ namespace padi::content {
         } m_lobby;
         sf::Clock m_roundCooldown;
 
-        void advanceLevel();
-
         void endOfRound();
 
         bool m_levelComplete = false;

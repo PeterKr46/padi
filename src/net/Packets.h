@@ -43,7 +43,10 @@ namespace padi::content {
         PlayerDespawn,
         NextLevel,
         InitHP,
-        ModifyHP
+        EventSpawn,
+        EventDespawn,
+        AskPlayer,
+        PlayerResponse,
     };
 
     struct alignas(64) ChatMessagePayload {
@@ -141,6 +144,28 @@ namespace padi::content {
         uint32_t cid{};
         uint16_t maxHP{};
         sf::Color color{0x0};
+    };
+
+    struct alignas(64) EventSpawnPayload {
+        const PayloadType type = EventSpawn;
+        sf::Vector2i    pos;
+        uint32_t        abilityType{};
+        uint8_t         abilityProps[16]{};
+    };
+
+    struct alignas(64) EventDespawnPayload {
+        const PayloadType type = EventDespawn;
+        sf::Vector2i    pos;
+    };
+
+    struct alignas(64) AskPlayerPayload {
+        const PayloadType type = AskPlayer;
+        char message[64] = "Yes/No?\0";
+    };
+
+    struct alignas(64) PlayerResponsePayload {
+        const PayloadType type = PlayerResponse;
+        bool response{};
     };
 
 }

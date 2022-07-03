@@ -66,7 +66,7 @@ namespace padi::content {
                         apollo->lookupAnimContext("cube"),
                         AllDirections[id % 4] * offset
                 );
-                playerColor = sf::Color(hsv(int(hash_c_string(m_lobby.names[id].c_str(), m_lobby.names[id].length())), 1.f, 0.8f));
+                playerColor = sf::Color(hsv(int(hash_c_string(m_lobby.names[id].c_str(), m_lobby.names[id].length())), 1.f, 1.f));
                 playerCharacter.entity->setColor(playerColor);
                 playerCharacter.entity->initHPBar(2, apollo->lookupAnimContext("hp_bars"));
                 playerCharacter.abilities = {
@@ -79,9 +79,12 @@ namespace padi::content {
             spawnCharacter(playerCharacter, id);
         }
         {
-            auto mob = std::make_shared<EndGate>("gate", m_level->getApollo()->lookupAnimContext("gate"),
-                                                 sf::Vector2i{-3, -3});
-            mob->m_requiredKills = m_lobby.size * 5;
+            auto mob = std::make_shared<EndGate>(
+                    "gate",
+                    m_level->getApollo()->lookupAnimContext("gate"),
+                    sf::Vector2i{-3, -3}
+            );
+            mob->m_requiredKills = m_lobby.size * 2;
             auto cr = mob->asCharacter(0);
             m_turnQueue.push(spawnCharacter(cr, m_lobby.size - 1));
         }
@@ -280,6 +283,15 @@ namespace padi::content {
             signalLevelAdvance();
             sendChatGeneric("Restarting after this round.");
             return;
+        } else if(msg[0] == '?') {
+            if(std::strstr(msg.c_str(), "?BLESS") || std::strstr(msg.c_str(), "?BLESSED")) {
+                sendChatGeneric("BLESSED Tiles are too LIGHT for DARK Creatures to enter. They can generally not be DARKened.");
+                return;
+            }
+            else if(std::strstr(msg.c_str(), "?CURSE") ||std::strstr(msg.c_str(), "?CURSED")) {
+                sendChatGeneric("CURSED Tiles are too DARK for LIGHT Creatures (you) to enter. They can generally not be LIGHTened.");
+                return;
+            }
         }
         std::string buf;
         if(from < m_lobby.size) {
@@ -390,21 +402,6 @@ namespace padi::content {
         return cid;
     }
 
-    void HostGame::advanceLevel() {
-        m_activeChar.reset();
-        while(!m_turnQueue.empty()) m_turnQueue.pop();
-
-        sf::Packet packet;
-
-        {
-            auto nextLevel = NextLevelPayload{};
-            broadcast(PackagePayload(packet,nextLevel));
-        }
-        for(size_t i = 0; i < m_lobby.size; ++i) {
-            m_turnQueue.push(i);
-        }
-    }
-
     void HostGame::broadcast(sf::Packet &packet, const uint32_t *ignore, uint32_t num_ignored) {
         for (size_t cid = 0; cid < m_lobby.remotes.size(); ++cid) {
             bool ignored = false;
@@ -430,4 +427,5 @@ namespace padi::content {
     void HostGame::signalLevelAdvance() {
         m_levelComplete = true;
     }
+
 }

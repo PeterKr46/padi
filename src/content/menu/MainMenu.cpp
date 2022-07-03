@@ -37,7 +37,7 @@ namespace padi::content {
                 "Tom", "Jerry",
                 "Garfunke", "Simon",
                 "Lucky", "Unlucky",
-                "Tadys", "Bleb"
+                "Cube"
         };
         m_uiContext.setText("nick_label", "Nick", {0, 0});
         m_uiContext.setText("nick_input", defaultNames[rand.getElapsedTime().asMicroseconds() % 8], {32, 0});
@@ -85,7 +85,7 @@ namespace padi::content {
                 break;
             case PlayAlone:
                 m_uiContext.updateTextString("play", "Play Alone");
-                m_uiContext.setText("seed_input", "Choose a Seed", {88, 52}, true);
+                m_uiContext.setText("seed_input", "Choose a Seed", {24, 52});
                 break;
             case PlayCoop:
                 m_uiContext.updateTextString("play", "Local Co-Op");
@@ -105,7 +105,7 @@ namespace padi::content {
 
                 m_uiContext.pushTransform().translate(0, 32);
                 m_uiContext.setText("join_title", "JOIN REMOTE PLAY", {88, 8}, true);
-                m_uiContext.setText("ip_input", "127.0.0.1", {88, 20}, true);
+                m_uiContext.setText("ip_input", "127.0.0.1", {36, 20});
                 m_uiContext.setText("connect", "Connect", {8, 34});
                 m_uiContext.popTransform();
 
@@ -167,7 +167,7 @@ namespace padi::content {
                               0,
                               m_uiContext.getApollo()->lookupAnim("arrow_left"));
             Immediate::Sprite(&m_uiContext,
-                              sf::FloatRect{150, 0, 32, 32},
+                              sf::FloatRect{144, 0, 32, 32},
                               0,
                               m_uiContext.getApollo()->lookupAnim("arrow_right"));
 
@@ -194,7 +194,7 @@ namespace padi::content {
                         {96, -2, 12, 12},
                         0,
                         m_uiContext.getApollo()->lookupAnim("scalable_window"),
-                        sf::Color(hsv(int(hash_c_string(t.c_str(), t.length())), 1.f, 0.8f))
+                        sf::Color(hsv(int(hash_c_string(t.c_str(), t.length())), 1.f, 1.f))
                         );
                 m_uiContext.popTransform();
             }
@@ -407,6 +407,8 @@ namespace padi::content {
         m_uiContext.updateTextColor("seed_input",
                                     Immediate::isFocused(&m_uiContext, "seed_input") ? sf::Color::Yellow
                                                                                    : sf::Color::White);
+        Immediate::ScalableSprite(&m_uiContext, {16, 46, 128, 16}, 0,
+                                  m_uiContext.getApollo()->lookupAnim("scalable_textfield"));
 
         if (Immediate::Button(&m_uiContext, "play", {16, 0, 128, 32})) {
             std::vector<InOutBox> nosocks;

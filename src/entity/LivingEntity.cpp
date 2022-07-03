@@ -219,6 +219,14 @@ void padi::LivingEntity::switchApollo(const Apollo *apollo) {
     }
 }
 
+bool padi::LivingEntity::isLight() const {
+    return m_color.r + m_color.b + m_color.g >= 255;
+}
+
+bool padi::LivingEntity::isDark() const {
+    return m_color.r + m_color.b + m_color.g < 100;
+}
+
 
 int padi::HPBar::getMaxHP() const {
     return m_maxHP;
@@ -228,7 +236,10 @@ void padi::HPBar::setMaxHP(int hp) {
     m_maxHP = std::max(1, std::min(5, hp));
 }
 
-void padi::HPBar::setHP(int hp) {
+void padi::HPBar::setHP(int hp, bool expandPool) {
+    if(expandPool && hp > m_maxHP) {
+        setMaxHP(hp);
+    }
     m_HP = std::max(0, std::min(m_maxHP, hp));
 }
 
