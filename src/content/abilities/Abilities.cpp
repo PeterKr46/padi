@@ -383,11 +383,11 @@ namespace padi {
             laserPart->m_color = m_user->getColor();
             lvl->getMap()->addEntity(laserPart);
             auto tile = lvl->getMap()->getTile(iPos);
-
-            auto col = tile->getColor();
-            uint16_t cSum = col.r + col.g + col.b;
-            if (cSum > 100) tile->lerpAdditiveColor(m_user->getColor(), 0.9);
-
+            if(tile) {
+                auto col = tile->getColor();
+                uint16_t cSum = col.r + col.g + col.b;
+                if (cSum > 100) tile->lerpAdditiveColor(m_user->getColor(), 0.9);
+            }
             lvl->addCycleEndListener(laserPart);
             std::vector<std::shared_ptr<Entity>> ents;
             if (lvl->getMap()->getEntities(iPos, ents)) {

@@ -81,7 +81,7 @@ namespace padi::content {
             auto mob = std::make_shared<Beacon>(
                     "gate",
                     m_level->getApollo()->lookupAnimContext("gate"),
-                    sf::Vector2i{-3, -3}
+                    sf::Vector2i{0, 0}
             );
             size_t slain = 0;
             for (int cid = 0; cid < m_lobby.size; cid++) {

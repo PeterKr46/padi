@@ -12,6 +12,13 @@ namespace padi {
         f.y = std::round(f.y);
         return f;
     }
+    sf::Vector2i orthAxis(sf::Vector2i const& dir) {
+        if(dir.x < 0) return {0,1};
+        if(dir.y < 0) return {1,0};
+        if(dir.x > 0) return {0, -1};
+        if(dir.y > 0) return {-1,0};
+        return {0,0};
+    }
 
     uint32_t rgb(int r, int g, int b) {
         return (r << 24) | (g << 16) | (b << 8) | 0xFF;

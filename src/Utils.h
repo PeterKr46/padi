@@ -17,4 +17,5 @@ namespace padi {
     uint32_t hsv(int hue, float sat, float val);
 
     sf::Vector2f round(sf::Vector2f f);
+    sf::Vector2i orthAxis(sf::Vector2i const& dir);
 }

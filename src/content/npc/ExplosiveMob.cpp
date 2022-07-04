@@ -132,19 +132,21 @@ namespace padi::content {
         auto lvl = level.lock();
         m_user->getHPBar().lock()->setHP(0);
         for (auto &direction: Neighborhood) {
-            auto strike = std::make_shared<padi::OneshotEntity>(pos + direction);
-            strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
-            strike->m_color = sf::Color::Black;
-            lvl->addCycleEndListener(strike);
-            lvl->getMap()->addEntity(strike);
-            std::vector<std::shared_ptr<Entity>> ents;
-            if (lvl->getMap()->getEntities(pos + direction, ents)) {
-                for (auto &entity: ents) {
-                    if ((entity->getType() & (LIVING | EXPLOSIVE)) == LIVING) {
-                        auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
-                        if (livingEntity->hasHPBar()) {
-                            auto hpBar = livingEntity->getHPBar().lock();
-                            hpBar->setHP(hpBar->getHP() - 1);
+            if(lvl->getMap()->getTile(pos + direction)) {
+                auto strike = std::make_shared<padi::OneshotEntity>(pos + direction);
+                strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
+                strike->m_color = sf::Color::Black;
+                lvl->addCycleEndListener(strike);
+                lvl->getMap()->addEntity(strike);
+                std::vector<std::shared_ptr<Entity>> ents;
+                if (lvl->getMap()->getEntities(pos + direction, ents)) {
+                    for (auto &entity: ents) {
+                        if ((entity->getType() & (LIVING | EXPLOSIVE)) == LIVING) {
+                            auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
+                            if (livingEntity->hasHPBar()) {
+                                auto hpBar = livingEntity->getHPBar().lock();
+                                hpBar->setHP(hpBar->getHP() - 1);
+                            }
                         }
                     }
                 }
@@ -177,11 +179,13 @@ namespace padi::content {
             auto pos = m_user->getPosition();
             for (auto &dir: Neighborhood) {
                 auto tile = lvl->getMap()->getTile(pos + dir);
-                auto col = tile->getColor();
-                uint16_t cSum = col.r + col.g + col.b;
-                if (cSum < 700) {
-                    tile->lerpColor(sf::Color(0x1e1e1eff), 0.5);
-                    tile->setVerticalOffset(float(frame % 2));
+                if(tile) {
+                    auto col = tile->getColor();
+                    uint16_t cSum = col.r + col.g + col.b;
+                    if (cSum < 700) {
+                        tile->lerpColor(sf::Color(0x1e1e1eff), 0.5);
+                        tile->setVerticalOffset(float(frame % 2));
+                    }
                 }
             }
         } else if (frame == 8) {
@@ -189,16 +193,18 @@ namespace padi::content {
             auto fireAnim = lvl->getApollo()->lookupAnim("fire");
             for (auto &dir: Neighborhood) {
                 auto tile = lvl->getMap()->getTile(pos + dir);
-                auto col = tile->getColor();
-                uint16_t cSum = col.r + col.g + col.b;
-                if(cSum < 700) {
-                    tile->setVerticalOffset(0);
+                if(tile) {
+                    auto col = tile->getColor();
+                    uint16_t cSum = col.r + col.g + col.b;
+                    if(cSum < 700) {
+                        tile->setVerticalOffset(0);
+                    }
+                    auto fire = std::make_shared<padi::OneshotEntity>(pos + dir);
+                    fire->m_animation = fireAnim;
+                    fire->m_color = sf::Color::Black;
+                    lvl->addCycleEndListener(fire);
+                    lvl->getMap()->addEntity(fire, ~0);
                 }
-                auto fire = std::make_shared<padi::OneshotEntity>(pos + dir);
-                fire->m_animation = fireAnim;
-                fire->m_color = sf::Color::Black;
-                lvl->addCycleEndListener(fire);
-                lvl->getMap()->addEntity(fire, ~0);
             }
             if (m_user->hasHPBar() && m_user->getHPBar().lock()->getHP() == 0) {
                 lvl->getMap()->removeEntity(m_user);

@@ -51,6 +51,7 @@ namespace padi {
         [[nodiscard]] std::shared_ptr<padi::Tile> getTile(int x, int y) const;
 
         bool addTile(const std::shared_ptr<padi::Tile> &tile);
+        std::shared_ptr<Tile> addTileIfNone(sf::Vector2i const &pos, bool* added = nullptr);
 
         size_t getEntities(sf::Vector2i const &pos, std::vector<std::shared_ptr<Entity>> &entities) const;
 

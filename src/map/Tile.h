@@ -43,7 +43,7 @@ namespace padi {
     private:
         size_t m_detail{0};
         float m_verticalOffset{0};
-        sf::Color m_color;
+        sf::Color m_color{0xAAAAAAFF};
         std::shared_ptr<padi::TileDecoration> m_decoration;
     };
 

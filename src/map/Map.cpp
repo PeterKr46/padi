@@ -228,5 +228,16 @@ namespace padi {
         return {nullptr};
     }
 
+    std::shared_ptr<Tile> Map::addTileIfNone(sf::Vector2i const &pos, bool* added) {
+        auto & tile = m_tiles[pos];
+
+        if(added) *added = !bool(tile.first);
+
+        if(!tile.first) {
+            tile.first = std::make_shared<Tile>(pos);
+        }
+        return tile.first;
+    }
+
 
 } // padi
