@@ -251,35 +251,47 @@ int padi::HPBar::getHP() const {
     return m_HP;
 }
 
+size_t padi::HPBar::quad(sf::Vector2f const& vertexAnchor, sf::Vector2i const& quadSize, sf::VertexArray &array, sf::Vector2f const& texCoordAnchor, size_t vertexIdxOffset, float verticalOffset, sf::Color const& color) const {
+    auto pVertex = &array[vertexIdxOffset];
+
+    float vo = m_verticalOffset + verticalOffset + float(padi::TileSize.y) / 2;
+
+    pVertex[0].position = vertexAnchor + sf::Vector2f(-quadSize.x / 2, vo - quadSize.y);
+    pVertex[1].position = vertexAnchor + sf::Vector2f(quadSize.x / 2, vo - quadSize.y);
+    pVertex[2].position = vertexAnchor + sf::Vector2f(quadSize.x / 2, vo);
+    pVertex[3].position = vertexAnchor + sf::Vector2f(-quadSize.x / 2, vo);
+
+    pVertex[0].texCoords = texCoordAnchor;
+    pVertex[1].texCoords = texCoordAnchor + sf::Vector2f(quadSize.x, 0);
+    pVertex[2].texCoords = texCoordAnchor + sf::Vector2f(quadSize);
+    pVertex[3].texCoords = texCoordAnchor + sf::Vector2f(0, quadSize.y);
+
+    for (int i = 0; i < 4; ++i) pVertex[i].color = m_overrideColor.toInteger() ? m_overrideColor : color;
+    return 4;
+}
+
 size_t padi::HPBar::populate(sf::VertexArray &array, size_t vertexOffset, float verticalOffset, const std::shared_ptr<const Entity> &entity,
                              sf::Color color) const {
     if(!m_apolloCtx) {
         return 0;
     }
 
-    auto frames = m_apolloCtx->at(std::to_string(m_maxHP));
-    if (!frames) {
+    std::shared_ptr<Animation> status;
+    size_t frame;
+    if(asleep) {
+        status = m_apolloCtx->at("asleep");
+        frame = 0;
+    } else {
+        status = m_apolloCtx->at(std::to_string(m_maxHP));
+        frame = m_HP;
+    }
+
+    if (!status) {
         return 0;
     }
-    auto size = frames->getResolution();
-    auto pVertex = &array[vertexOffset];
 
     sf::Vector2f anchor = padi::Map::mapTilePosToWorld(entity->getPosition());
-    float vo = m_verticalOffset + verticalOffset + float(padi::TileSize.y) / 2;
-
-    pVertex[0].position = anchor + sf::Vector2f(-size.x / 2, vo - size.y);
-    pVertex[1].position = anchor + sf::Vector2f(size.x / 2, vo - size.y);
-    pVertex[2].position = anchor + sf::Vector2f(size.x / 2, vo);
-    pVertex[3].position = anchor + sf::Vector2f(-size.x / 2, vo);
-
-    sf::Vector2f texCoordAnchor = (*frames)[m_HP];
-    pVertex[0].texCoords = texCoordAnchor;
-    pVertex[1].texCoords = texCoordAnchor + sf::Vector2f(size.x, 0);
-    pVertex[2].texCoords = texCoordAnchor + sf::Vector2f(size);
-    pVertex[3].texCoords = texCoordAnchor + sf::Vector2f(0, size.y);
-
-    for (int i = 0; i < 4; ++i) pVertex[i].color = m_overrideColor.toInteger() ? m_overrideColor : color;
-    return 4;
+    return quad(anchor, status->getResolution(), array, (*status)[frame], vertexOffset, verticalOffset, color);
 }
 
 padi::HPBar::HPBar(padi::AnimationSet const *sprites, int maxHP, sf::Color const &overrideColor)

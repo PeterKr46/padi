@@ -155,6 +155,7 @@ namespace padi::content {
                 transitionUI(TARGETING, SELECTING, character);
                 character->abilities[m_activeAbility]->castCancel(level);
                 level->pause();
+                level->moveCursor(character->entity->getPosition());
                 m_uiContext->updateTextString("ability", character->abilities[m_activeAbility]->getDescription());
             } else {
                 character->abilities[m_activeAbility]->castIndicator(level);

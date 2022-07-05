@@ -93,6 +93,7 @@ namespace padi::content {
         const PayloadType type = CharacterSpawn;
         uint32_t        cid{};
         ControllerType  controller{};
+        bool asleep{};
     };
 
     /**

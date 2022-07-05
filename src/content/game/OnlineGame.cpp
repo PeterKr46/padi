@@ -117,6 +117,10 @@ namespace padi::content {
                 abilities[payload.abilitySlot] = std::make_shared<GateUnlock>(chr->entity);
                 break;
             }
+            case AbilityType::Raze: {
+                abilities[payload.abilitySlot] = std::make_shared<Raze>(chr->entity);
+                break;
+            }
             default: {
                 printf("[OnlineGame] Attempted to assign unknown ability type.\n");
             }

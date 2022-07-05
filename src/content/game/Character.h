@@ -42,5 +42,11 @@ namespace padi::content {
          * Characters not marked alive at the end of their turn will be removed from play.
          */
         bool alive{true};
+
+        /**
+         * Characters may be asleep - while they are asleep, their turns will be skipped.
+         */
+        bool awake{true};
+        uint8_t wakeupRange{5};
     };
 }

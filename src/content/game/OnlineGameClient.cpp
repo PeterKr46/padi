@@ -156,7 +156,7 @@ namespace padi::content {
                     m_level->moveCursor(m_activeChar->entity->getPosition());
                 }
             } else if (host.has(PayloadType::NextLevel)) {
-                synchronize("iForgot"); // TODO
+                synchronize(m_lobby.names[m_localChar]); // TODO
             }
         }
     }
@@ -212,6 +212,7 @@ namespace padi::content {
         auto &newChar = m_characters[payload.cid];
         newChar = std::make_shared<Character>(Character{payload.cid});
         if (payload.controller == CharacterSpawnPayload::LocalPlayer) {
+            m_localChar = payload.cid;
             newChar->controller = LocalPlayerTurn(&m_uiContext);
         } else {
             newChar->controller = RemotePlayerTurn(m_lobby.host, false);

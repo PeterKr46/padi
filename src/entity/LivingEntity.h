@@ -33,9 +33,15 @@ namespace padi {
         float m_verticalOffset = -32;
         sf::Color m_overrideColor{0x0};
 
+        bool asleep = false;
+
     private:
         int m_HP, m_maxHP;
         padi::AnimationSet const*  m_apolloCtx;
+
+        size_t quad(const sf::Vector2f &vertexAnchor, const sf::Vector2i &quadSize, sf::VertexArray &array,
+                    const sf::Vector2f &texCoordAnchor, size_t vertexIdxOffset, float verticalOffset,
+                    const sf::Color &color) const;
     };
 
     class LivingEntity

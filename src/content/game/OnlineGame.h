@@ -166,5 +166,7 @@ namespace padi::content {
         void spawnNewCharacter(CharacterSpawnPayload payload);
 
         void spawnNewEntity(EntitySpawnPayload payload);
+
+        uint32_t m_localChar;
     };
 } // content

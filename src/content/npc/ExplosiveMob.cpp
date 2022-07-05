@@ -118,7 +118,9 @@ namespace padi::content {
                  std::make_shared<SelfDestruct>(shared_from_this())},
                 [=](const std::shared_ptr<OnlineGame> &l, const std::shared_ptr<Character> &c) {
                     return takeTurn(l, c);
-                }
+                },
+                true,
+                false
         };
     }
 

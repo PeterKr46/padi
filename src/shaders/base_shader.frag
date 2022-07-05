@@ -20,7 +20,7 @@ vec3 hsv2rgb(vec3 c)
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-void main(){
+void main() {
     vec2 fragCoord = gl_TexCoord[0].xy;
 
     vec4 fragColor = texture2D(texture, fragCoord);

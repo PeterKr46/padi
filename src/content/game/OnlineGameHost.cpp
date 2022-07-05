@@ -45,17 +45,17 @@ namespace padi::content {
 
         Character playerCharacter;
         sf::Color playerColor;
-        int offset = 1;
+        sf::Vector2i nextPlayerPos;
+        uint8_t nextPlayerType;
         for (size_t id = 0; id < m_lobby.size; ++id) {
-            if (id - 4 * (offset - 1) >= 4) offset++;
+            m_level->popSpawnPosition(nextPlayerPos, nextPlayerType);
             if (savedCharacters.size() > id) {
                 playerCharacter.entity = savedCharacters[id].entity;
                 playerCharacter.entity->switchApollo(apollo);
                 playerCharacter.entity->getHPBar().lock()->setHP(INT_MAX);
 
                 // A really ugly hack to reposition...
-                map->moveEntity(playerCharacter.entity,
-                                              AllDirections[id % 4] * offset);
+                map->moveEntity(playerCharacter.entity, nextPlayerPos);
 
                 playerCharacter.abilities = savedCharacters[id].abilities;
                 playerCharacter.alive = true;
@@ -63,7 +63,8 @@ namespace padi::content {
                 playerCharacter.entity = std::make_shared<padi::LivingEntity>(
                         m_lobby.names[id],
                         apollo->lookupAnimContext("cube"),
-                        AllDirections[id % 4] * offset, PLAYER
+                        nextPlayerPos,
+                        PLAYER
                 );
                 playerColor = sf::Color(hsv(int(hash_c_string(m_lobby.names[id].c_str(), m_lobby.names[id].length())), 1.f, 1.f));
                 playerCharacter.entity->setColor(playerColor);
@@ -94,19 +95,18 @@ namespace padi::content {
         }
         sf::Vector2i nextMobPos;
         uint8_t nextMobType;
-        while(m_level->popMobSpawnPosition(nextMobPos, nextMobType)) {
+        while(m_level->popSpawnPosition(nextMobPos, nextMobType)) {
             if(nextMobType < 160) {
                 auto mob = std::make_shared<ExplosiveMob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
                                                           nextMobPos);
                 mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
-
+                mob->getHPBar().lock()->asleep = true;
                 map->moveEntity(mob, nextMobPos);
                 spawnCharacter(mob->asCharacter(), ~0u);
             } else {
                 auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
                                                      nextMobPos);
                 mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
-
                 spawnCharacter(mob->asCharacter(), ~0u);
 
             }
@@ -233,13 +233,34 @@ namespace padi::content {
             m_activeChar = m_characters.at(m_turnQueue.front());
             m_turnQueue.pop();
 
+            if (!m_activeChar->awake) {
+                auto activeEntity = m_activeChar->entity;
+                if (activeEntity) {
+                    auto pos = activeEntity->getPosition();
+                    for (int i = 0; i < m_lobby.size; ++i) {
+                        auto player = m_characters[i]->entity;
+                        if (player) {
+                            auto delta = player->getPosition() - pos;
+                            if (std::abs(delta.x) + std::abs(delta.y) < m_activeChar->wakeupRange) {
+                                m_activeChar->awake = true;
+                                if (activeEntity->hasHPBar()) {
+                                    activeEntity->getHPBar().lock()->asleep = false;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!m_activeChar->awake) {
+                    m_activeChar.reset();
+                    return;
+                }
+            }
             if (m_activeChar->entity) {
                 m_level->centerView(m_activeChar->entity->getPosition());
                 m_level->moveCursor(m_activeChar->entity->getPosition());
-
                 // Dead characters don't get to take their turns :c
-                if(m_activeChar->entity->hasHPBar()) {
-                    if(m_activeChar->entity->getHPBar().lock()->getHP() == 0) {
+                if (m_activeChar->entity->hasHPBar()) {
+                    if (m_activeChar->entity->getHPBar().lock()->getHP() == 0) {
                         m_activeChar.reset();
                         return;
                     }
@@ -345,7 +366,8 @@ namespace padi::content {
                         c.entity,
                         c.abilities,
                         c.controller,
-                        c.alive
+                        c.alive,
+                        c.awake
                 });
 
         if(owner < m_lobby.size - 1) {
@@ -424,6 +446,7 @@ namespace padi::content {
 
     void HostGame::signalLevelAdvance() {
         m_levelComplete = true;
+        m_seed = (m_seed * 456123) % 4574567;
     }
 
 }

@@ -294,7 +294,7 @@ namespace padi {
                         }
                         if (!spawn && adjustedHeight > 0.4 && tile->m_walkable) {
                             spawn = true;
-                            level->m_mobSpawns.emplace(cellAnchor + v, uint8_t(m_rand() % UINT8_MAX));
+                            level->m_spawnPoints.emplace(cellAnchor + v, uint8_t(m_rand() % UINT8_MAX));
                         }
                     }
                 }

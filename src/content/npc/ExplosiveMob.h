@@ -38,6 +38,7 @@ namespace padi::content {
         ExplosiveMob(std::string name, padi::AnimationSet const *moveset, const sf::Vector2i &pos);
         bool takeTurn(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 
+
         Character asCharacter();
 
     private:

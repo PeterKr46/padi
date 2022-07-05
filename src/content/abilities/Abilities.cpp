@@ -298,6 +298,7 @@ namespace padi {
         LimitedRangeAbility::castCancel(level);
         level.lock()->hideCursor();
         m_complete = true;
+        m_path.clear();
     }
 
     content::Walk::Walk(std::shared_ptr<padi::LivingEntity> user, size_t range, Walkable w)
@@ -458,6 +459,7 @@ namespace padi {
         LimitedRangeAbility::castCancel(lvl);
         m_complete = true;
         lvl.lock()->getCursor()->unlock();
+        m_direction = sf::Vector2i {0,0};
     }
 
     void content::Dash::recalculateRange(const std::weak_ptr<Level> &l) {
@@ -509,6 +511,7 @@ namespace padi {
 
     void content::Peep::castCancel(const std::weak_ptr<Level> &level) {
         level.lock()->hideCursor();
+        level.lock()->getMap()->removeEntity(m_infoEntity);
     }
 
     void content::Peep::castIndicator(const std::weak_ptr<Level> &lvl) {
@@ -542,13 +545,6 @@ namespace padi {
         map->removeEntity(m_infoEntity);
 
         std::vector<std::shared_ptr<padi::Entity>> entities;
-        if (level->getMap()->getEntities(pos, entities)) {
-            for (auto &entity: entities) {
-                if (entity->getType() & 5 /* TODO different type... */) {
-                    return true;
-                }
-            }
-        }
         return false;
     }
 
@@ -620,6 +616,7 @@ namespace padi {
 
     bool content::Raze::onFrameEnd(const std::weak_ptr<padi::Level> &l, uint8_t frame) {
         m_razePos->lerpColor(m_user->getColor(), 0.6);
+        auto map = l.lock()->getMap();
         if(frame >= 3 && frame <= 8) {
             float height = -std::sin(float(frame - 3) * 3.141f / 5.f) * 4;
             m_razePos->setVerticalOffset(-height);
@@ -631,6 +628,13 @@ namespace padi {
             m_razePos->m_walkable = true;
             m_razePos->setDecoration(nullptr);
             m_razePos->setColor(m_user->getColor());
+            for(auto & adj : m_adjacent) {
+                auto livingEntity = std::static_pointer_cast<LivingEntity>(map->getEntity(adj->getPosition(), EntityType::LIVING));
+                if (livingEntity && livingEntity->isLight() != m_user->isLight() && livingEntity->hasHPBar()) {
+                    auto hpbar = livingEntity->getHPBar().lock();
+                    hpbar->setHP(hpbar->getHP() - 1);
+                }
+            }
         }
         if(frame == 11) {
             m_user->setVerticalOffset(0);

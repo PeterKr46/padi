@@ -67,7 +67,10 @@ namespace padi::content {
                          },
                          [=](const std::shared_ptr<OnlineGame> &l, const std::shared_ptr<Character> &c) {
                              return takeTurn(l, c);
-                         }
+                         },
+                         true,
+                         false,
+                         15
         };
 
     }

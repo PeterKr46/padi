@@ -60,6 +60,7 @@ anim 2              32 8   896 648 0 40    3
 anim 3              32 8   896 656 0 40    4
 anim 4              32 8   896 664 0 40    5
 anim 5              32 8   896 672 0 40    6
+anim asleep         32 16  896 880 0 0     1
 
 block event
 anim idle             32 36   416 0   0 36    12
