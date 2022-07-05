@@ -21,9 +21,25 @@ namespace padi {
         if (!m_locked) {
             auto map = level->getMap();
             if (padi::Controls::wasKeyPressed(sf::Keyboard::Left)) {
-                level->moveCursor(getPosition() + padi::Left + padi::Down);
+                static const sf::Vector2i lefts[3] {padi::Left + padi::Down, padi::Left, padi::Down};
+                auto left = 0;
+                if(!map->getTile(getPosition() + lefts[left])) {
+                    left = (left + 1) % 3;
+                }
+                if(!map->getTile(getPosition() + lefts[left])) {
+                    left = (left + 1) % 3;
+                }
+                level->moveCursor(getPosition() + lefts[left]);
             } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Right)) {
-                level->moveCursor(getPosition() + padi::Right + padi::Up);
+                static const sf::Vector2i rights[3] {padi::Right + padi::Up, padi::Right, padi::Up};
+                auto right = 0;
+                if(!map->getTile(getPosition() + rights[right])) {
+                    right = (right + 1) % 3;
+                }
+                if(!map->getTile(getPosition() + rights[right])) {
+                    right = (right + 1) % 3;
+                }
+                level->moveCursor(getPosition() + rights[right]);
             } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Up)) {
                 static const sf::Vector2i ups[2] {padi::Left, padi::Up};
                 auto up = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 0 ? 0 : 1;
