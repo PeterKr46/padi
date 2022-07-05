@@ -72,6 +72,8 @@ namespace padi {
 
         void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
+        bool popMobSpawnPosition(sf::Vector2i &pos, uint8_t &seed);
+
     private:
         sf::View m_view;
         sf::View m_viewTarget;
@@ -99,6 +101,7 @@ namespace padi {
 
         padi::Map m_map;
         std::shared_ptr<padi::Cursor> m_cursor;
+        std::queue<std::pair<sf::Vector2i, uint8_t>> m_mobSpawns;
     };
 
 } // padi

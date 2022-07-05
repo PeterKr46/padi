@@ -29,7 +29,7 @@ namespace padi::content {
 
         bool takeTurn(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 
-        Character asCharacter(uint32_t id);
+        Character asCharacter();
     private:
 
         // Very lazy init

@@ -260,14 +260,16 @@ namespace padi {
         for(auto & cellAnchor : visited) {
             // GENERATE CELL
             sf::Vector2i v;
-            for(v.x = -MAZE_RESOLUTION;       v.x < MAZE_RESOLUTION; v.x++ ) {
+            bool spawn = false;
+            for (v.x = -MAZE_RESOLUTION; v.x < MAZE_RESOLUTION; v.x++) {
                 for (v.y = -MAZE_RESOLUTION; v.y < MAZE_RESOLUTION; v.y++) {
                     bool isNew;
                     float tHeight = weightedHeight(cellAnchor.x + v.x, cellAnchor.y + v.y);
-                    float adjustedHeight = tHeight * std::max(0.f, 1.f - (float(v.x * v.x + v.y * v.y) / (MAZE_RESOLUTION * 2.f)));
+                    float adjustedHeight =
+                            tHeight * std::max(0.f, 1.f - (float(v.x * v.x + v.y * v.y) / (MAZE_RESOLUTION * 2.f)));
                     if (adjustedHeight > 0.2) {
                         auto tile = map->addTileIfNone(cellAnchor + v, &isNew);
-                        if(isNew || adjustedHeight < 0.23) {
+                        if (isNew || adjustedHeight < 0.23) {
                             sf::Color tColor{color(cellAnchor.x + v.x, cellAnchor.y + v.y)};
                             tile->setColor(tColor);
                             auto decor = tile->getDecoration();
@@ -275,7 +277,8 @@ namespace padi {
                                 decor = std::make_shared<TileDecoration>(cellAnchor + v, nullptr);
                                 tile->setDecoration(decor);
                             }
-                            float mountainHeight = (1 - adjustedHeight);// * std::max(0.f, 0.8f - float(v.x * v.x + v.y * v.y) / (MAZE_RESOLUTION * 2.f));
+                            float mountainHeight = (1 - adjustedHeight);
+                            // * std::max(0.f, 0.8f - float(v.x * v.x + v.y * v.y) / (MAZE_RESOLUTION * 2.f));
                             auto mountain = mountainGeneration(cellAnchor.x + v.x, cellAnchor.y + v.y, mountainHeight);
                             if (mountain.second[0] != '\0') {
                                 decor->m_animation = apollo->lookupAnim(mountain.second);
@@ -288,6 +291,10 @@ namespace padi {
                                     decor->m_animation = apollo->lookupAnim("pillars");
                                 }
                             }
+                        }
+                        if (!spawn && adjustedHeight > 0.4 && tile->m_walkable) {
+                            spawn = true;
+                            level->m_mobSpawns.emplace(cellAnchor + v, uint8_t(m_rand() % UINT8_MAX));
                         }
                     }
                 }

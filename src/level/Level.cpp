@@ -238,4 +238,14 @@ namespace padi {
         return m_paused;
     }
 
+    bool Level::popMobSpawnPosition(sf::Vector2i &pos, uint8_t& seed) {
+        if(!m_mobSpawns.empty()) {
+            pos = m_mobSpawns.front().first;
+            seed = m_mobSpawns.front().second;
+            m_mobSpawns.pop();
+            return true;
+        }
+        return false;
+    }
+
 } // padi

@@ -19,16 +19,25 @@ namespace padi {
 
     void padi::Cursor::update(padi::Level *level) {
         if (!m_locked) {
+            auto map = level->getMap();
             if (padi::Controls::wasKeyPressed(sf::Keyboard::Left)) {
                 level->moveCursor(getPosition() + padi::Left + padi::Down);
             } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Right)) {
                 level->moveCursor(getPosition() + padi::Right + padi::Up);
             } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Up)) {
-                auto up = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 0 ? padi::Left : padi::Up;
-                level->moveCursor(getPosition() + up);
+                static const sf::Vector2i ups[2] {padi::Left, padi::Up};
+                auto up = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 0 ? 0 : 1;
+                if(!map->getTile(getPosition() + ups[up])) {
+                    up = (up + 1) % 2;
+                }
+                level->moveCursor(getPosition() + ups[up]);
             } else if (padi::Controls::wasKeyPressed(sf::Keyboard::Down)) {
-                auto down = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 1 ? padi::Right : padi::Down;
-                level->moveCursor(getPosition() + down);
+                static const sf::Vector2i downs[2] {padi::Right, padi::Down};
+                auto down = (abs(getPosition().x) + abs(getPosition().y)) % 2 == 0 ? 0 : 1;
+                if(!map->getTile(getPosition() + downs[down])) {
+                    down = (down + 1) % 2;
+                }
+                level->moveCursor(getPosition() + downs[down]);
             }
             if (padi::Controls::wasAnyKeyPressed<sf::Keyboard::Key *>(&arrows[0], &arrows[4])) {
                 m_color = sf::Color::Yellow;

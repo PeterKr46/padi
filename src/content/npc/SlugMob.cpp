@@ -59,8 +59,8 @@ namespace padi::content {
         }
     }
 
-    Character SlugMob::asCharacter(uint32_t id) {
-        return Character{id,
+    Character SlugMob::asCharacter() {
+        return Character{0,
                          shared_from_this(),
                          {
                                  std::make_shared<SlugWalk>(shared_from_this(), 2, Walk::Walkable{-600}),

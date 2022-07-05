@@ -92,31 +92,25 @@ namespace padi::content {
             auto cr = mob->asCharacter();
             m_turnQueue.push(spawnCharacter(cr, ~0u));
         }
-        /*for (int i = 0; i < m_lobby.size * 2; ++i) {
-            auto refPos = m_characters[i % m_lobby.size]->entity->getPosition();
-            std::shared_ptr<Tile> target = nullptr;
-            while(!target) {
-                target = m_level->getMap()->getTile(refPos + AllDirections[m_rand() % 4] + AllDirections[m_rand() % 4] +AllDirections[m_rand() % 4] + AllDirections[m_rand() % 4]);
-                if(target && (!target->m_walkable || m_level->getMap()->hasEntities(target->getPosition(), LIVING))) {
-                    target.reset();
-                }
+        sf::Vector2i nextMobPos;
+        uint8_t nextMobType;
+        while(m_level->popMobSpawnPosition(nextMobPos, nextMobType)) {
+            if(nextMobType < 160) {
+                auto mob = std::make_shared<ExplosiveMob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
+                                                          nextMobPos);
+                mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+
+                map->moveEntity(mob, nextMobPos);
+                spawnCharacter(mob->asCharacter(), ~0u);
+            } else {
+                auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
+                                                     nextMobPos);
+                mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+
+                spawnCharacter(mob->asCharacter(), ~0u);
+
             }
-            auto mob = std::make_shared<ExplosiveMob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
-                                                      target->getPosition());
-            mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
-
-            map->moveEntity(mob, target->getPosition());
-            auto cr = mob->asCharacter();
-            spawnCharacter(cr, ~0u);
         }
-        {
-            auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
-                                                 sf::Vector2i{2, 2});
-            mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
-
-            auto cr = mob->asCharacter(0);
-            spawnCharacter(cr, ~0u);
-        }*/
         for(auto & [id, chr] : m_characters) {
             if(chr->entity) map->removeEntity(chr->entity);
         }

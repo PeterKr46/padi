@@ -586,7 +586,7 @@ namespace padi {
             m_razePos = tile;
             for(auto const& dir : AllDirections) {
                 tile = map->getTile(pos + dir);
-                if (tile) {
+                if (tile && !map->hasEntities(pos+dir, BEACON)) {
                     m_adjacent.push_back(tile);
                 }
             }
@@ -610,7 +610,8 @@ namespace padi {
     content::Raze::Raze(std::shared_ptr<padi::LivingEntity> user)
             : LimitedRangeAbility(std::move(user), 1) {
         m_iconId = "raze";
-        m_description = "Blink to an adjacent Tile, destroying any obstacle.";
+        m_description = "Destroy a nearby obstacle,\n"
+                        "then take its place.";
     }
 
     uint32_t content::Raze::getAbilityType() const {
