@@ -73,6 +73,7 @@ namespace padi::content {
                         std::make_shared<Walk>(playerCharacter.entity, 5),
                         std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100}),
                         std::make_shared<Lighten>(playerCharacter.entity),
+                        std::make_shared<Raze>(playerCharacter.entity),
                 };
             }
             spawnCharacter(playerCharacter, id);
@@ -91,7 +92,7 @@ namespace padi::content {
             auto cr = mob->asCharacter();
             m_turnQueue.push(spawnCharacter(cr, ~0u));
         }
-        for (int i = 0; i < m_lobby.size * 2; ++i) {
+        /*for (int i = 0; i < m_lobby.size * 2; ++i) {
             auto refPos = m_characters[i % m_lobby.size]->entity->getPosition();
             std::shared_ptr<Tile> target = nullptr;
             while(!target) {
@@ -115,7 +116,7 @@ namespace padi::content {
 
             auto cr = mob->asCharacter(0);
             spawnCharacter(cr, ~0u);
-        }
+        }*/
         for(auto & [id, chr] : m_characters) {
             if(chr->entity) map->removeEntity(chr->entity);
         }

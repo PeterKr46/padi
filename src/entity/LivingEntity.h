@@ -66,7 +66,7 @@ namespace padi {
 
         void switchApollo(const Apollo* apollo);
         padi::AnimationSet const* getAnimationSet() const;
-        void trySetAnimation(std::string const& anim);
+        bool trySetAnimation(std::string const& anim);
 
         bool onCycleBegin(std::weak_ptr<padi::Level> const &lvl) override;
         bool onCycleEnd(std::weak_ptr<padi::Level> const &lvl) override;

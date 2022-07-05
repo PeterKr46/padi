@@ -74,6 +74,7 @@ anim move_y_to      32 32   48 8    0 48    12
 anim idle           32 32   0  568  0 32    12
 anim spawn          32 32   32 568  0 32    12
 anim spawn_ray      32 32   64 568  0 32    12
+anim raze           32 32   592 0   0 32    12
 
 block gate
 anim idle           32 32   960 0   0 32    12

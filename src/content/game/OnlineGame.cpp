@@ -34,8 +34,8 @@ namespace padi::content {
         m_level->populateVBO();
         m_crt.asTarget()->clear();
         auto states = sf::RenderStates::Default;
-        states.transform.scale(255.f / m_crt.asTarget()->getView().getSize().y * 0.5,
-                               255.f / m_crt.asTarget()->getView().getSize().y * 0.5
+        states.transform.scale(255.f / m_crt.asTarget()->getView().getSize().y,
+                               255.f / m_crt.asTarget()->getView().getSize().y
                                );
         m_crt.asTarget()->draw(*m_level, states);
         m_uiContext.nextFrame();

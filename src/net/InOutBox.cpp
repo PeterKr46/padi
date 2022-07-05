@@ -29,7 +29,7 @@ namespace padi::content {
                 if(type == PayloadType::CharacterAbilityCast) {
                     printf("Received a cast!\n");
                 } else if(type == PayloadType::CharacterTurnBegin) {
-                    printf("Received nex turn!\n");
+                    printf("Received next turn!\n");
                 }
                 auto &queue = (*m_inbox)[data[0]];
                 queue.emplace(data, data + incoming.getDataSize());

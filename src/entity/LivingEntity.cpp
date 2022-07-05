@@ -160,8 +160,12 @@ sf::Vector2i padi::LivingEntity::currentMoveDirection() const {
     return m_slaves.front()->getPosition() - getPosition();
 }
 
-void padi::LivingEntity::trySetAnimation(std::string const &anim) {
-    m_animation = m_apolloCtx->at(anim);
+bool padi::LivingEntity::trySetAnimation(std::string const &anim) {
+    if(m_apolloCtx->has(anim)) {
+        m_animation = m_apolloCtx->at(anim);
+        return true;
+    }
+    return false;
 }
 
 padi::AnimationSet const *padi::LivingEntity::getAnimationSet() const {

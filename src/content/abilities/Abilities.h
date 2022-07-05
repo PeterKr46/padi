@@ -27,18 +27,25 @@ namespace padi::content {
             Darken,
             SelfDestruct,
             SlugWalk,
-            GateUnlock
+            GateUnlock,
+            Raze
         };
     }
 
     class Peep : public padi::Ability {
     public:
         explicit Peep(std::shared_ptr<LivingEntity> user);
+
         bool isCastComplete() override;
+
         void castCancel(const std::weak_ptr<Level> &level) override;
+
         void castIndicator(const std::weak_ptr<Level> &level) override;
+
         bool cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) override;
+
         [[nodiscard]] uint32_t getAbilityType() const override;
+
     private:
         std::shared_ptr<StaticEntity> m_infoEntity;
     };
@@ -115,7 +122,8 @@ namespace padi::content {
     public:
         struct Walkable {
             int16_t cutOff;
-            bool operator()(const Map* map, std::shared_ptr<Tile> const& t);
+
+            bool operator()(const Map *map, std::shared_ptr<Tile> const &t);
         };
 
         Walk(std::shared_ptr<padi::LivingEntity> user, size_t range, Walkable walkable = Walkable{100});
@@ -176,6 +184,27 @@ namespace padi::content {
         bool m_complete{true};
         sf::Vector2i m_direction{0, 0};
         Walk::Walkable m_walkable;
+    };
+
+    class Raze : public padi::LimitedRangeAbility, public CycleListener, public std::enable_shared_from_this<Raze> {
+    public:
+        explicit Raze(std::shared_ptr<padi::LivingEntity> user);
+
+        bool cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) override;
+
+        void castIndicator(const std::weak_ptr<Level> &level) override;
+
+        uint32_t getAbilityType() const override;
+
+        bool onFrameEnd(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) override;
+
+        bool isCastComplete() override;
+
+        void recalculateRange(const std::weak_ptr<Level> &level) override;
+
+    private:
+        std::shared_ptr<Tile> m_razePos;
+        std::vector<std::shared_ptr<Tile>> m_adjacent;
     };
 
 }

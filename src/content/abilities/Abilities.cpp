@@ -564,14 +564,102 @@ namespace padi {
         return AbilityType::Peep;
     }
 
-    bool content::Walk::Walkable::operator()(const Map* map, const std::shared_ptr<Tile> &t) {
+    bool content::Walk::Walkable::operator()(const Map *map, const std::shared_ptr<Tile> &t) {
         if (t && t->m_walkable && !map->hasEntities(t->getPosition(), LIVING)) {
             auto col = t->getColor();
-            if(cutOff < 0) {
+            if (cutOff < 0) {
                 return col.r + col.g + col.b < -cutOff;
             }
             return col.r + col.g + col.b > cutOff;
         }
         return false;
+    }
+
+    bool content::Raze::cast(const std::weak_ptr<Level> &l, const sf::Vector2i &pos) {
+        if (LimitedRangeAbility::cast(l, pos)) {
+            auto lvl = l.lock();
+            auto map = lvl->getMap();
+            auto tile = map->getTile(pos);
+            if (!tile || tile->m_walkable) {
+                return false;
+            }
+            m_razePos = tile;
+            for(auto const& dir : AllDirections) {
+                tile = map->getTile(pos + dir);
+                if (tile) {
+                    m_adjacent.push_back(tile);
+                }
+            }
+            if(m_user->trySetAnimation("raze")) {
+                map->moveEntity(m_user, pos);
+                m_user->setVerticalOffset(-12);
+                // TODO
+                /*
+                 * - Add to Sprite Atlas
+                 * - confirm vfx
+                 * - set icon
+                 * - maybe sound?
+                 */
+                lvl->addFrameEndListener(shared_from_this());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    content::Raze::Raze(std::shared_ptr<padi::LivingEntity> user)
+            : LimitedRangeAbility(std::move(user), 1) {
+        m_iconId = "raze";
+        m_description = "Blink to an adjacent Tile, destroying any obstacle.";
+    }
+
+    uint32_t content::Raze::getAbilityType() const {
+        return AbilityType::Raze;
+    }
+
+    bool content::Raze::onFrameEnd(const std::weak_ptr<padi::Level> &l, uint8_t frame) {
+        m_razePos->lerpColor(m_user->getColor(), 0.6);
+        if(frame >= 3 && frame <= 8) {
+            float height = -std::sin(float(frame - 3) * 3.141f / 5.f) * 4;
+            m_razePos->setVerticalOffset(-height);
+            for(auto & adj : m_adjacent) {
+                adj->setVerticalOffset(height);
+            }
+        }
+        if (frame == 5) {
+            m_razePos->m_walkable = true;
+            m_razePos->setDecoration(nullptr);
+            m_razePos->setColor(m_user->getColor());
+        }
+        if(frame == 11) {
+            m_user->setVerticalOffset(0);
+            m_razePos.reset();
+            m_adjacent.clear();
+        }
+        return frame != 11;
+    }
+
+    bool content::Raze::isCastComplete() {
+        return !m_razePos;
+    }
+
+    void content::Raze::castIndicator(const std::weak_ptr<Level> &level) {
+        level.lock()->showCursor();
+        LimitedRangeAbility::castIndicator(level);
+    }
+
+    void content::Raze::recalculateRange(const std::weak_ptr<Level> &l) {
+        auto level = l.lock();
+        auto map = level->getMap();
+        LimitedRangeAbility::recalculateRange(l);
+        auto iter = m_inRange.begin();
+        while (iter != m_inRange.end()) {
+            auto tile = map->getTile(*iter);
+            if(!tile || tile->m_walkable) {
+                iter = m_inRange.erase(iter);
+            } else {
+                ++iter;
+            }
+        }
     }
 }
