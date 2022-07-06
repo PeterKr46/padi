@@ -71,6 +71,8 @@ namespace padi::content {
 
         void spawnEvent(sf::Vector2i const& pos, EventSpawnPayload const& payload);
 
+        void despawnEvent(sf::Vector2i const& pos);
+
     protected:
         padi::content::CRTMonitor m_crt;
 

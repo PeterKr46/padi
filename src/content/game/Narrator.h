@@ -69,13 +69,9 @@ namespace padi::content {
     public:
         virtual bool operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 
+        void queue(NarratorEvent const& event);
 
         float speed = 2.0f;
-
-    protected:
-        static void displayText(std::string const &txt, UIContext *ctx, bool center = true);
-
-        void clear(UIContext *ui);
 
         void queueText(const char* msg, bool center = true);
         void queueFrame(sf::FloatRect const& rect);
@@ -83,6 +79,11 @@ namespace padi::content {
         void queueSprite(const char* id, sf::Vector2f const& center);
         void queueConfirm();
         void queueSleep(float duration);
+
+    protected:
+        static void displayText(std::string const &txt, UIContext *ctx, bool center = true);
+
+        void clear(UIContext *ui);
 
         std::vector<NarratorEvent> m_active;
         std::queue<NarratorEvent> m_promptQueue;

@@ -146,6 +146,18 @@ namespace padi::content {
             host.fetch(payload);
             spawnEvent(payload.pos, payload);
         }
+        while(host.has(PayloadType::EventDespawn)) {
+            EventDespawnPayload payload;
+            host.fetch(payload);
+            despawnEvent(payload.pos);
+        }
+        while(host.has(PayloadType::Narration)) {
+            NarratorPayload payload;
+            host.fetch(payload);
+            if(m_narrator) {
+                m_narrator->queue(payload.event);
+            }
+        }
         takeTurn();
     }
 

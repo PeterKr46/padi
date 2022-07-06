@@ -69,12 +69,11 @@ namespace padi::content {
                 playerColor = sf::Color(hsv(int(hash_c_string(m_lobby.names[id].c_str(), m_lobby.names[id].length())), 1.f, 1.f));
                 playerCharacter.entity->setColor(playerColor);
                 playerCharacter.entity->initHPBar(2, apollo->lookupAnimContext("hp_bars"));
+
                 playerCharacter.abilities = {
                         std::make_shared<Peep>(playerCharacter.entity),
-                        std::make_shared<Walk>(playerCharacter.entity, 5),
+                        std::make_shared<Walk>(playerCharacter.entity, 6),
                         std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100}),
-                        std::make_shared<Lighten>(playerCharacter.entity),
-                        std::make_shared<Raze>(playerCharacter.entity),
                 };
             }
             spawnCharacter(playerCharacter, id);
@@ -465,7 +464,7 @@ namespace padi::content {
     void HostGame::spawnDropEvent(const sf::Vector2i &pos) {
         EventSpawnPayload payload;
         payload.pos = pos;
-        payload.abilityType = m_rand() % AbilityType::NUM_ABILITIES;
+        payload.abilityType = m_rand() % 6;
         auto packet = PackagePayload(payload);
         broadcast(packet);
         spawnEvent(pos, payload);
@@ -477,6 +476,51 @@ namespace padi::content {
             auto event = m_events.find(pos);
             if (event != m_events.end()) {
                 printf("%s is interacting with an event at %i, %i.\n", m_lobby.names[m_activeChar->id].c_str(), pos.x, pos.y);
+                auto & data = event->second.second;
+                {
+                    CharacterAbilityAssignPayload payload;
+                    std::memcpy(payload.abilityProps, data.abilityProps, sizeof(payload.abilityProps));
+                    payload.abilityType = data.abilityType;
+                    payload.cid = m_activeChar->id;
+                    payload.abilitySlot = 4;
+                    assignPlayerAbility(payload);
+                }
+                {
+                    EventDespawnPayload payload;
+                    payload.pos = pos;
+                    auto packet = PackagePayload(payload);
+                    broadcast(packet);
+                    despawnEvent(pos);
+                }
+                {
+                    if(m_activeChar->id < m_lobby.size - 1) {
+                        auto outbox = m_lobby.remotes[m_activeChar->id];
+                        sf::Packet packet;
+
+                        NarratorPayload payload{};
+
+                        const char* msg = "You found a new ability!";
+                        payload.event.type = NarratorEvent::ShowText;
+                        payload.event.data.showText.center = true;
+                        strncpy_s(payload.event.data.showText.text, msg, std::min(strlen(msg), sizeof(payload.event.data.showText.text) / sizeof(char) - 1));
+
+                        packet = PackagePayload(payload);
+                        outbox.send(packet);
+
+                        payload.event.type = NarratorEvent::ShowSprite;
+                        payload.event.data.showSprite.pos = {224,128};
+                        auto id = m_activeChar->abilities[4]->getIconId().c_str();
+                        strncpy_s(payload.event.data.showSprite.id, id, std::min(strlen(id), sizeof(payload.event.data.showSprite.id) / sizeof(char) - 1));
+
+                        payload.event.type = NarratorEvent::Confirm;
+                        packet = PackagePayload(payload);
+                        outbox.send(packet);
+                    } else {
+                        m_narrator->queueText("You found a new ability!");
+                        m_narrator->queueSprite(m_activeChar->abilities[4]->getIconId().c_str(), {224,128});
+                        m_narrator->queueConfirm();
+                    }
+                }
             }
         }
     }

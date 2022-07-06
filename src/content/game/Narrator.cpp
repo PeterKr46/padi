@@ -120,6 +120,10 @@ namespace padi::content {
         return false;
     }
 
+    void Narrator::queue(const NarratorEvent &event) {
+        m_promptQueue.emplace(event);
+    }
+
     Tutorial::Tutorial() {
         // Event 1
         queueText("Welcome to the Tutorial!");

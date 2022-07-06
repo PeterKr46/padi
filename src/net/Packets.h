@@ -10,6 +10,7 @@
 #include <SFML/Network.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include "../entity/LivingEntity.h"
+#include "../content/game/Narrator.h"
 
 namespace padi::content {
 
@@ -47,6 +48,7 @@ namespace padi::content {
         EventDespawn,
         AskPlayer,
         PlayerResponse,
+        Narration
     };
 
     struct alignas(64) ChatMessagePayload {
@@ -157,6 +159,11 @@ namespace padi::content {
     struct alignas(64) EventDespawnPayload {
         const PayloadType type = EventDespawn;
         sf::Vector2i    pos;
+    };
+
+    struct alignas(64) NarratorPayload {
+        const PayloadType type = Narration;
+        NarratorEvent event{};
     };
 
     struct alignas(64) AskPlayerPayload {
