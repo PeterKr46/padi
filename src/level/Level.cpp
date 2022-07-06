@@ -242,7 +242,7 @@ namespace padi {
         if(!m_spawnPoints.empty()) {
             pos = m_spawnPoints.front().first;
             seed = m_spawnPoints.front().second;
-            m_spawnPoints.pop();
+            m_spawnPoints.pop_front();
             return true;
         }
         return false;

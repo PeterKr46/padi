@@ -279,7 +279,7 @@ size_t padi::HPBar::populate(sf::VertexArray &array, size_t vertexOffset, float 
     std::shared_ptr<Animation> status;
     size_t frame;
     float vo = verticalOffset;
-    if(asleep) {
+    if(asleep && m_HP > 0) {
         status = m_apolloCtx->at("asleep");
         frame = 0;
         vo += 16;

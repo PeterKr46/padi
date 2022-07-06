@@ -70,7 +70,7 @@ namespace padi::content {
                          },
                          true,
                          false,
-                         15
+                         9
         };
 
     }

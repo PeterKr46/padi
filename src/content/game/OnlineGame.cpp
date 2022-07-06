@@ -34,6 +34,12 @@ namespace padi::content {
         m_level->populateVBO();
         m_crt.asTarget()->clear();
         auto states = sf::RenderStates::Default;
+
+        if(padi::Controls::isKeyDown(sf::Keyboard::Tab)) {
+            states.transform.scale(2/12.f, 2/12.f);
+            m_crt.asTarget()->setView(sf::View({0,0},{453,255}));
+        }
+
         states.transform.scale(255.f / m_crt.asTarget()->getView().getSize().y,
                                255.f / m_crt.asTarget()->getView().getSize().y
                                );
@@ -144,12 +150,13 @@ namespace padi::content {
     }
 
     void OnlineGame::synchronize(std::string const &ownName) {
+        m_stage++;
         synchronizeLobby(ownName);
         synchronizeSeed();
         // This glorious copy prevents Apollo from going out of scope
         auto tmpCopy = m_level;
 
-        m_level = LevelGenerator().withSeed(m_seed).withArea({32, 32})
+        m_level = LevelGenerator().withSeed(m_seed).withArea({int(std::log10(m_stage * 10)) * 24, int(std::log10(m_stage * 10)) * 24})
                 .withSpritesheet("../media/level_sheet.png")    // TODO
                 .withApollo("../media/level.apollo")            // TODO
                 .generateLevel();

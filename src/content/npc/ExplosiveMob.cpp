@@ -50,7 +50,9 @@ namespace padi::content {
                                                                          chr->entity->getAnimationSet(),
                                                                          tile->getPosition());
                             child1->initHPBar(chr->entity->getHPBar());
-                            host->spawnCharacter(child1->asCharacter(), ~0u);
+                            auto chr = child1->asCharacter();
+                            chr.awake = true;
+                            host->spawnCharacter(chr, ~0u);
                             placed++;
                         }
                     }

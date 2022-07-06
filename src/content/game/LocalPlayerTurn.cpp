@@ -107,6 +107,14 @@ namespace padi::content {
                                                 0,
                                                 m_uiContext->getApollo()->lookupAnim("scalable_window"),
                                                 sf::Color(168, 168, 168, 255));
+                if(numAbilities > 3) {
+                    padi::Immediate::ScalableSprite(m_uiContext,
+                                                    sf::FloatRect{bounds.left - 4,
+                                                                  bounds.top - 4 + float(3 * 40), 40, 40},
+                                                    0,
+                                                    m_uiContext->getApollo()->lookupAnim("scalable_window"),
+                                                    sf::Color(emphColor.r, emphColor.g, emphColor.b, 86));
+                }
                 for (size_t i = 0; i < numAbilities; ++i) {
                     auto &ability = character->abilities[i];
                     padi::Immediate::Sprite(m_uiContext, sf::FloatRect{bounds.left, bounds.top + 40.f * i, 32, 32}, 0,
@@ -142,7 +150,7 @@ namespace padi::content {
                     CharacterCastPayload payload;
                     payload.ability = uint8_t(m_activeAbility);
                     payload.pos = level->getCursorLocation();
-                    printf("[LocalPlayerTurn] Casting %lld at (%i, %i)\n", m_activeAbility, payload.pos.x,
+                    printf("[LocalPlayerTurn] Casting %lld (%i) at (%i, %i)\n", m_activeAbility, character->abilities[m_activeAbility]->getAbilityType(), payload.pos.x,
                            payload.pos.y);
                     packet.append(&payload, sizeof(payload));
                     game->broadcast(packet);

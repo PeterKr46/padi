@@ -14,7 +14,6 @@
 #include "../npc/Beacon.h"
 #include "Narrator.h"
 #include "../../level/LevelGenerator.h"
-#include "../../Utils.h"
 
 namespace padi::content {
     void HostGame::synchronizeSeed() {
@@ -74,6 +73,7 @@ namespace padi::content {
                         std::make_shared<Peep>(playerCharacter.entity),
                         std::make_shared<Walk>(playerCharacter.entity, 6),
                         std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100}),
+                        std::make_shared<Lighten>(playerCharacter.entity)
                 };
             }
             spawnCharacter(playerCharacter, id);
@@ -275,13 +275,6 @@ namespace padi::content {
                     }
                 }
             }
-            if (m_activeChar->id < m_lobby.remotes.size()) {
-                auto packet = PackagePayload(ChatMessagePayload(-1, "Your turn."));
-                m_lobby.remotes[m_activeChar->id].send(packet);
-            } else if (m_activeChar->id == m_lobby.remotes.size() ||
-                       (m_activeChar->id == 0 && m_lobby.remotes.empty())) {
-                printChatMessage("Your turn.", true);
-            }
             printf("[OnlineGame|Server] Character %i is starting their turn.\n", m_activeChar->id);
             auto nextTurn = PackagePayload(CharacterTurnBeginPayload(m_activeChar->id));
             broadcast(nextTurn);
@@ -464,7 +457,8 @@ namespace padi::content {
     void HostGame::spawnDropEvent(const sf::Vector2i &pos) {
         EventSpawnPayload payload;
         payload.pos = pos;
-        payload.abilityType = m_rand() % 6;
+        static const uint8_t possibleDrops[]{AbilityType::Raze, AbilityType::Lighten, AbilityType::Teleport};
+        payload.abilityType = possibleDrops[m_rand() % sizeof(possibleDrops)];
         auto packet = PackagePayload(payload);
         broadcast(packet);
         spawnEvent(pos, payload);
@@ -482,8 +476,10 @@ namespace padi::content {
                     std::memcpy(payload.abilityProps, data.abilityProps, sizeof(payload.abilityProps));
                     payload.abilityType = data.abilityType;
                     payload.cid = m_activeChar->id;
-                    payload.abilitySlot = 4;
+                    payload.abilitySlot = 3;
                     assignPlayerAbility(payload);
+                    auto packet = PackagePayload(payload);
+                    broadcast(packet);
                 }
                 {
                     EventDespawnPayload payload;
@@ -509,15 +505,17 @@ namespace padi::content {
 
                         payload.event.type = NarratorEvent::ShowSprite;
                         payload.event.data.showSprite.pos = {224,128};
-                        auto id = m_activeChar->abilities[4]->getIconId().c_str();
-                        strncpy_s(payload.event.data.showSprite.id, id, std::min(strlen(id), sizeof(payload.event.data.showSprite.id) / sizeof(char) - 1));
+                        auto id2 = m_activeChar->abilities[3]->getIconId().c_str();
+                        strncpy_s(payload.event.data.showSprite.id, id2, std::min(strlen(id2), sizeof(payload.event.data.showSprite.id) / sizeof(char) - 1));
+                        packet = PackagePayload(payload);
+                        outbox.send(packet);
 
                         payload.event.type = NarratorEvent::Confirm;
                         packet = PackagePayload(payload);
                         outbox.send(packet);
                     } else {
                         m_narrator->queueText("You found a new ability!");
-                        m_narrator->queueSprite(m_activeChar->abilities[4]->getIconId().c_str(), {224,128});
+                        m_narrator->queueSprite(m_activeChar->abilities[3]->getIconId().c_str(), {224,128});
                         m_narrator->queueConfirm();
                     }
                 }

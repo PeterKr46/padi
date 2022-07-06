@@ -288,18 +288,20 @@ namespace padi {
                                 if (structure > 230) {
                                     decor->m_animation = apollo->lookupAnim("pillars");
                                 } else {
-                                    decor->m_animation = apollo->lookupAnim("pillars");
+                                    decor->m_animation = apollo->lookupAnim("houses_a");
                                 }
                             }
                         }
                         if (!spawn && adjustedHeight > 0.4 && tile->m_walkable) {
                             spawn = true;
-                            level->m_spawnPoints.emplace(cellAnchor + v, uint8_t(m_rand() % UINT8_MAX));
+                            level->m_spawnPoints.emplace(level->m_spawnPoints.end(), cellAnchor + v, uint8_t(m_rand() % UINT8_MAX));
                         }
                     }
                 }
             }
         }
+        std::shuffle(level->m_spawnPoints.begin(), level->m_spawnPoints.end(), m_rand);
+        level->addFrameBeginListener(std::make_shared<padi::content::MapShaker>());
         level->centerView({0,0});
         level->initCursor("cursor");
         return level;

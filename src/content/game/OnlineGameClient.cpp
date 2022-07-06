@@ -167,6 +167,9 @@ namespace padi::content {
                 m_activeChar.reset();
             }
         } else {
+            if(!(*m_narrator)(shared_from_this(), nullptr)) {
+                return;
+            }
             auto &host = m_lobby.host;
             if (host.has(CharacterTurnBegin)) {
                 CharacterTurnBeginPayload nextTurn(0);
@@ -196,7 +199,7 @@ namespace padi::content {
     ClientGame::ClientGame(InOutBox &host, const std::string &name)
             : m_lobby({host}){
         synchronize(name);
-        m_narrator = std::make_shared<RemoteNarrator>();
+        m_narrator = std::make_shared<Narrator>();
     }
 
     void ClientGame::broadcast(sf::Packet &packet) {

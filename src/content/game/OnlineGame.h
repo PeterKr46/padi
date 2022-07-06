@@ -85,6 +85,7 @@ namespace padi::content {
         uint32_t m_seed;
         std::mt19937 m_rand;
         std::shared_ptr<Level> m_level;
+        uint8_t m_stage = 0;
 
         std::shared_ptr<Narrator> m_narrator;
 

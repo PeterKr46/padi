@@ -52,7 +52,8 @@ namespace padi::content {
                 level->centerView(payload.pos);
                 ability->castIndicator(level);
                 chr->entity->intentCast(ability, payload.pos);
-                printf("[RemotePlayerTurn] Casting %u at (%i, %i)\n", m_activeAbility, payload.pos.x, payload.pos.y);
+                printf("[RemotePlayerTurn] Casting %hhd (%i) at (%i, %i)\n", m_activeAbility, chr->abilities[m_activeAbility]->getAbilityType(), payload.pos.x,
+                       payload.pos.y);
                 if(m_reflect) {
                     printf("[RemotePlayerTurn] Reflecting to all but %i.\n", m_ignore);
                     auto packet = PackagePayload(payload);

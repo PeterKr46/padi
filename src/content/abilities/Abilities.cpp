@@ -81,6 +81,7 @@ namespace padi {
         m_ghostFX->m_stackSize = 8;
         m_description = "Instantly teleport to a location of your choice.";
         m_iconId = "teleport";
+        numUses = 1;
     }
 
     bool content::Teleport::isCastComplete() {
@@ -116,6 +117,7 @@ namespace padi {
 
     void content::Lighten::castIndicator(const std::weak_ptr<Level> &level) {
         LimitedRangeAbility::castIndicator(level);
+        m_rangeChanged = true;
         level.lock()->showCursor();
     }
 
@@ -255,6 +257,7 @@ namespace padi {
         LimitedRangeAbility::cast(level, pos);
         lvl->hideCursor();
         if (std::find(m_inRange.begin(), m_inRange.end(), pos) == m_inRange.end()) {
+            printf("[Walk] Target not in range.\n");
             return false;
         }
         if (!m_path.empty()) {
@@ -263,6 +266,7 @@ namespace padi {
         }
         m_path = padi::FindPath(lvl->getMap(), m_user->getPosition(), pos, walkable);
         if (m_path.empty()) {
+            printf("[Walk] Failed to find path.\n");
             return false;
         }
         lvl->addCycleEndListener(shared_from_this());

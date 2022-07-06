@@ -95,10 +95,5 @@ namespace padi::content {
         Tutorial();
     };
 
-    class RemoteNarrator : public Narrator {
-    public:
-        bool operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &) override;
-    };
-
 } // content
 

@@ -170,8 +170,4 @@ namespace padi::content {
         queueConfirm();
     }
 
-    bool RemoteNarrator::operator()(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &) {
-        return false;
-    }
-
 } // content
