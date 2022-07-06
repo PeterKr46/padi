@@ -106,16 +106,24 @@ namespace padi::content {
                 .withApollo("../media/level.apollo")
                 .withSeed(6774586)
                 .withArea({20, 20})
-                .generateLevel();
+                .getEmpty();
+        //m_level.ini
+        auto map = m_level->getMap();
+        sf::Vector2i p;
+        for(p.x = 0; p.x < 5; ++p.x) {
+            for(p.y = 0; p.y < 12; ++p.y) {
+                map->addTileIfNone(p);
+            }
+        }
         std::vector<std::shared_ptr<LivingEntity>> cubes = {
                 std::make_shared<padi::LivingEntity>("r", m_level->getApollo()->lookupAnimContext("cube"),
-                                                     sf::Vector2i{-2, -5}),
+                                                     sf::Vector2i{0, 0}),
                 std::make_shared<padi::LivingEntity>("g", m_level->getApollo()->lookupAnimContext("cube"),
-                                                     sf::Vector2i{-5, -2}),
+                                                     sf::Vector2i{2, 0}),
                 std::make_shared<padi::LivingEntity>("b", m_level->getApollo()->lookupAnimContext("cube"),
-                                                     sf::Vector2i{3, 4})
+                                                     sf::Vector2i{4, 0})
         };
-        m_level->addFrameBeginListener(std::make_shared<Disolver>());
+        //m_level->addFrameBeginListener(std::make_shared<Disolver>());
         cubes[0]->setColor(sf::Color::Red);
         cubes[1]->setColor(sf::Color::Green);
         cubes[2]->setColor(sf::Color::Blue);

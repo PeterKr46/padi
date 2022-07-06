@@ -304,4 +304,12 @@ namespace padi {
         level->initCursor("cursor");
         return level;
     }
+
+    std::shared_ptr<Level> LevelGenerator::getEmpty() {
+        auto level = std::make_shared<Level>(m_targetArea, padi::TileSize);
+        level->m_sprites.loadFromFile(m_spritesheetPath);
+        level->m_apollo.loadFromFile(m_apolloPath);
+        level->initCursor("cursor");
+        return level;
+    }
 } // padi

@@ -75,8 +75,8 @@ padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_
     for (int i = 0; i < 4; ++i) pVertex[i].color = m_color;
     size_t used = 4;
     if(m_hp) {
-        auto ent = std::static_pointer_cast<const padi::Entity>(shared_from_this());
-        used += m_hp->populate(array, vertexOffset+used, tileVerticalOffset, ent, getColor());
+        auto ent = shared_from_this();
+        used += m_hp->populate(array, vertexOffset+used, tileVerticalOffset, ent, frame, getColor());
     }
     return used;
 }
@@ -270,7 +270,7 @@ size_t padi::HPBar::quad(sf::Vector2f const& vertexAnchor, sf::Vector2i const& q
     return 4;
 }
 
-size_t padi::HPBar::populate(sf::VertexArray &array, size_t vertexOffset, float verticalOffset, const std::shared_ptr<const Entity> &entity,
+size_t padi::HPBar::populate(sf::VertexArray &array, size_t vertexOffset, float verticalOffset, const std::shared_ptr<const LivingEntity> &entity, uint8_t f,
                              sf::Color color) const {
     if(!m_apolloCtx) {
         return 0;
@@ -278,9 +278,11 @@ size_t padi::HPBar::populate(sf::VertexArray &array, size_t vertexOffset, float 
 
     std::shared_ptr<Animation> status;
     size_t frame;
+    float vo = verticalOffset;
     if(asleep) {
         status = m_apolloCtx->at("asleep");
         frame = 0;
+        vo += 16;
     } else {
         status = m_apolloCtx->at(std::to_string(m_maxHP));
         frame = m_HP;
@@ -291,7 +293,12 @@ size_t padi::HPBar::populate(sf::VertexArray &array, size_t vertexOffset, float 
     }
 
     sf::Vector2f anchor = padi::Map::mapTilePosToWorld(entity->getPosition());
-    return quad(anchor, status->getResolution(), array, (*status)[frame], vertexOffset, verticalOffset, color);
+    if(entity->isMoving()) {
+        auto targetAnchor = padi::Map::mapTilePosToWorld(entity->getPosition() + entity->currentMoveDirection());
+        float progress = float(f)/ CycleLength_F;
+        anchor = progress * targetAnchor + (1 - progress) * anchor;
+    }
+    return quad(anchor, status->getResolution(), array, (*status)[frame], vertexOffset, vo, color);
 }
 
 padi::HPBar::HPBar(padi::AnimationSet const *sprites, int maxHP, sf::Color const &overrideColor)

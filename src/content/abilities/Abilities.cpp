@@ -167,6 +167,7 @@ namespace padi {
     }
 
     void content::Lighten::castCancel(const std::weak_ptr<Level> &level) {
+        LimitedRangeAbility::castCancel(level);
         level.lock()->hideCursor();
         m_complete = true;
     }
@@ -598,13 +599,7 @@ namespace padi {
             if(m_user->trySetAnimation("raze")) {
                 map->moveEntity(m_user, pos);
                 m_user->setVerticalOffset(-12);
-                // TODO
-                /*
-                 * - Add to Sprite Atlas
-                 * - confirm vfx
-                 * - set icon
-                 * - maybe sound?
-                 */
+                // TODO maybe sound?
                 lvl->addFrameEndListener(shared_from_this());
             }
             return true;

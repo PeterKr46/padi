@@ -39,6 +39,7 @@ namespace padi {
         LIVING = CURSOR << 1,
         BEACON = LIVING << 1,
         PLAYER = BEACON << 1,
+        EVENT  = PLAYER << 1,
 
         EXPLOSIVE = PLAYER << 8,
     };

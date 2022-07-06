@@ -20,10 +20,9 @@ namespace padi::content {
     enum TargetMode : int {
         PlayTutorial    = 0,
         PlayAlone       = 1,
-        PlayCoop        = 2,
-        OnlineHost      = 3,
-        OnlineClient    = 4,
-        NUM_MODES       = 5
+        OnlineHost      = 2,
+        OnlineClient    = 3,
+        NUM_MODES       = 4
     };
 
     class MainMenu : public padi::Activity, public std::enable_shared_from_this<Activity> {
@@ -85,8 +84,6 @@ namespace padi::content {
         void drawTutorialUI();
 
         void drawSPUI();
-
-        void drawCoopUI();
 
         void drawHostUI();
 

@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <array>
 #include <SFML/System/Vector2.hpp>
 
 
@@ -18,4 +19,15 @@ namespace padi {
 
     sf::Vector2f round(sf::Vector2f f);
     sf::Vector2i orthAxis(sf::Vector2i const& dir);
+
+
+    struct less {
+        bool operator()(std::pair<size_t, sf::Vector2i> const &left, std::pair<size_t, sf::Vector2i> const &right) const {
+            return left.first > right.first;
+        }
+
+        bool operator()(sf::Vector2i const &left, sf::Vector2i const &right) const {
+            return left.x > right.x || (left.x == right.x && left.y > right.y);
+        }
+    };
 }

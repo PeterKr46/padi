@@ -54,6 +54,17 @@ namespace padi::content {
         target->draw(m_crt);
     }
 
+    void OnlineGame::spawnEvent(sf::Vector2i const& pos, EventSpawnPayload const& payload) {
+        auto entity = std::make_shared<StaticEntity>(payload.pos, EVENT);
+        entity->m_animation = m_level->getApollo()->lookupAnim("q_mark");
+        m_level->getMap()->addEntity(entity);
+        auto & data = m_events[pos];
+        data.first = entity;
+        data.second.pos = pos;
+        data.second.abilityType = payload.abilityType;
+        std::memcpy(data.second.abilityProps, payload.abilityProps, sizeof(payload.abilityProps));
+    }
+
     void OnlineGame::assignPlayerAbility(CharacterAbilityAssignPayload &payload) {
         auto &chr = m_characters.at(payload.cid);
         auto &abilities = chr->abilities;

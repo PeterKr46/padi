@@ -21,7 +21,7 @@ namespace padi::content {
 
         m_uiContext.init(apollo, spritesheet);
         m_chat.init(&m_uiContext);
-        m_chat.submit = [&](std::string const &msg) { sendChatMessage(msg); };
+        m_chat.submit = [&](std::string const &msg) { sendChatMessage(m_uiContext.getTextString("nick_input") + ": " + msg); };
 
         m_crt.setShader(m_uiContext.getApollo()->lookupShader("fpa"));
 
@@ -35,9 +35,9 @@ namespace padi::content {
         m_uiContext.pushTransform().translate(240, 148);
         static const char defaultNames[][9] = {
                 "Tom", "Jerry",
-                "Garfunke", "Simon",
                 "Lucky", "Unlucky",
-                "Cube"
+                "Cube", "Voxel",
+                "Box"
         };
         m_uiContext.setText("nick_label", "Nick", {0, 0});
         m_uiContext.setText("nick_input", defaultNames[rand.getElapsedTime().asMicroseconds() % 8], {32, 0});
@@ -58,8 +58,6 @@ namespace padi::content {
             case PlayAlone:
                 m_uiContext.removeText("seed_input");
                 break;
-            case PlayCoop:
-                break;
             case OnlineHost:
                 m_uiContext.removeText("host_title");
                 m_uiContext.removeText("own_ip");
@@ -78,20 +76,17 @@ namespace padi::content {
         }
         switch (to) {
             case PlayTutorial:
-                m_uiContext.updateTextString("play", "Tutorial");
+                m_uiContext.setText("play", "Tutorial", {64 + 16, 12}, true);
                 m_uiContext.setText("tut_info",
                                             "A short introduction\n"
                                                 " to this wonderful game.", {0,40});
                 break;
             case PlayAlone:
-                m_uiContext.updateTextString("play", "Play Alone");
+                m_uiContext.setText("play", "Play Alone", {64 + 16, 12}, true);
                 m_uiContext.setText("seed_input", "Choose a Seed", {24, 52});
                 break;
-            case PlayCoop:
-                m_uiContext.updateTextString("play", "Local Co-Op");
-                break;
             case OnlineHost:
-                m_uiContext.updateTextString("play", "Host Game");
+                m_uiContext.setText("play", "Host Game", {64 + 16, 12}, true);
 
                 m_uiContext.pushTransform().translate(0, 32);
                 m_uiContext.setText("host_title", "HOST REMOTE PLAY", {88, 8}, true);
@@ -101,7 +96,7 @@ namespace padi::content {
                 m_uiContext.popTransform();
                 break;
             case OnlineClient:
-                m_uiContext.updateTextString("play", "Join Game");
+                m_uiContext.setText("play", "Join Game", {64 + 16, 12}, true);
 
                 m_uiContext.pushTransform().translate(0, 32);
                 m_uiContext.setText("join_title", "JOIN REMOTE PLAY", {88, 8}, true);
@@ -149,9 +144,6 @@ namespace padi::content {
                     break;
                 case PlayAlone:
                     drawSPUI();
-                    break;
-                case PlayCoop:
-                    drawCoopUI();
                     break;
                 case OnlineHost:
                     drawHostUI();
@@ -416,14 +408,6 @@ namespace padi::content {
         }
         if (Immediate::TextInput(&m_uiContext, "seed_input", &t, 16, AlphabeticNumericCharacterSet)) {
             m_uiContext.updateTextString("seed_input", t);
-        }
-    }
-
-    void MainMenu::drawCoopUI() {
-        if (Immediate::Button(&m_uiContext, "play", {16, 0, 128, 32})) {
-            std::vector<InOutBox> nosocks;
-            // TODO
-            m_next = std::make_shared<padi::content::HostGame>(nosocks, m_uiContext.getTextString("nick_input"), 1234);
         }
     }
 

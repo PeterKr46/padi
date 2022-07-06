@@ -141,6 +141,11 @@ namespace padi::content {
             chr->alive = false;
             m_level->getMap()->removeEntity(chr->entity);
         }
+        while (host.has(PayloadType::EventSpawn)) {
+            EventSpawnPayload payload;
+            host.fetch(payload);
+            spawnEvent(payload.pos, payload);
+        }
         takeTurn();
     }
 

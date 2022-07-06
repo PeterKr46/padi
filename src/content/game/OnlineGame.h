@@ -14,6 +14,7 @@
 #include "../../net/InOutBox.h"
 #include "../ui/Chat.h"
 #include "../../entity/OneshotEntity.h"
+#include "../../Utils.h"
 
 namespace padi {
     class Level;
@@ -68,6 +69,8 @@ namespace padi::content {
 
         virtual void sendChatMessage(const std::string &msg) = 0;
 
+        void spawnEvent(sf::Vector2i const& pos, EventSpawnPayload const& payload);
+
     protected:
         padi::content::CRTMonitor m_crt;
 
@@ -87,6 +90,8 @@ namespace padi::content {
         std::shared_ptr<Character> m_activeChar;
 
         std::shared_ptr<padi::Activity> m_next;
+
+        std::map<sf::Vector2i, std::pair<std::shared_ptr<StaticEntity>, EventSpawnPayload>, padi::less> m_events;
     };
 
     class HostGame : public OnlineGame {
@@ -119,6 +124,8 @@ namespace padi::content {
 
         uint32_t spawnCharacter(Character const &c, uint32_t owner = 0);
 
+        void spawnDropEvent(sf::Vector2i const& pos);
+
         void signalLevelAdvance();
     private:
         std::queue<uint32_t> m_turnQueue;
@@ -132,6 +139,8 @@ namespace padi::content {
         void endOfRound();
 
         bool m_levelComplete = false;
+
+        void detectEventInteraction();
     };
 
     class ClientGame : public OnlineGame {

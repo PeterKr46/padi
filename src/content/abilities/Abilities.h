@@ -28,7 +28,8 @@ namespace padi::content {
             SelfDestruct,
             SlugWalk,
             GateUnlock,
-            Raze
+            Raze,
+            NUM_ABILITIES
         };
     }
 

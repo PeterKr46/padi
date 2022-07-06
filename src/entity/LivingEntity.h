@@ -11,6 +11,7 @@ namespace padi {
 
     class Map;
     class Ability;
+    class LivingEntity;
     class StaticEntity;
 
     class HPBar {
@@ -18,7 +19,7 @@ namespace padi {
         explicit HPBar(const std::weak_ptr<HPBar>& copy);
         HPBar(padi::AnimationSet const *sprites, int maxHP, sf::Color const &overrideColor);
 
-        size_t populate(sf::VertexArray &array, size_t vertexOffset, float verticalOffset, const std::shared_ptr<const Entity> &entity,
+        size_t populate(sf::VertexArray &array, size_t vertexOffset, float verticalOffset, const std::shared_ptr<const LivingEntity> &entity, uint8_t frame,
                         sf::Color color = sf::Color::Green) const;
 
         void setHP(int hp, bool expandPool = false);

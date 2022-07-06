@@ -192,6 +192,7 @@ namespace padi::content {
             }
         }
         takeTurn();
+        fflush(stdout);
     }
 
     void HostGame::advanceTurn() {
@@ -199,6 +200,8 @@ namespace padi::content {
             if(m_activeChar->id == m_lobby.size - 1) {
                 sendChatGeneric("The darkness moves.");
             }
+            // TODO this should probably not be right here...
+            detectEventInteraction();
             m_activeChar.reset();
             m_roundCooldown.restart();
         }
@@ -221,9 +224,13 @@ namespace padi::content {
                     chr->alive &= (chr->entity->getHPBar().lock()->getHP() > 0);
                     if (!chr->alive) {
                         m_level->getMap()->removeEntity(chr->entity);
-                        if(chr->id < m_lobby.size) sendChatGeneric(m_lobby.names[chr->id] + " died.");
                         auto packet = PackagePayload(PlayerDespawnPayload(chr->id));
                         broadcast(packet);
+                        if(chr->entity->getType() & EntityType::PLAYER) {
+                            sendChatGeneric(m_lobby.names[chr->id] + " died.");
+                        } else if (m_rand() % 256 > 0 ) {
+                            spawnDropEvent(chr->entity->getPosition());
+                        }
                     }
                 }
                 if (chr->alive) {
@@ -232,7 +239,6 @@ namespace padi::content {
             }
         }
         {
-            printf("[OnlineGame|Server] Character %i is starting their turn.\n", m_turnQueue.front());
             m_activeChar = m_characters.at(m_turnQueue.front());
             m_turnQueue.pop();
 
@@ -277,6 +283,7 @@ namespace padi::content {
                        (m_activeChar->id == 0 && m_lobby.remotes.empty())) {
                 printChatMessage("Your turn.", true);
             }
+            printf("[OnlineGame|Server] Character %i is starting their turn.\n", m_activeChar->id);
             auto nextTurn = PackagePayload(CharacterTurnBeginPayload(m_activeChar->id));
             broadcast(nextTurn);
         }
@@ -453,6 +460,25 @@ namespace padi::content {
     void HostGame::signalLevelAdvance() {
         m_levelComplete = true;
         m_seed = (m_seed * 456123) % 4574567;
+    }
+
+    void HostGame::spawnDropEvent(const sf::Vector2i &pos) {
+        EventSpawnPayload payload;
+        payload.pos = pos;
+        payload.abilityType = m_rand() % AbilityType::NUM_ABILITIES;
+        auto packet = PackagePayload(payload);
+        broadcast(packet);
+        spawnEvent(pos, payload);
+    }
+
+    void HostGame::detectEventInteraction() {
+        if (m_activeChar && m_activeChar->id < m_lobby.size && m_activeChar->alive) {
+            auto pos = m_activeChar->entity->getPosition();
+            auto event = m_events.find(pos);
+            if (event != m_events.end()) {
+                printf("%s is interacting with an event at %i, %i.\n", m_lobby.names[m_activeChar->id].c_str(), pos.x, pos.y);
+            }
+        }
     }
 
 }
