@@ -79,8 +79,9 @@ namespace padi::content {
             }
             spawnCharacter(playerCharacter, id);
         }
+
         {
-            auto mob = std::make_shared<Beacon>(
+            auto beacon = std::make_shared<Beacon>(
                     "gate",
                     m_level->getApollo()->lookupAnimContext("gate"),
                     sf::Vector2i{0, 0}
@@ -89,10 +90,11 @@ namespace padi::content {
             for (int cid = 0; cid < m_lobby.size; cid++) {
                 slain += m_characters.at(cid)->entity->enemiesSlain;
             }
-            mob->m_requiredKills = std::max<unsigned int>(slain, m_lobby.size) * 2;
-            auto cr = mob->asCharacter();
+            beacon->m_requiredKills = std::max<unsigned int>(slain, m_lobby.size) * 2;
+            auto cr = beacon->asCharacter();
             m_turnQueue.push(spawnCharacter(cr, ~0u));
         }
+
         sf::Vector2i nextMobPos;
         uint8_t nextMobType;
         while(m_level->popSpawnPosition(nextMobPos, nextMobType)) {
@@ -100,13 +102,14 @@ namespace padi::content {
                 auto mob = std::make_shared<ExplosiveMob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
                                                           nextMobPos);
                 mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
-                mob->getHPBar().lock()->asleep = true;
+                mob->getHPBar().lock()->asleep = !mob->asCharacter().awake;
                 map->moveEntity(mob, nextMobPos);
                 spawnCharacter(mob->asCharacter(), ~0u);
             } else {
                 auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
                                                      nextMobPos);
                 mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+                mob->getHPBar().lock()->asleep = !mob->asCharacter().awake;
                 spawnCharacter(mob->asCharacter(), ~0u);
 
             }
@@ -246,6 +249,7 @@ namespace padi::content {
                                 if (activeEntity->hasHPBar()) {
                                     activeEntity->getHPBar().lock()->asleep = false;
                                 }
+                                break;
                             }
                         }
                     }
@@ -367,7 +371,8 @@ namespace padi::content {
                         c.abilities,
                         c.controller,
                         c.alive,
-                        c.awake
+                        c.awake,
+                        c.wakeupRange
                 });
 
         if(owner < m_lobby.size - 1) {
@@ -383,6 +388,7 @@ namespace padi::content {
             auto &remote = m_lobby.remotes[i];
             auto payload = CharacterSpawnPayload{PayloadType::CharacterSpawn, cid};
             payload.controller = (i == owner) ? CharacterSpawnPayload::LocalPlayer : CharacterSpawnPayload::RemotePlayer;
+            payload.asleep = !newChar->awake;
             PackagePayload(packet, payload);
             remote.send(packet);
         }

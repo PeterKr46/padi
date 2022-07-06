@@ -50,7 +50,7 @@ namespace padi::content {
         std::shared_ptr<StaticEntity> m_infoEntity;
     };
 
-    class Lighten : public padi::Ability, public padi::CycleListener, public std::enable_shared_from_this<Lighten> {
+    class Lighten : public padi::LimitedRangeAbility, public padi::CycleListener, public std::enable_shared_from_this<Lighten> {
     public:
         explicit Lighten(std::shared_ptr<LivingEntity> user);
 
@@ -67,6 +67,8 @@ namespace padi::content {
         bool isCastComplete() override;
 
         uint32_t getAbilityType() const override;
+    protected:
+        void recalculateRange(const std::weak_ptr<Level> &level) override;
 
     private:
         bool m_complete{true};

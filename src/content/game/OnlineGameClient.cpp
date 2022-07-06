@@ -111,9 +111,14 @@ namespace padi::content {
         while (host.has(PayloadType::InitHP)) {
             InitHPPayload payload;
             host.fetch(payload);
-            m_characters[payload.cid]->entity->initHPBar(payload.maxHP,
-                                                         m_level->getApollo()->lookupAnimContext("hp_bars"),
-                                                         payload.color);
+            auto chr = m_characters[payload.cid];
+            auto entity = chr->entity;
+            entity->initHPBar(payload.maxHP,
+                             m_level->getApollo()->lookupAnimContext("hp_bars"),
+                             payload.color);
+            if(!chr->awake) {
+                entity->getHPBar().lock()->asleep = true;
+            }
         }
         while (host.has(PayloadType::CharacterAbilityAssign)) {
             CharacterAbilityAssignPayload abilityPayload;
@@ -154,6 +159,9 @@ namespace padi::content {
                 if (m_activeChar->entity) {
                     m_level->centerView(m_activeChar->entity->getPosition());
                     m_level->moveCursor(m_activeChar->entity->getPosition());
+                    if(m_activeChar->entity->hasHPBar()) {
+                        m_activeChar->entity->getHPBar().lock()->asleep = false;
+                    }
                 }
             } else if (host.has(PayloadType::NextLevel)) {
                 synchronize(m_lobby.names[m_localChar]); // TODO
@@ -211,6 +219,7 @@ namespace padi::content {
     void ClientGame::spawnNewCharacter(CharacterSpawnPayload payload) {
         auto &newChar = m_characters[payload.cid];
         newChar = std::make_shared<Character>(Character{payload.cid});
+        newChar->awake = !payload.asleep;
         if (payload.controller == CharacterSpawnPayload::LocalPlayer) {
             m_localChar = payload.cid;
             newChar->controller = LocalPlayerTurn(&m_uiContext);

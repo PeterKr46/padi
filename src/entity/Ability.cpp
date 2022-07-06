@@ -50,13 +50,17 @@ namespace padi {
     }
 
     void LimitedRangeAbility::recalculateRange(const std::weak_ptr<Level> &level) {
+        auto map = level.lock()->getMap();
         m_inRange.clear();
         m_inRange.reserve((m_range * 2) * (m_range * 2));
-        sf::Vector2i min = m_user->getPosition();
-        for (int x = min.x - m_range; x <= min.x + m_range; ++x)
-            for (int y = min.y - m_range; y <= min.y + m_range; ++y) {
-                m_inRange.emplace_back(x, y);
+        sf::Vector2i center = m_user->getPosition();
+        for (int x = center.x - m_range; x <= center.x + m_range; ++x) {
+            for (int y = center.y - m_range; y <= center.y + m_range; ++y) {
+                if (map->getTile(x, y)) {
+                    m_inRange.emplace_back(x, y);
+                }
             }
+        }
         m_rangeChanged = false;
     }
 

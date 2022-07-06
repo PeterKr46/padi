@@ -97,21 +97,25 @@ namespace padi {
     }
 
     bool content::Lighten::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
-        auto lvl = level.lock();
-        lvl->hideCursor();
-        strikePos = pos;
-        auto strike = std::make_shared<padi::OneshotEntity>(pos);
-        strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
-        strike->dispatchImmediate(level);
-        auto fire = std::make_shared<padi::OneshotEntity>(strikePos);
-        fire->m_animation = lvl->getApollo()->lookupAnim("fire");
-        fire->dispatchImmediate(level);
-        lvl->addFrameBeginListener(shared_from_this());
-        m_complete = false;
-        return true;
+        if (LimitedRangeAbility::cast(level, pos)) {
+            auto lvl = level.lock();
+            lvl->hideCursor();
+            strikePos = pos;
+            auto strike = std::make_shared<padi::OneshotEntity>(pos);
+            strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
+            strike->dispatchImmediate(level);
+            auto fire = std::make_shared<padi::OneshotEntity>(strikePos);
+            fire->m_animation = lvl->getApollo()->lookupAnim("fire");
+            fire->dispatchImmediate(level);
+            lvl->addFrameBeginListener(shared_from_this());
+            m_complete = false;
+            return true;
+        }
+        return false;
     }
 
     void content::Lighten::castIndicator(const std::weak_ptr<Level> &level) {
+        LimitedRangeAbility::castIndicator(level);
         level.lock()->showCursor();
     }
 
@@ -167,7 +171,7 @@ namespace padi {
         m_complete = true;
     }
 
-    content::Lighten::Lighten(std::shared_ptr<LivingEntity> user) : Ability(std::move(user)) {
+    content::Lighten::Lighten(std::shared_ptr<LivingEntity> user) : LimitedRangeAbility(std::move(user), 8) {
         m_description = "Bless an UNCURSED Tile.\n"
                         " Heals LIGHT, Damages DARK Occupants.";
         m_iconId = "strike";
@@ -180,6 +184,11 @@ namespace padi {
 
     uint32_t content::Lighten::getAbilityType() const {
         return AbilityType::Lighten;
+    }
+
+    void content::Lighten::recalculateRange(const std::weak_ptr<Level> &level) {
+        LimitedRangeAbility::recalculateRange(level);
+
     }
 
     bool content::Darken::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
