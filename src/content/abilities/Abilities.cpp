@@ -675,4 +675,99 @@ namespace padi {
             }
         }
     }
+
+    content::Wildfire::Wildfire(std::shared_ptr<LivingEntity> user, int range)
+        : LimitedRangeAbility(std::move(user), range) {
+        m_description = "Sets multiple tiles ALIGHT in your color.\n"
+                        "Will affect CURSED tiles.";
+        m_iconId = "wildfire";
+        numUses = 1;
+    }
+
+    bool content::Wildfire::cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) {
+        auto level = lvl.lock();
+        if (LimitedRangeAbility::cast(lvl, pos)) {
+            auto map = level->getMap();
+            for (auto &n: AllDirections) {
+                auto tile = map->getTile(pos + n);
+                if (tile && !map->hasEntities(pos + n, EntityType::BEACON)) {
+                    auto fire = std::make_shared<OneshotEntity>(pos + n);
+                    fire->m_animation = level->getApollo()->lookupAnim("air_strike");
+                    fire->m_color = m_user->getColor();
+                    fire->dispatchImmediate(level);
+                }
+            }
+            auto airstrike = std::make_shared<OneshotEntity>(pos);
+            airstrike->m_animation = level->getApollo()->lookupAnim("air_strike_large");
+            airstrike->m_color = m_user->getColor();
+            airstrike->dispatchImmediate(level);
+
+            level->addFrameBeginListener(shared_from_this());
+            m_strikePos = pos;
+            m_complete = false;
+            m_cycles = 0;
+            return true;
+        }
+        return false;
+    }
+
+    void content::Wildfire::castCancel(const std::weak_ptr<Level> &level) {
+        LimitedRangeAbility::castCancel(level);
+        level.lock()->hideCursor();
+        m_complete = true;
+    }
+
+    void content::Wildfire::castIndicator(const std::weak_ptr<Level> &level) {
+        LimitedRangeAbility::castIndicator(level);
+        level.lock()->showCursor();
+    }
+
+    bool content::Wildfire::onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) {
+        auto level = lvl.lock();
+        auto map = level->getMap();
+        auto pos = m_strikePos;
+        if(frame < 8 && !m_cycles) {
+            for (auto &dir: Neighborhood) {
+                auto tile = map->getTile(pos + dir);
+                if (tile) {
+                    tile->lerpAdditiveColor(m_user->getColor(), 0.1);
+                    tile->setVerticalOffset(float(frame % 2));
+                }
+            }
+        } else if (frame == 8 && !m_cycles) {
+            auto fireAnim = level->getApollo()->lookupAnim("fire");
+            for (auto &dir: Neighborhood) {
+                auto tile = map->getTile(pos + dir);
+                if (tile) {
+                    tile->setVerticalOffset(0);
+                    auto fire = std::make_shared<padi::OneshotEntity>(pos + dir);
+                    fire->m_animation = fireAnim;
+                    fire->m_color = m_user->getColor();
+                    fire->dispatch(level);
+                    auto ent = std::static_pointer_cast<LivingEntity>(map->getEntity(pos + dir, LIVING));
+                    if(ent) {
+                        if(ent->isDark() && ent->hasHPBar()) {
+                            auto hp = ent->getHPBar().lock();
+                            hp->setHP(hp->getHP() - 2);
+                        }
+                    }
+                }
+            }
+            if (m_user->hasHPBar() && m_user->getHPBar().lock()->getHP() == 0) {
+                map->removeEntity(m_user);
+            }
+        } else if (frame == 11) {
+            m_complete = (++m_cycles == 2);
+            return !m_complete;
+        }
+        return true;
+    }
+
+    bool content::Wildfire::isCastComplete() {
+        return m_complete;
+    }
+
+    uint32_t content::Wildfire::getAbilityType() const {
+        return AbilityType::Wildfire;
+    }
 }

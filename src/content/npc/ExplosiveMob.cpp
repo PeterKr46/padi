@@ -30,7 +30,7 @@ namespace padi::content {
                     payload.ability = uint8_t(1);
                     payload.pos = chr->entity->getPosition(); // ?
                     sf::Packet packet = PackagePayload(payload);
-                    printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
+                    printf("[ExplosiveMob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
                     game->broadcast(packet);
 
                     auto rand = std::mt19937(game->getSeed() + chr->id * 45689);
@@ -63,8 +63,18 @@ namespace padi::content {
                 auto rng = std::mt19937(game->getSeed() + chr->id * 7341);
                 std::shuffle(targets.begin(), targets.end(), rng);
                 if (targets.empty()) {
-                    walk->castCancel(level);
-                    return true; // TODO
+                    /*{
+                        sf::Packet packet;
+                        EntityBlinkPayload payload;
+                        payload.cid = chr->id;
+                        payload.frequency = 4;
+                        PackagePayload(packet, payload);
+                        game->broadcast(packet);
+                        auto blink = std::make_shared<padi::content::EntityBlink>(shared_from_this(), payload.frequency);
+                        level->addFrameBeginListener(blink);
+                    }*/
+                    m_primed = true;
+                    return false;
                 }
                 auto target = targets.front();
                 std::vector<std::shared_ptr<Entity>> ents;
@@ -92,7 +102,7 @@ namespace padi::content {
                     CharacterCastPayload payload;
                     payload.ability = uint8_t(0);
                     payload.pos = target;
-                    printf("[Mob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
+                    printf("[ExplosiveMob] Casting %u at (%i, %i)\n", payload.ability, payload.pos.x, payload.pos.y);
                     packet.append(&payload, sizeof(payload));
                     game->broadcast(packet);
                 }
@@ -115,7 +125,7 @@ namespace padi::content {
                         payload.frequency = 4;
                         PackagePayload(packet, payload);
                         game->broadcast(packet);
-                        auto blink = std::make_shared<padi::content::EntityBlink>(shared_from_this(), 2);
+                        auto blink = std::make_shared<padi::content::EntityBlink>(shared_from_this(), payload.frequency);
                         level->addFrameBeginListener(blink);
                     }
                 }
@@ -136,7 +146,7 @@ namespace padi::content {
                 },
                 true,
                 awake,
-                4
+                5
         };
     }
 

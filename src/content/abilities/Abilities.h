@@ -29,6 +29,7 @@ namespace padi::content {
             SlugWalk,
             GateUnlock,
             Raze,
+            Wildfire,
             NUM_ABILITIES
         };
     }
@@ -51,7 +52,10 @@ namespace padi::content {
         std::shared_ptr<StaticEntity> m_infoEntity;
     };
 
-    class Lighten : public padi::LimitedRangeAbility, public padi::CycleListener, public std::enable_shared_from_this<Lighten> {
+    class Lighten
+            : public padi::LimitedRangeAbility,
+              public padi::CycleListener,
+              public std::enable_shared_from_this<Lighten> {
     public:
         explicit Lighten(std::shared_ptr<LivingEntity> user);
 
@@ -68,11 +72,36 @@ namespace padi::content {
         bool isCastComplete() override;
 
         uint32_t getAbilityType() const override;
+
     protected:
         void recalculateRange(const std::weak_ptr<Level> &level) override;
 
     private:
         bool m_complete{true};
+    };
+
+    class Wildfire
+            : public padi::LimitedRangeAbility,
+              public padi::CycleListener,
+              public std::enable_shared_from_this<Wildfire> {
+    public:
+        explicit Wildfire(std::shared_ptr<LivingEntity> user, int range = 8);
+
+        bool cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) override;
+
+        void castCancel(const std::weak_ptr<Level> &level) override;
+
+        void castIndicator(const std::weak_ptr<Level> &level) override;
+
+        bool onFrameBegin(std::weak_ptr<padi::Level> const &lvl, uint8_t frame) override;
+
+        bool isCastComplete() override;
+
+        uint32_t getAbilityType() const override;
+
+        uint8_t m_cycles = 0;
+        bool m_complete{true};
+        sf::Vector2i m_strikePos;
     };
 
     class Darken : public padi::Ability, public padi::CycleListener, public std::enable_shared_from_this<Darken> {

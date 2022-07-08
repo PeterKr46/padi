@@ -89,12 +89,15 @@ namespace padi {
     }
 
     bool LimitedRangeAbility::cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) {
-        auto level = lvl.lock();
-        m_rangeChanged = true;
-        for (auto const &ind: m_rangeIndicators) {
-            level->getMap()->removeUIObject(ind);
+        if(std::find(m_inRange.begin(), m_inRange.end(), pos) != m_inRange.end()) {
+            auto level = lvl.lock();
+            m_rangeChanged = true;
+            for (auto const &ind: m_rangeIndicators) {
+                level->getMap()->removeUIObject(ind);
+            }
+            return true;
         }
-        return true;
+        return false;
     }
 
     void LimitedRangeAbility::castCancel(const std::weak_ptr<Level> &lvl) {

@@ -35,3 +35,4 @@ anim strike             32 32   96 64   0 0 1
 anim dash               32 32   96 96   0 0 1
 anim raze               32 32   96 128  0 0 1
 anim view               32 32   96 160  0 0 1
+anim wildfire           32 32   96 224  0 0 1

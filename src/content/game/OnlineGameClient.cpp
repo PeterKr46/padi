@@ -10,6 +10,7 @@
 #include "../menu/MainMenu.h"
 #include "../npc/Beacon.h"
 #include "Narrator.h"
+#include "../vfx/EntityBlink.h"
 
 namespace padi::content {
 
@@ -137,7 +138,7 @@ namespace padi::content {
         while(host.has(PayloadType::PlayerDespawn)) {
             PlayerDespawnPayload payload;
             host.fetch(payload);
-            auto & chr = m_characters[payload.cid];
+            auto &chr = m_characters[payload.cid];
             chr->alive = false;
             m_level->getMap()->removeEntity(chr->entity);
         }
@@ -146,19 +147,26 @@ namespace padi::content {
             host.fetch(payload);
             spawnEvent(payload.pos, payload);
         }
-        while(host.has(PayloadType::EventDespawn)) {
+        while (host.has(PayloadType::EventDespawn)) {
             EventDespawnPayload payload;
             host.fetch(payload);
             despawnEvent(payload.pos);
         }
-        while(host.has(PayloadType::Narration)) {
+        while (host.has(PayloadType::Narration)) {
             NarratorPayload payload;
             host.fetch(payload);
-            if(m_narrator) {
+            if (m_narrator) {
                 m_narrator->queue(payload.event);
             }
         }
+        while (host.has(PayloadType::EntityStartBlinking)) {
+            EntityBlinkPayload payload;
+            host.fetch(payload);
+            auto &chr = m_characters[payload.cid];
+            m_level->addFrameBeginListener(std::make_shared<EntityBlink>(chr->entity, payload.frequency));
+        }
         takeTurn();
+        fflush(stdout);
     }
 
     void ClientGame::takeTurn() {

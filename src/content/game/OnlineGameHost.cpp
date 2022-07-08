@@ -73,7 +73,8 @@ namespace padi::content {
                         std::make_shared<Peep>(playerCharacter.entity),
                         std::make_shared<Walk>(playerCharacter.entity, 6),
                         std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100}),
-                        std::make_shared<Teleport>(playerCharacter.entity)
+                        //std::make_shared<Teleport>(playerCharacter.entity),
+                        std::make_shared<Wildfire>(playerCharacter.entity)
                         //std::make_shared<Lighten>(playerCharacter.entity)
                 };
             }
@@ -90,7 +91,7 @@ namespace padi::content {
             for (int cid = 0; cid < m_lobby.size; cid++) {
                 slain += m_characters.at(cid)->entity->enemiesSlain;
             }
-            beacon->m_requiredKills = std::max<unsigned int>(slain, m_lobby.size) * 2;
+            beacon->m_requiredKills = slain + std::log2(m_stage + 1.f) * 6 * m_lobby.size;
             auto cr = beacon->asCharacter();
             m_turnQueue.push(spawnCharacter(cr, ~0u));
         }
@@ -196,6 +197,7 @@ namespace padi::content {
 
     void HostGame::advanceTurn() {
         if(m_activeChar) {
+            printf("[OnlineGame|Host] Character %i completed their turn.\n", m_activeChar->id);
             if(m_activeChar->id == m_lobby.size - 1) {
                 sendChatGeneric("The darkness moves.");
             }
@@ -457,7 +459,7 @@ namespace padi::content {
     void HostGame::spawnDropEvent(const sf::Vector2i &pos) {
         EventSpawnPayload payload;
         payload.pos = pos;
-        static const uint8_t possibleDrops[]{AbilityType::Raze, AbilityType::Lighten, AbilityType::Teleport};
+        static const uint8_t possibleDrops[]{AbilityType::Raze, AbilityType::Lighten, AbilityType::Teleport, AbilityType::Wildfire};
         payload.abilityType = possibleDrops[m_rand() % sizeof(possibleDrops)];
         auto packet = PackagePayload(payload);
         broadcast(packet);

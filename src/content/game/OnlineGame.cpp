@@ -127,6 +127,10 @@ namespace padi::content {
                 abilities[payload.abilitySlot] = std::make_shared<Raze>(chr->entity);
                 break;
             }
+            case AbilityType::Wildfire: {
+                abilities[payload.abilitySlot] = std::make_shared<Wildfire>(chr->entity);
+                break;
+            }
             default: {
                 printf("[OnlineGame] Attempted to assign unknown ability type.\n");
             }
@@ -156,7 +160,7 @@ namespace padi::content {
         // This glorious copy prevents Apollo from going out of scope
         auto tmpCopy = m_level;
 
-        m_level = LevelGenerator().withSeed(m_seed).withArea({int(std::log2(m_stage +1)) * 24, int(std::log2(m_stage +1)) * 24})
+        m_level = LevelGenerator().withSeed(m_seed).withArea({int(std::log2(m_stage + 1.f) * 24.f), int(std::log2(m_stage + 1.f) * 24.f)})
                 .withSpritesheet("../media/level_sheet.png")    // TODO
                 .withApollo("../media/level.apollo")            // TODO
                 .generateLevel();

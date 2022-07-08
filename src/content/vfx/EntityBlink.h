@@ -20,7 +20,7 @@ namespace padi::content {
         std::weak_ptr<LivingEntity> m_target;
         int m_frequency = 4;
 
-        sf::Color m_colors[2]{sf::Color(96,32,32, 255),sf::Color(96,32,32, 255)};
+        sf::Color m_colors[2]{sf::Color(96,0,0, 255),sf::Color(96,0,0, 255)};
         int m_counter = 0;
     };
 
