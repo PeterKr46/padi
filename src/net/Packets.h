@@ -48,7 +48,8 @@ namespace padi::content {
         EventDespawn,
         AskPlayer,
         PlayerResponse,
-        Narration
+        Narration,
+        EntityStartBlinking
     };
 
     struct alignas(64) ChatMessagePayload {
@@ -164,6 +165,12 @@ namespace padi::content {
     struct alignas(64) NarratorPayload {
         const PayloadType type = Narration;
         NarratorEvent event{};
+    };
+
+    struct alignas(64) EntityBlinkPayload {
+        const PayloadType type = EntityStartBlinking;
+        uint32_t cid{};
+        uint16_t frequency{};
     };
 
     struct alignas(64) AskPlayerPayload {

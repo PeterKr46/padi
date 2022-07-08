@@ -59,7 +59,7 @@ namespace padi::content {
         }
     }
 
-    Character SlugMob::asCharacter() {
+    Character SlugMob::asCharacter(bool awake) {
         return Character{0,
                          shared_from_this(),
                          {

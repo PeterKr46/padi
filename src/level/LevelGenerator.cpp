@@ -103,8 +103,12 @@ namespace padi {
         level->addFrameBeginListener(std::make_shared<padi::content::MapShaker>());
         level->centerView({0,0});
         level->initCursor("cursor");
+        level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{1,1}, 1);
+        level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{3,3}, 161);
+        level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{4,2}, 1);
         return level;
     }
+
     struct vecHash
     {
         size_t operator()(const sf::Vector2i &v) const
@@ -294,7 +298,7 @@ namespace padi {
                         }
                         if (!spawn && adjustedHeight > 0.4 && tile->m_walkable) {
                             spawn = true;
-                            level->m_spawnPoints.emplace(level->m_spawnPoints.end(), cellAnchor + v, uint8_t(m_rand() % UINT8_MAX));
+                            level->m_spawnPoints.emplace(level->m_spawnPoints.end(), cellAnchor + v, uint8_t(m_rand() % UINT8_MAX) & ~1u);
                         }
                     }
                 }

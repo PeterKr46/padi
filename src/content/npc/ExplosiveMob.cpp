@@ -7,6 +7,7 @@
 #include "../game/OnlineGame.h"
 #include "SFML/Network/Packet.hpp"
 #include "../../media/AudioPlayback.h"
+#include "../vfx/EntityBlink.h"
 
 #include <utility>
 
@@ -20,12 +21,7 @@ namespace padi::content {
     bool ExplosiveMob::takeTurn(const std::shared_ptr<OnlineGame> &game, const std::shared_ptr<Character> &chr) {
         auto level = game->getLevel().lock();
         if (!m_turnStarted) {
-            bool explode = false;
-            for (auto dir: AllDirections) {
-                if (level->getMap()->hasEntities(chr->entity->getPosition() + dir, LIVING)) {
-                    explode = true;
-                }
-            }
+            bool explode = m_primed;
             if (explode) {
                 usedAbility = 1;
                 chr->entity->intentCast(chr->abilities[usedAbility], chr->entity->getPosition());
@@ -50,9 +46,9 @@ namespace padi::content {
                                                                          chr->entity->getAnimationSet(),
                                                                          tile->getPosition());
                             child1->initHPBar(chr->entity->getHPBar());
-                            auto chr = child1->asCharacter();
-                            chr.awake = true;
-                            host->spawnCharacter(chr, ~0u);
+                            auto childChr = child1->asCharacter(true);
+                            childChr.awake = true;
+                            host->spawnCharacter(childChr, ~0u);
                             placed++;
                         }
                     }
@@ -106,6 +102,23 @@ namespace padi::content {
         if (chr->entity) {
             if (!chr->entity->hasCastIntent() && chr->abilities[usedAbility]->isCastComplete()) {
                 m_turnStarted = false;
+                for (auto dir: AllDirections) {
+                    if (level->getMap()->hasEntities(chr->entity->getPosition() + dir, LIVING)) {
+                        m_primed = true;
+                    }
+                }
+                if(m_primed) {
+                    {
+                        sf::Packet packet;
+                        EntityBlinkPayload payload;
+                        payload.cid = chr->id;
+                        payload.frequency = 4;
+                        PackagePayload(packet, payload);
+                        game->broadcast(packet);
+                        auto blink = std::make_shared<padi::content::EntityBlink>(shared_from_this(), 2);
+                        level->addFrameBeginListener(blink);
+                    }
+                }
             }
             return !chr->entity->hasCastIntent() && chr->abilities[usedAbility]->isCastComplete();
         } else {
@@ -113,7 +126,7 @@ namespace padi::content {
         }
     }
 
-    Character ExplosiveMob::asCharacter() {
+    Character ExplosiveMob::asCharacter(bool awake) {
         return {0,
                 shared_from_this(),
                 {std::make_shared<Walk>(shared_from_this(), 5, Walk::Walkable{-700}),
@@ -122,7 +135,8 @@ namespace padi::content {
                     return takeTurn(l, c);
                 },
                 true,
-                false
+                awake,
+                4
         };
     }
 

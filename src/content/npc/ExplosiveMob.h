@@ -39,11 +39,12 @@ namespace padi::content {
         bool takeTurn(const std::shared_ptr<OnlineGame> &, const std::shared_ptr<Character> &);
 
 
-        Character asCharacter();
+        Character asCharacter(bool awake);
 
     private:
         size_t usedAbility = 0;
         bool m_turnStarted = false;
+        bool m_primed = false;
     };
 
 } // content

@@ -73,7 +73,8 @@ namespace padi::content {
                         std::make_shared<Peep>(playerCharacter.entity),
                         std::make_shared<Walk>(playerCharacter.entity, 6),
                         std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100}),
-                        std::make_shared<Lighten>(playerCharacter.entity)
+                        std::make_shared<Teleport>(playerCharacter.entity)
+                        //std::make_shared<Lighten>(playerCharacter.entity)
                 };
             }
             spawnCharacter(playerCharacter, id);
@@ -101,16 +102,15 @@ namespace padi::content {
                 auto mob = std::make_shared<ExplosiveMob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
                                                           nextMobPos);
                 mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
-                mob->getHPBar().lock()->asleep = !mob->asCharacter().awake;
+                mob->getHPBar().lock()->asleep = !mob->asCharacter(nextMobType & 1u).awake;
                 map->moveEntity(mob, nextMobPos);
-                spawnCharacter(mob->asCharacter(), ~0u);
+                spawnCharacter(mob->asCharacter(nextMobType & 1u), ~0u);
             } else {
                 auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
                                                      nextMobPos);
                 mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
-                mob->getHPBar().lock()->asleep = !mob->asCharacter().awake;
-                spawnCharacter(mob->asCharacter(), ~0u);
-
+                mob->getHPBar().lock()->asleep = !mob->asCharacter(nextMobType & 1u).awake;
+                spawnCharacter(mob->asCharacter(nextMobType & 1u), ~0u);
             }
         }
         for(auto & [id, chr] : m_characters) {

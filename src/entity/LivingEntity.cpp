@@ -56,6 +56,9 @@ sf::Color padi::LivingEntity::getColor() const {
 size_t
 padi::LivingEntity::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame,
                              float tileVerticalOffset) const {
+    // Ensure synced colors... ugly
+    m_slaves.front()->m_color = m_color;
+
     sf::Vector2f size{getSize()};
     auto pVertex = &array[vertexOffset];
 
