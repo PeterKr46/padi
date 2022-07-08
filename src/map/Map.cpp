@@ -156,6 +156,12 @@ namespace padi {
         addEntity(e, e->getPosition(), lower_by);
     }
 
+    void Map::removeTile(int x, int y) {
+        auto iter = m_tiles.find({x,y});
+        if (iter != m_tiles.end()) {
+            m_tiles.erase(iter);
+        }
+    }
     void Map::removeTile(const sf::Vector2i &p) {
         auto iter = m_tiles.find(p);
         if (iter != m_tiles.end()) {

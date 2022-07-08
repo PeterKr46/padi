@@ -59,12 +59,13 @@ namespace padi::content {
 
         bool onCycleEnd(std::weak_ptr<padi::Level> const &level) override {
             auto lvl = level.lock();
-            static const sf::Vector2i directions[4]{
+            static sf::Vector2i directions[4]{
                     sf::Vector2i(0, 1),
                     sf::Vector2i(0, -1),
                     sf::Vector2i(1, 0),
                     sf::Vector2i(-1, 0)
             };
+            std::shuffle(directions, directions+4, std::mt19937());
             for (auto &entity: m_entities) {
                 size_t dir = rand() % 4;
                 auto position = entity->getPosition();
@@ -72,10 +73,12 @@ namespace padi::content {
                     position += entity->currentMoveDirection();
                 }
                 auto tile = lvl->getMap()->getTile(position + directions[dir]);
-                if (tile && tile->m_walkable) {
-                    entity->intentMove(directions[dir]);
-                    tile->setColor(tile->getColor() + entity->getColor());
+                while (!tile || !tile->m_walkable) {
+                    ++dir;
+                    tile = lvl->getMap()->getTile(position + directions[dir]);
                 }
+                entity->intentMove(directions[dir]);
+                tile->setColor(tile->getColor() + entity->getColor());
             }
             return true;
         }
@@ -105,23 +108,20 @@ namespace padi::content {
                 .withSpritesheet("../media/level_sheet.png")
                 .withApollo("../media/level.apollo")
                 .withSeed(6774586)
-                .withArea({20, 20})
-                .getEmpty();
-        //m_level.ini
-        auto map = m_level->getMap();
-        sf::Vector2i p;
-        for(p.x = 0; p.x < 5; ++p.x) {
-            for(p.y = 0; p.y < 12; ++p.y) {
-                map->addTileIfNone(p);
-            }
-        }
+                .withArea({16, 16})
+                .generateLevel();
+        sf::Vector2i spawnPos[3];
+        uint8_t seed;
+        m_level->popSpawnPosition(spawnPos[0], seed);
+        m_level->popSpawnPosition(spawnPos[1], seed);
+        m_level->popSpawnPosition(spawnPos[2], seed);
         std::vector<std::shared_ptr<LivingEntity>> cubes = {
                 std::make_shared<padi::LivingEntity>("r", m_level->getApollo()->lookupAnimContext("cube"),
-                                                     sf::Vector2i{0, 0}),
+                                                     spawnPos[0]),
                 std::make_shared<padi::LivingEntity>("g", m_level->getApollo()->lookupAnimContext("cube"),
-                                                     sf::Vector2i{2, 0}),
+                                                     spawnPos[1]),
                 std::make_shared<padi::LivingEntity>("b", m_level->getApollo()->lookupAnimContext("cube"),
-                                                     sf::Vector2i{4, 0})
+                                                     spawnPos[2])
         };
         //m_level->addFrameBeginListener(std::make_shared<Disolver>());
         cubes[0]->setColor(sf::Color::Red);

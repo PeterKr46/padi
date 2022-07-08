@@ -77,6 +77,8 @@ namespace padi {
         void for_each(const std::function<void(std::shared_ptr<padi::Tile>)> &);
         [[nodiscard]] const std::unordered_set<std::shared_ptr<Entity>> & allEntities() const;
 
+
+        void removeTile(int x, int y);
         void removeTile(sf::Vector2i const &vector2);
 
         bool addUIObject(const std::shared_ptr<padi::GridObject> &obj);

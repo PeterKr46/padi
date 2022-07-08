@@ -114,7 +114,7 @@ namespace padi::content {
         {
             auto lvl = m_background.getLevel().lock();
             lvl->update(m_crt.asTarget());
-            lvl->centerView({-3, 3});
+            //lvl->centerView({-3, 3});
             lvl->populateVBO();
         }
 
