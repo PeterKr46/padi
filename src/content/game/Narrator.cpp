@@ -130,8 +130,9 @@ namespace padi::content {
         queueSleep(5);
         // Event 2
         queueText("This is you!", false);
-        queueCenter({-1, 0});
-        queueFrame({226.5 - 19, 127.5 - 19 - 8, 38, 38});
+        //queueCenter({-4, 4});
+        queueCenter({0,0});
+        queueFrame({sf::Vector2f {226-19, 127-19-8} + Map::mapTilePosToWorld({-4,4}), {38,38}});
         queueSleep(2);
 
         queueText("This is you! Yup, a cube...", false);
@@ -144,8 +145,7 @@ namespace padi::content {
         queueText("So, how do you leave?");
         queueSleep(4);
         queueText("Each level, you must activate a beacon.");
-        queueCenter({-3,-3});
-        queueFrame({226.5 - 19, 127.5 - 19 - 8, 38, 38});
+        queueFrame({sf::Vector2f {226-19, 127-19-8} + Map::mapTilePosToWorld({0,0}), {38,38}});
         queueConfirm();
 
         queueText("First, you must defeat a certain number of enemies.");
@@ -154,17 +154,14 @@ namespace padi::content {
         queueConfirm();
 
         queueText("Some  will chase you\n to go out with a bang!");
-        queueCenter({ 0,1});
-        queueFrame({226.5 - 19, 127.5 - 19 - 8, 38, 38});
+        queueFrame({sf::Vector2f {226-19, 127-19-8} + Map::mapTilePosToWorld({-3,2}), {38,38}});
         queueConfirm();
 
         queueText("Others will pursue your light,\n cursing every place they step.");
-        queueCenter({ 2,2});
-        queueFrame({226.5 - 19, 127.5 - 19 - 8, 38, 38});
+        queueFrame({sf::Vector2f {226-19, 127-19-8} + Map::mapTilePosToWorld({2,-3}), {38,38}});
         queueConfirm();
 
         queueText("Using a limited set of abilities,\n plan your every move carefully!");
-        queueCenter({ -1,0});
         queueSleep(3.0f);
         queueText("Let's give it a go, start your turn!");
         queueConfirm();

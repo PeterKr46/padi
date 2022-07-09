@@ -155,9 +155,9 @@ namespace padi::content {
                     break;
             }
             Immediate::Sprite(&m_uiContext,
-                              sf::FloatRect{453-176, 0, 176, 64},
+                              sf::FloatRect{226-176/2, 64, 176, 64},
                               0,
-                              m_uiContext.getApollo()->lookupAnim("logo"), sf::Color(hsv(m_crt.getGraphicsClock().getElapsedTime().asSeconds() * 120, 1, 1)));
+                              m_uiContext.getApollo()->lookupAnim("logo"), sf::Color(hsv(m_crt.getGraphicsClock().getElapsedTime().asSeconds() * 60, 1, 1)));
             Immediate::Sprite(&m_uiContext,
                               sf::FloatRect{-16, 0, 32, 32},
                               0,

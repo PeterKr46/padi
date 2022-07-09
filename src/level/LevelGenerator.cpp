@@ -59,17 +59,19 @@ namespace padi {
         auto mountain = apollo.lookupAnim("mountain");
         for(sf::Vector2i pos = {-8, -8}; pos.x <= 8; ++pos.x) {
             for ( pos.y = -8; pos.y <= 8; ++pos.y) {
-                tile = std::make_shared<padi::Tile>(pos);
-                tile->setColor(sf::Color(0x484848FF));
                 float rad = sqrt(float(pos.x * pos.x) + float(pos.y * pos.y));
-                if(rad > 7) {
-                    decor = std::make_shared<padi::TileDecoration>(pos);
-                    decor->m_animation = mountain;
-                    tile->m_walkable = false;
-                    tile->m_decoration = decor;
-                    tile->m_verticalOffset = (rad - 7) * 12;
+                if (rad < 8.5) {
+                    tile = std::make_shared<padi::Tile>(pos);
+                    tile->setColor(sf::Color(0x484848FF));
+                    if (rad > 7) {
+                        decor = std::make_shared<padi::TileDecoration>(pos);
+                        decor->m_animation = mountain;
+                        tile->m_walkable = false;
+                        tile->m_decoration = decor;
+                        tile->m_verticalOffset = (rad - 7) * 12;
+                    }
+                    map->addTile(tile);
                 }
-                map->addTile(tile);
             }
         }
 
@@ -82,14 +84,16 @@ namespace padi {
             if(rand() % 2) {
                 decor->m_animation = rocks;
                 tile = map->getTile(spawn);
-                tile->m_decoration = decor;
-                tile->m_walkable = false;
-                for (auto &dir: AllDirections) {
-                    tile = map->getTile(spawn + dir);
-                    if (!tile->m_decoration) {
-                        decor = std::make_shared<padi::TileDecoration>(spawn + dir);
-                        decor->m_animation = hill;
-                        tile->m_decoration = decor;
+                if(tile) {
+                    tile->m_decoration = decor;
+                    tile->m_walkable = false;
+                    for (auto &dir: AllDirections) {
+                        tile = map->getTile(spawn + dir);
+                        if (tile && !tile->m_decoration) {
+                            decor = std::make_shared<padi::TileDecoration>(spawn + dir);
+                            decor->m_animation = hill;
+                            tile->m_decoration = decor;
+                        }
                     }
                 }
             }
@@ -103,9 +107,9 @@ namespace padi {
         level->addFrameBeginListener(std::make_shared<padi::content::MapShaker>());
         level->centerView({0,0});
         level->initCursor("cursor");
-        level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{1,1}, 1);
-        level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{3,3}, 161);
-        level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{4,2}, 1);
+        level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{-4,4}, 1);
+        level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{2,-3}, 161);
+        level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{-3,2}, 1);
         return level;
     }
 

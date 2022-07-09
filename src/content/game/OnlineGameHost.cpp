@@ -74,8 +74,8 @@ namespace padi::content {
                         std::make_shared<Walk>(playerCharacter.entity, 6),
                         std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100}),
                         //std::make_shared<Teleport>(playerCharacter.entity),
-                        std::make_shared<Wildfire>(playerCharacter.entity)
-                        //std::make_shared<Lighten>(playerCharacter.entity)
+                        //std::make_shared<Wildfire>(playerCharacter.entity)
+                        std::make_shared<Lighten>(playerCharacter.entity)
                 };
             }
             spawnCharacter(playerCharacter, id);
@@ -91,7 +91,10 @@ namespace padi::content {
             for (int cid = 0; cid < m_lobby.size; cid++) {
                 slain += m_characters.at(cid)->entity->enemiesSlain;
             }
-            beacon->m_requiredKills = 0;//slain + std::log2(m_stage + 1.f) * 3 * m_lobby.size;
+            beacon->m_requiredKills = slain + std::log2(m_stage + 1.f) * 3 * m_lobby.size;
+            if (m_seed == LevelGenerator::TutorialSeed) {
+                beacon->m_requiredKills = 2;
+            }
             auto cr = beacon->asCharacter();
             m_turnQueue.push(spawnCharacter(cr, ~0u));
         }
@@ -229,8 +232,13 @@ namespace padi::content {
                         broadcast(packet);
                         if(chr->entity->getType() & EntityType::PLAYER) {
                             sendChatGeneric(m_lobby.names[chr->id] + " died.");
-                        } else if (m_rand() % 256 > 0 ) {
+                        } else if (m_seed == LevelGenerator::TutorialSeed || m_rand() % 256 > 128 ) {
                             spawnDropEvent(chr->entity->getPosition());
+                            if (m_seed == LevelGenerator::TutorialSeed) {
+                               m_narrator->queueCenter(chr->entity->getPosition());
+                               m_narrator->queueText("They dropped something!");
+                               m_narrator->queueConfirm();
+                            }
                         }
                     }
                 }
