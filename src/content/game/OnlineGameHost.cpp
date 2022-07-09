@@ -91,7 +91,7 @@ namespace padi::content {
             for (int cid = 0; cid < m_lobby.size; cid++) {
                 slain += m_characters.at(cid)->entity->enemiesSlain;
             }
-            beacon->m_requiredKills = slain + std::log2(m_stage + 1.f) * 6 * m_lobby.size;
+            beacon->m_requiredKills = 0;//slain + std::log2(m_stage + 1.f) * 3 * m_lobby.size;
             auto cr = beacon->asCharacter();
             m_turnQueue.push(spawnCharacter(cr, ~0u));
         }

@@ -5,10 +5,11 @@
 #pragma once
 
 #include <random>
+#include <SFML/Network/TcpSocket.hpp>
+
 #include "../../entity/LivingEntity.h"
 #include "../abilities/Abilities.h"
 #include "../game/Character.h"
-#include "SFML/Network/TcpSocket.hpp"
 #include "../../net/InOutBox.h"
 
 namespace padi::content {

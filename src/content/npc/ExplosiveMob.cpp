@@ -40,16 +40,19 @@ namespace padi::content {
                     size_t placed = 0;
                     for(int i = 0; i < 4 && placed < 3; ++i) {
                         tile = level->getMap()->getTile(chr->entity->getPosition() + AllDirections[(dir_id+i) % 4]);
-                        if (tile && tile->m_walkable &&
-                            !level->getMap()->hasEntities(tile->getPosition(), LIVING)) {
-                            auto child1 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
-                                                                         chr->entity->getAnimationSet(),
-                                                                         tile->getPosition());
-                            child1->initHPBar(chr->entity->getHPBar());
-                            auto childChr = child1->asCharacter(true);
-                            childChr.awake = true;
-                            host->spawnCharacter(childChr, ~0u);
-                            placed++;
+                        if (tile) {
+                            auto tCol = tile->getColor();
+                            uint16_t tSum = tCol.r + tCol.g + tCol.b;
+                            if(tSum > 96 && tile->m_walkable && !level->getMap()->hasEntities(tile->getPosition(), LIVING)) {
+                                auto child1 = std::make_shared<ExplosiveMob>(chr->entity->getName(),
+                                                                             chr->entity->getAnimationSet(),
+                                                                             tile->getPosition());
+                                child1->initHPBar(chr->entity->getHPBar());
+                                auto childChr = child1->asCharacter(true);
+                                childChr.awake = true;
+                                host->spawnCharacter(childChr, ~0u);
+                                placed++;
+                            }
                         }
                     }
                 }

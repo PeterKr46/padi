@@ -575,7 +575,7 @@ namespace padi {
     }
 
     bool content::Walk::Walkable::operator()(const Map *map, const std::shared_ptr<Tile> &t) {
-        if (t && t->m_walkable && !map->hasEntities(t->getPosition(), LIVING)) {
+        if (t && t->m_walkable && (!map->hasEntities(t->getPosition(), LIVING) || (cutOff > 0 && map->hasEntities(t->getPosition(), BEACON)))) {
             auto col = t->getColor();
             if (cutOff < 0) {
                 return col.r + col.g + col.b < -cutOff;
@@ -748,7 +748,10 @@ namespace padi {
                     if(ent) {
                         if(ent->isDark() && ent->hasHPBar()) {
                             auto hp = ent->getHPBar().lock();
-                            hp->setHP(hp->getHP() - 2);
+                            if(hp->getHP() > 0) {
+                                hp->setHP(hp->getHP() - 2);
+                                if(!hp->getHP()) m_user->enemiesSlain++;
+                            }
                         }
                     }
                 }

@@ -29,6 +29,8 @@ namespace padi::content {
 
         static sf::Vector2f mapWindowToCRTPosition(sf::Vector2f const& window);
 
+        const sf::Clock & getGraphicsClock() const;
+
     public:
         bool paused{false};
     private:

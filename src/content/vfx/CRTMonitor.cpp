@@ -76,4 +76,8 @@ namespace padi::content {
         return uv;
     }
 
+    const sf::Clock &CRTMonitor::getGraphicsClock() const {
+        return m_graphicsClock;
+    }
+
 }

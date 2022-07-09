@@ -29,7 +29,7 @@ namespace padi::content {
         bool onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) override;
     private:
         bool m_open = false;
-        bool m_complete;
+        bool m_complete = true;
     };
 
     class Beacon : public padi::LivingEntity {

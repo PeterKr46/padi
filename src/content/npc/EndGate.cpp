@@ -100,7 +100,7 @@ namespace padi::content {
 
     size_t Beacon::populate(const padi::Map *map, sf::VertexArray &array, size_t vertexOffset, uint8_t frame,
                             float tileVerticalOffset) const {
-        return LivingEntity::populate(map, array, vertexOffset, uint8_t(abs(tileVerticalOffset)) % 7, tileVerticalOffset);
+        return LivingEntity::populate(map, array, vertexOffset, 6 - (std::clamp(-getVerticalOffset(), 8.f, 14.f) - 8), tileVerticalOffset);
     }
 
     size_t Beacon::countSlainEnemies(const std::shared_ptr<OnlineGame> & g) const {
@@ -114,6 +114,7 @@ namespace padi::content {
 
     bool GateUnlock::cast(const std::weak_ptr<Level> &lvl, const sf::Vector2i &pos) {
         m_complete = false;
+        bool wasopen = m_open;
         if (pos == m_user->getPosition()) {
             m_open = true;
             auto ap = std::make_shared<AudioPlayback>(lvl.lock()->getApollo()->lookupAudio("beacon_activate"));
@@ -121,7 +122,7 @@ namespace padi::content {
         } else {
             m_open = false;
         }
-        lvl.lock()->addFrameBeginListener(shared_from_this());
+        if(m_open && !wasopen) lvl.lock()->addFrameBeginListener(shared_from_this());
         return true;
     }
 
@@ -150,10 +151,9 @@ namespace padi::content {
         auto map = level->getMap();
         auto tile = map->getTile(m_user->getPosition());
         if (m_open) {
-            tile->setVerticalOffset(tile->getVerticalOffset() + std::round((0 - tile->getVerticalOffset()) * 0.6f));
-            auto color = uint8_t(255u * (1.f - tile->getVerticalOffset() / 6.f));
+            m_user->setVerticalOffset(m_user->getVerticalOffset() + std::round((-15 - m_user->getVerticalOffset()) * 0.6f));
         } else {
-            tile->setVerticalOffset(tile->getVerticalOffset() + std::round((6 - tile->getVerticalOffset()) * 0.6f));
+            m_user->setVerticalOffset(m_user->getVerticalOffset() + std::round((6 - m_user->getVerticalOffset()) * 0.6f) - 8);
         }
         if(frame == 8 && m_open) {
             auto pos = m_user->getPosition();
@@ -163,8 +163,8 @@ namespace padi::content {
             gate->m_animation = gateFloor;
             gate->m_stackAnimation = gateAnim;
             gate->m_stackSize = 8;
-            map->addEntity(gate);
-            map->removeEntity(m_user);
+            map->addEntity(gate, 69);
+            //map->removeEntity(m_user);
             for (auto &d: Neighborhood) {
                 map->getTile(pos + d)->setColor(sf::Color::White);
             }
