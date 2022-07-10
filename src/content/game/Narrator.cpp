@@ -161,6 +161,9 @@ namespace padi::content {
         queueFrame({sf::Vector2f {226-19, 127-19-8} + Map::mapTilePosToWorld({2,-3}), {38,38}});
         queueConfirm();
 
+        queueText("Darkness is creeping all around you.");
+        queueConfirm();
+
         queueText("Using a limited set of abilities,\n plan your every move carefully!");
         queueSleep(3.0f);
         queueText("Let's give it a go, start your turn!");

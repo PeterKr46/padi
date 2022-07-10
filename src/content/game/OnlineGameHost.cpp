@@ -74,7 +74,7 @@ namespace padi::content {
                         std::make_shared<Peep>(playerCharacter.entity),
                         std::make_shared<Walk>(playerCharacter.entity, 6),
                         std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100}),
-                        std::make_shared<Lighten>(playerCharacter.entity)
+                        //std::make_shared<Lighten>(playerCharacter.entity)
                 };
             }
             spawnCharacter(playerCharacter, id);
