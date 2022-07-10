@@ -52,7 +52,7 @@ namespace padi::content {
             if (savedCharacters.size() > id) {
                 playerCharacter.entity = savedCharacters[id].entity;
                 playerCharacter.entity->switchApollo(apollo);
-                playerCharacter.entity->getHPBar().lock()->setHP(INT_MAX);
+                //playerCharacter.entity->getHPBar().lock()->setHP(INT_MAX);
 
                 // A really ugly hack to reposition...
                 map->moveEntity(playerCharacter.entity, nextPlayerPos);
@@ -74,8 +74,6 @@ namespace padi::content {
                         std::make_shared<Peep>(playerCharacter.entity),
                         std::make_shared<Walk>(playerCharacter.entity, 6),
                         std::make_shared<Dash>(playerCharacter.entity, 3, Walk::Walkable{100}),
-                        //std::make_shared<Teleport>(playerCharacter.entity),
-                        //std::make_shared<Wildfire>(playerCharacter.entity)
                         std::make_shared<Lighten>(playerCharacter.entity)
                 };
             }
@@ -103,23 +101,23 @@ namespace padi::content {
         sf::Vector2i nextMobPos;
         uint8_t nextMobType;
         while(m_level->popSpawnPosition(nextMobPos, nextMobType)) {
-            if(nextMobType < 128){//128) {
+            if(nextMobType < 128){
                 auto mob = std::make_shared<ExplosiveMob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
                                                           nextMobPos);
                 mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
                 mob->getHPBar().lock()->asleep = !mob->asCharacter(nextMobType & 1u).awake;
                 map->moveEntity(mob, nextMobPos);
                 spawnCharacter(mob->asCharacter(nextMobType & 1u), ~0u);
-            } else if(nextMobType < 180){//< 196) {
+            } else if(nextMobType < 224) {
                 auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
                                                      nextMobPos);
-                mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
-                mob->getHPBar().lock()->asleep = !mob->asCharacter(nextMobType & 1u).awake;
-                spawnCharacter(mob->asCharacter(nextMobType & 1u), ~0u);
+                mob->initHPBar(2, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+                mob->getHPBar().lock()->asleep = !mob->asCharacter(true).awake;
+                spawnCharacter(mob->asCharacter(true), ~0u);
             } else {
                 auto mob = std::make_shared<Thirdman>("volcano", m_level->getApollo()->lookupAnimContext("volcano"),
                                                      nextMobPos);
-                mob->initHPBar(3, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+                mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
                 mob->getHPBar().lock()->asleep = false;
                 spawnCharacter(mob->asCharacter(true), ~0u, false);
             }

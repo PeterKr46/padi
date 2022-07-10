@@ -83,7 +83,7 @@ namespace padi::content {
                 break;
             case PlayAlone:
                 m_uiContext.setText("play", "Play Alone", {64 + 16, 12}, true);
-                m_uiContext.setText("seed_input", "Choose a Seed", {24, 52});
+                m_uiContext.setText("seed_input", "Enter Seed", {24, 52});
                 break;
             case OnlineHost:
                 m_uiContext.setText("play", "Host Game", {64 + 16, 12}, true);
@@ -376,7 +376,7 @@ namespace padi::content {
             for (const auto &client: hostRole.clients) inboxes.emplace_back(client);
 
             auto game = std::make_shared<padi::content::HostGame>(inboxes, m_uiContext.getTextString("nick_input"),
-                                                                  12345);
+                                                                  3456);
             m_next = game;
         }
     }

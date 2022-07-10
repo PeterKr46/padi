@@ -19,9 +19,9 @@ int main() {
     //ambient.openFromFile("../media/audio/kelewin/ambient-intro-layered.ogg");
     ambient.setLoop(true);
     //ambient.setLoopPoints(sf::Music::TimeSpan(sf::Time(), ambient.getDuration() - sf::seconds(0.8)));
-    ambient.setPitch(120.f / 125.8f);
+    ambient.setPitch(120.f / 125.8f * (80.f/60));
     //ambient.setPitch(120.f / 88.f);
-    ambient.setPitch(90.f / 91.7f);
+    //ambient.setPitch(90.f / 91.7f);
 
     ambient.setVolume(8);
     ambient.play();
