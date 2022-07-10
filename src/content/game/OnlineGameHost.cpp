@@ -110,7 +110,7 @@ namespace padi::content {
                 mob->getHPBar().lock()->asleep = !mob->asCharacter(nextMobType & 1u).awake;
                 map->moveEntity(mob, nextMobPos);
                 spawnCharacter(mob->asCharacter(nextMobType & 1u), ~0u);
-            } else if(nextMobType < 140){//< 196) {
+            } else if(nextMobType < 180){//< 196) {
                 auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
                                                      nextMobPos);
                 mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);

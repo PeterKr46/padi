@@ -51,6 +51,7 @@ audio chord_01          ../media/audio/jorgesbcomposer/chord_01.ogg
 audio guitar_01         ../media/audio/jorgesbcomposer/string_01.ogg
 audio deep_beep         ../media/audio/kenneth_cooney/one-beeper.ogg
 audio zap               ../media/audio/egomassive/zap.ogg
+audio whoosh            ../media/audio/sfx4animation/whoosh-sfx-40.ogg
 
 
 anim heal           32 32   928 0   0 32    12

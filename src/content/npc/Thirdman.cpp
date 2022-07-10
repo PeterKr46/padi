@@ -7,6 +7,7 @@
 #include <utility>
 #include "../game/OnlineGame.h"
 #include "../vfx/EntityBlink.h"
+#include "../../media/AudioPlayback.h"
 
 namespace padi::content {
 
@@ -110,6 +111,10 @@ namespace padi::content {
         m_strikePos = pos;
         m_user->trySetAnimation("erupt");
         level->centerView(pos);
+        auto ap = std::make_shared<padi::AudioPlayback>(level->getApollo()->lookupAudio("whoosh"));
+        ap->setPosition(m_user->getPosition());
+        ap->sound.setVolume(60);
+        ap->start(lvl);
         return true;
     }
 
@@ -240,6 +245,13 @@ namespace padi::content {
         level->centerView(pos);
         m_complete = false;
         m_strikePos = pos;
+
+        auto ap = std::make_shared<padi::AudioPlayback>(level->getApollo()->lookupAudio("chord_01"));
+        ap->sound.setPitch(0.3);
+        ap->setPosition(m_user->getPosition());
+        ap->sound.setVolume(100);
+        ap->start(lvl);
+
         return true;
     }
 
