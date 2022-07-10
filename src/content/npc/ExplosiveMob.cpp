@@ -50,7 +50,7 @@ namespace padi::content {
                                 child1->initHPBar(chr->entity->getHPBar());
                                 auto childChr = child1->asCharacter(true);
                                 childChr.awake = true;
-                                host->spawnCharacter(childChr, ~0u);
+                                host->spawnCharacter(childChr, ~0u, false);
                                 placed++;
                             }
                         }
@@ -128,7 +128,7 @@ namespace padi::content {
                         payload.frequency = 4;
                         PackagePayload(packet, payload);
                         game->broadcast(packet);
-                        auto blink = std::make_shared<padi::content::EntityBlink>(shared_from_this(), payload.frequency);
+                        auto blink = std::make_shared<padi::content::EntityBlink<LivingEntity>>(shared_from_this(), payload.frequency);
                         level->addFrameBeginListener(blink);
                     }
                 }

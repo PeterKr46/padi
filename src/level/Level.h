@@ -74,6 +74,8 @@ namespace padi {
 
         bool popSpawnPosition(sf::Vector2i &pos, uint8_t &seed);
 
+        sf::Vector2i getGridSize() const;
+
     private:
         sf::View m_view;
         sf::View m_viewTarget;
@@ -102,6 +104,7 @@ namespace padi {
         padi::Map m_map;
         std::shared_ptr<padi::Cursor> m_cursor;
         std::deque<std::pair<sf::Vector2i, uint8_t>> m_spawnPoints;
+        sf::Vector2i m_gridSize{0,0};
     };
 
 } // padi

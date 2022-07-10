@@ -38,4 +38,12 @@ namespace padi {
 
         return 4;
     }
+
+    void StaticEntity::setColor(const sf::Color &c) {
+        m_color = c;
+    }
+
+    sf::Color const &StaticEntity::getColor() const {
+        return m_color;
+    }
 }

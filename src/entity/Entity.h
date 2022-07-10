@@ -40,6 +40,7 @@ namespace padi {
         BEACON = LIVING << 1,
         PLAYER = BEACON << 1,
         EVENT  = PLAYER << 1,
+        INCOMING = EVENT << 1,
 
         EXPLOSIVE = PLAYER << 8,
     };

@@ -110,6 +110,7 @@ namespace padi {
         level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{-4,4}, 1);
         level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{2,-3}, 161);
         level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{-3,2}, 1);
+        level->m_gridSize = {4,4};
         return level;
     }
 
@@ -311,6 +312,7 @@ namespace padi {
         std::shuffle(level->m_spawnPoints.begin(), level->m_spawnPoints.end(), m_rand);
         level->addFrameBeginListener(std::make_shared<padi::content::MapShaker>());
         level->centerView({0,0});
+        level->m_gridSize = {MAZE_RESOLUTION, MAZE_RESOLUTION};
         level->initCursor("cursor");
         return level;
     }

@@ -143,6 +143,23 @@ namespace padi::content {
                                   padi::Controls::isKeyDown(sf::Keyboard::Down) ? emphColor : sf::Color::White);
             }
         } else if (state == TARGETING) {
+            if(padi::Controls::wasKeyPressed(sf::Keyboard::F1)) {
+                auto chr = game->getCharacters().at(0);
+                if(chr->entity) level->moveCursor(chr->entity->getPosition());
+                level->centerView(level->getCursorLocation());
+            } else if(padi::Controls::wasKeyPressed(sf::Keyboard::F2)) {
+                auto chr = game->getCharacters().at(1);
+                if(chr->entity) level->moveCursor(chr->entity->getPosition());
+                level->centerView(level->getCursorLocation());
+            } else if(padi::Controls::wasKeyPressed(sf::Keyboard::F3)) {
+                auto chr = game->getCharacters().at(2);
+                if(chr->entity) level->moveCursor(chr->entity->getPosition());
+                level->centerView(level->getCursorLocation());
+            } else if(padi::Controls::wasKeyPressed(sf::Keyboard::F4)) {
+                auto chr = game->getCharacters().at(3);
+                if(chr->entity) level->moveCursor(chr->entity->getPosition());
+                level->centerView(level->getCursorLocation());
+            }
             if (!m_uiContext->isFocusActive() && padi::Controls::wasKeyPressed(sf::Keyboard::Space)) {
                 character->entity->intentCast(character->abilities[m_activeAbility], level->getCursorLocation());
                 {

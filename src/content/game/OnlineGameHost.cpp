@@ -14,6 +14,7 @@
 #include "../npc/Beacon.h"
 #include "Narrator.h"
 #include "../../level/LevelGenerator.h"
+#include "../npc/Thirdman.h"
 
 namespace padi::content {
     void HostGame::synchronizeSeed() {
@@ -96,25 +97,31 @@ namespace padi::content {
                 beacon->m_requiredKills = 2;
             }
             auto cr = beacon->asCharacter();
-            m_turnQueue.push(spawnCharacter(cr, ~0u));
+            m_turnQueue.push(spawnCharacter(cr, ~0u, false));
         }
 
         sf::Vector2i nextMobPos;
         uint8_t nextMobType;
         while(m_level->popSpawnPosition(nextMobPos, nextMobType)) {
-            if(nextMobType < 160) {
+            if(nextMobType < 128){//128) {
                 auto mob = std::make_shared<ExplosiveMob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
                                                           nextMobPos);
                 mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
                 mob->getHPBar().lock()->asleep = !mob->asCharacter(nextMobType & 1u).awake;
                 map->moveEntity(mob, nextMobPos);
                 spawnCharacter(mob->asCharacter(nextMobType & 1u), ~0u);
-            } else {
+            } else if(nextMobType < 140){//< 196) {
                 auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
                                                      nextMobPos);
                 mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
                 mob->getHPBar().lock()->asleep = !mob->asCharacter(nextMobType & 1u).awake;
                 spawnCharacter(mob->asCharacter(nextMobType & 1u), ~0u);
+            } else {
+                auto mob = std::make_shared<Thirdman>("volcano", m_level->getApollo()->lookupAnimContext("volcano"),
+                                                     nextMobPos);
+                mob->initHPBar(3, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+                mob->getHPBar().lock()->asleep = false;
+                spawnCharacter(mob->asCharacter(true), ~0u, false);
             }
         }
         for(auto & [id, chr] : m_characters) {
@@ -251,7 +258,7 @@ namespace padi::content {
             m_activeChar = m_characters.at(m_turnQueue.front());
             m_turnQueue.pop();
 
-            if (!m_activeChar->awake) {
+            if (!m_activeChar->awake && m_activeChar->wakeupRange > 0) {
                 auto activeEntity = m_activeChar->entity;
                 if (activeEntity) {
                     auto pos = activeEntity->getPosition();
@@ -366,7 +373,7 @@ namespace padi::content {
         }
     }
 
-    uint32_t HostGame::spawnCharacter(Character const& c, uint32_t owner) {
+    uint32_t HostGame::spawnCharacter(Character const& c, uint32_t owner, bool spawnAnimation) {
         // Determine final Character ID
         uint32_t cid = m_characters.empty() ? 0 : m_characters.rbegin()->first + 1;
 
@@ -404,13 +411,12 @@ namespace padi::content {
 
         // If the character has an entity, let everyone know about it.
         if (newChar->entity) {
-            auto spawnEvent = std::make_shared<SpawnEvent>(c.entity);
-            spawnEvent->dispatch(m_level);
             EntitySpawnPayload payload;
             payload.cid = cid;
             payload.entitytype = c.entity->getType();
             payload.pos = c.entity->getPosition();
             payload.color = c.entity->getColor();
+            payload.spawnAnimation = spawnAnimation;
             auto & animSet = c.entity->getAnimationSet()->getName();
             std::memcpy(payload.animations, animSet.data(), animSet.length());
 
@@ -425,6 +431,8 @@ namespace padi::content {
                 PackagePayload(packet, hpPayload);
                 broadcast(packet);
             }
+            auto spawnEvent = std::make_shared<SpawnEvent>(c.entity, spawnAnimation);
+            spawnEvent->dispatch(m_level);
         }
         // Let everyone know about the Character's abilities.
         for (size_t aid = 0; aid < c.abilities.size(); ++aid) {

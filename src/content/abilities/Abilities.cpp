@@ -37,7 +37,7 @@ namespace padi {
         ap->start(lvl);
 
         lvl->getMap()->removeEntity(m_user);
-        auto spawnEvent = std::make_shared<padi::SpawnEvent>(m_user, pos);
+        auto spawnEvent = std::make_shared<padi::SpawnEvent>(m_user, pos, true);
         spawnEvent->onCycleBegin(lvl);
         lvl->addCycleEndListener(shared_from_this());
         m_complete = false;
@@ -772,5 +772,29 @@ namespace padi {
 
     uint32_t content::Wildfire::getAbilityType() const {
         return AbilityType::Wildfire;
+    }
+
+    void content::Idle::castIndicator(const std::weak_ptr<Level> &level) {
+
+    }
+
+    bool content::Idle::isCastComplete() {
+        return true;
+    }
+
+    uint32_t content::Idle::getAbilityType() const {
+        return AbilityType::Idle;
+    }
+
+    bool content::Idle::cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) {
+        return true;
+    }
+
+    void content::Idle::castCancel(const std::weak_ptr<Level> &level) {
+
+    }
+
+    content::Idle::Idle(std::shared_ptr<LivingEntity> user) : Ability(std::move(user)) {
+
     }
 }

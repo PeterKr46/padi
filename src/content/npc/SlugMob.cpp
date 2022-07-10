@@ -69,7 +69,7 @@ namespace padi::content {
                              return takeTurn(l, c);
                          },
                          true,
-                         false,
+                         awake,
                          9
         };
 

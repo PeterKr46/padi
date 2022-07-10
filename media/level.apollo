@@ -67,6 +67,12 @@ anim idle             32 36   416 0   0 36    12
 anim spawn          0 0  0 0 0 0 12
 anim spawn_ray      0 0  0 0 0 0 12
 
+block volcano
+anim idle           32 36   624 0   0 36    6 2
+anim spawn          32 36   624 0   0 36    6 2
+anim spawn_ray      0 0  0 0 0 0 12
+anim erupt          32 36   656 0   0 36    12
+
 block cube
 anim move_x_from    32 32   0  0    0 48    12
 anim move_x_to      32 32   16 8    0 48    12
@@ -101,3 +107,8 @@ anim move_y_to      32 32   240 8   0 48    12
 anim idle           32 32   192  568 0 32    12
 anim spawn          32 32   224 568 0 32    12
 anim spawn_ray      32 32   64  568 0 32    12
+
+block invisible
+anim idle           0 0  0 0 0 0 12
+anim spawn          0 0  0 0 0 0 12
+anim spawn_ray      0 0  0 0 0 0 12

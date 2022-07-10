@@ -163,7 +163,7 @@ namespace padi::content {
             EntityBlinkPayload payload;
             host.fetch(payload);
             auto &chr = m_characters[payload.cid];
-            m_level->addFrameBeginListener(std::make_shared<EntityBlink>(chr->entity, payload.frequency));
+            m_level->addFrameBeginListener(std::make_shared<EntityBlink<LivingEntity>>(chr->entity, payload.frequency));
         }
         takeTurn();
         fflush(stdout);
@@ -229,7 +229,7 @@ namespace padi::content {
                         payload.pos, payload.entitytype);
             }
             chr->entity->setColor(payload.color);
-            auto spawnEvent = std::make_shared<SpawnEvent>(chr->entity);
+            auto spawnEvent = std::make_shared<SpawnEvent>(chr->entity, payload.spawnAnimation);
             spawnEvent->dispatch(m_level);
         } else if(payload.cid == ~0u) {
             printf("[OnlineGame|Client] Spawning detached Entity!");
@@ -238,8 +238,12 @@ namespace padi::content {
                     m_level->getApollo()->lookupAnimContext(payload.animations),
                     payload.pos, payload.entitytype);
             entity->setColor(payload.color);
-            auto spawnEvent = std::make_shared<SpawnEvent>(entity);
-            spawnEvent->dispatch(m_level);
+            if(payload.spawnAnimation) {
+                auto spawnEvent = std::make_shared<SpawnEvent>(entity);
+                spawnEvent->dispatch(m_level);
+            } else {
+                m_level->getMap()->addEntity(entity);
+            }
         }
     }
 

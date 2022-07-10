@@ -125,7 +125,7 @@ namespace padi::content {
 
         void broadcast(sf::Packet &packet, const uint32_t *ignore, uint32_t num_ignored) override;
 
-        uint32_t spawnCharacter(Character const &c, uint32_t owner = 0);
+        uint32_t spawnCharacter(Character const &c, uint32_t owner = 0, bool spawnAnimation = true);
 
         void spawnDropEvent(sf::Vector2i const& pos);
 
@@ -179,6 +179,6 @@ namespace padi::content {
 
         void spawnNewEntity(EntitySpawnPayload payload);
 
-        uint32_t m_localChar;
+        uint32_t m_localChar = -1;
     };
 } // content

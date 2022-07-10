@@ -109,6 +109,7 @@ namespace padi::content {
         sf::Vector2i    pos;
         sf::Color       color;
         char            animations[12] = "\0";
+        bool            spawnAnimation = false;
     };
 
     struct alignas(64) CharacterCastPayload {

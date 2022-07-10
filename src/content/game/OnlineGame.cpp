@@ -15,6 +15,7 @@
 #include "../npc/ExplosiveMob.h"
 #include "../npc/SlugMob.h"
 #include "../npc/Beacon.h"
+#include "../npc/Thirdman.h"
 
 
 namespace padi::content {
@@ -129,6 +130,18 @@ namespace padi::content {
             }
             case AbilityType::Wildfire: {
                 abilities[payload.abilitySlot] = std::make_shared<Wildfire>(chr->entity);
+                break;
+            }
+            case AbilityType::Eruption: {
+                abilities[payload.abilitySlot] = std::make_shared<Eruption>(chr->entity);
+                break;
+            }
+            case AbilityType::DownPour: {
+                abilities[payload.abilitySlot] = std::make_shared<DownPour>(chr->entity);
+                break;
+            }
+            case AbilityType::Idle: {
+                abilities[payload.abilitySlot] = std::make_shared<Idle>(chr->entity);
                 break;
             }
             default: {

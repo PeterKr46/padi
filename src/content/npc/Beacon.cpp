@@ -122,7 +122,11 @@ namespace padi::content {
         } else {
             m_open = false;
         }
-        if(m_open && !wasopen) lvl.lock()->addFrameBeginListener(shared_from_this());
+        if(m_open && !wasopen) {
+            lvl.lock()->addFrameBeginListener(shared_from_this());
+        } else {
+            m_complete = true;
+        }
         return true;
     }
 

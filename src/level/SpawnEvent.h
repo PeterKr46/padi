@@ -14,8 +14,8 @@ namespace padi {
     class SpawnEvent
             : public CycleListener, public std::enable_shared_from_this<SpawnEvent> {
     public:
-        explicit SpawnEvent(const std::shared_ptr<LivingEntity>& entity);
-        explicit SpawnEvent(std::shared_ptr<LivingEntity> entity, sf::Vector2i const& pos);
+        explicit SpawnEvent(const std::shared_ptr<LivingEntity>& entity, bool animated = true);
+        explicit SpawnEvent(std::shared_ptr<LivingEntity> entity, sf::Vector2i const& pos, bool animated);
 
         ~SpawnEvent() = default;
 
@@ -30,7 +30,7 @@ namespace padi {
         bool pullFocus{false};
 
     private:
-        std::shared_ptr<OneshotEntityStack> m_ray;
-        std::shared_ptr<LivingEntity> m_entity;
+        std::shared_ptr<OneshotEntityStack> m_ray{nullptr};
+        std::shared_ptr<LivingEntity> m_entity{nullptr};
     };
 }

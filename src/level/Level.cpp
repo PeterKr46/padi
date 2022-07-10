@@ -248,5 +248,9 @@ namespace padi {
         return false;
     }
 
+    sf::Vector2i Level::getGridSize() const {
+        return m_gridSize;
+    }
+
 
 } // padi

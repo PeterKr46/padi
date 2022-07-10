@@ -30,9 +30,22 @@ namespace padi::content {
             GateUnlock,
             Raze,
             Wildfire,
+            Eruption,
+            DownPour,
+            Idle,
             NUM_ABILITIES
         };
     }
+
+    class Idle : public padi::Ability {
+    public:
+        explicit Idle(std::shared_ptr<LivingEntity> user);
+        void castIndicator(const std::weak_ptr<Level> &level) override;
+        bool isCastComplete() override;
+        [[nodiscard]] uint32_t getAbilityType() const override;
+        bool cast(const std::weak_ptr<Level> &level, const sf::Vector2i &pos) override;
+        void castCancel(const std::weak_ptr<Level> &level) override;
+    };
 
     class Peep : public padi::Ability {
     public:

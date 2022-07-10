@@ -10,18 +10,32 @@
 
 namespace padi::content {
 
+    template<typename Colorable>
     class EntityBlink : public padi::CycleListener {
-    public:
-        EntityBlink(std::weak_ptr<LivingEntity> livingEntity, int frequency);
-
-        bool onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) override;
-
     private:
-        std::weak_ptr<LivingEntity> m_target;
+        std::weak_ptr<Colorable> m_target;
         int m_frequency = 4;
 
-        sf::Color m_colors[2]{sf::Color(96,0,0, 255),sf::Color(96,0,0, 255)};
+        sf::Color m_colors[2]{sf::Color(96, 0, 0, 255), sf::Color(96, 0, 0, 255)};
         int m_counter = 0;
+    public:
+        EntityBlink(std::weak_ptr<Colorable> livingEntity, int frequency)
+                : m_target(std::move(livingEntity)),
+                  m_frequency(frequency) {
+            m_colors[0] = m_target.lock()->getColor();
+        }
+
+        bool onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) override {
+            m_counter = (m_counter + 1) % m_frequency;
+            if (!m_target.expired()) {
+                if (!m_counter) {
+                    std::swap(*m_colors, m_colors[1]);
+                    m_target.lock()->setColor(m_colors[0]);
+                }
+                return true;
+            }
+            return false;
+        }
     };
 
 } // content

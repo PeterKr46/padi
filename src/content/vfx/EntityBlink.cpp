@@ -7,12 +7,9 @@
 #include <utility>
 
 namespace padi::content {
-    EntityBlink::EntityBlink(std::weak_ptr<LivingEntity> livingEntity, int frequency)
-            : m_target(std::move(livingEntity)), m_frequency(frequency) {
-        m_colors[0] = m_target.lock()->getColor();
-    }
 
-    bool EntityBlink::onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) {
+   /* template<typename Colorable>
+    bool EntityBlink<Colorable>::onFrameBegin(const std::weak_ptr<padi::Level> &lvl, uint8_t frame) {
         m_counter = (m_counter + 1) % m_frequency;
         if(!m_target.expired()) {
             if (!m_counter) {
@@ -23,4 +20,10 @@ namespace padi::content {
         }
         return false;
     }
+
+    template<typename Colorable>
+    EntityBlink<Colorable>::EntityBlink(std::weak_ptr<Colorable> livingEntity, int frequency)
+            : m_target(std::move(livingEntity)), m_frequency(frequency) {
+        m_colors[0] = m_target.lock()->getColor();
+    }*/
 } // content
