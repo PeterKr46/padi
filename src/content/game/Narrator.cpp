@@ -4,6 +4,7 @@
 
 #include "Narrator.h"
 
+#include <cstring>
 #include "../../ui/Immediate.h"
 #include "OnlineGame.h"
 
@@ -28,7 +29,7 @@ namespace padi::content {
     void Narrator::queueText(const char* msg, bool center) {
         NarratorEvent event{NarratorEvent::ShowText};
         event.data.showText.center = center;
-        strncpy_s(event.data.showText.text, msg, std::min(strlen(msg), sizeof(event.data.showText.text) / sizeof(char) - 1));
+        std::strncpy(event.data.showText.text, msg, std::min(strlen(msg), sizeof(event.data.showText.text) / sizeof(char) - 1));
         m_promptQueue.emplace(event);
     }
 
@@ -57,7 +58,7 @@ namespace padi::content {
     void Narrator::queueSprite(const char* id, sf::Vector2f const& center) {
         NarratorEvent event{NarratorEvent::ShowSprite};
         event.data.showSprite.pos = center;
-        strncpy_s(event.data.showSprite.id, id, std::min(strlen(id), sizeof(event.data.showSprite.id) / sizeof(char) - 1));
+        std::strncpy(event.data.showSprite.id, id, std::min(strlen(id), sizeof(event.data.showSprite.id) / sizeof(char) - 1));
 
         m_promptQueue.emplace(event);
     }

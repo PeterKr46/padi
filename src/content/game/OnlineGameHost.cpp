@@ -3,6 +3,9 @@
 //
 
 #include "OnlineGame.h"
+
+#include <climits>
+
 #include "LocalPlayerTurn.h"
 #include "../abilities/Abilities.h"
 #include "RemotePlayerTurn.h"
@@ -514,7 +517,7 @@ namespace padi::content {
                         const char* msg = "You found a new ability!";
                         payload.event.type = NarratorEvent::ShowText;
                         payload.event.data.showText.center = true;
-                        strncpy_s(payload.event.data.showText.text, msg, std::min(strlen(msg), sizeof(payload.event.data.showText.text) / sizeof(char) - 1));
+                        std::strncpy(payload.event.data.showText.text, msg, std::min(strlen(msg), sizeof(payload.event.data.showText.text) / sizeof(char) - 1));
 
                         packet = PackagePayload(payload);
                         outbox.send(packet);
@@ -522,7 +525,7 @@ namespace padi::content {
                         payload.event.type = NarratorEvent::ShowSprite;
                         payload.event.data.showSprite.pos = {224,128};
                         auto id2 = m_activeChar->abilities[3]->getIconId().c_str();
-                        strncpy_s(payload.event.data.showSprite.id, id2, std::min(strlen(id2), sizeof(payload.event.data.showSprite.id) / sizeof(char) - 1));
+                        std::strncpy(payload.event.data.showSprite.id, id2, std::min(strlen(id2), sizeof(payload.event.data.showSprite.id) / sizeof(char) - 1));
                         packet = PackagePayload(payload);
                         outbox.send(packet);
 

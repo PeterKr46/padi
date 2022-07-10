@@ -6,6 +6,7 @@
 
 #include <utility>
 #include <cstring>
+#include <cmath>
 #include "../../level/Cursor.h"
 #include "../../Controls.h"
 #include "../../entity/OneshotEntity.h"
