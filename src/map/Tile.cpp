@@ -4,6 +4,7 @@
 
 #include "Tile.h"
 
+#include <cmath>
 #include <utility>
 #include "Map.h"
 #include "../Constants.h"
@@ -84,7 +85,7 @@ namespace padi {
         float delta;
         for (int i = 0; i < 3; ++i) {
             delta = float(rawTarget[i] - rawStatus[i]);
-            rawStatus[i] += int16_t(ceil(delta * power));
+            rawStatus[i] += int16_t(std::ceil(delta * power));
         }
     }
 
@@ -94,7 +95,7 @@ namespace padi {
         float delta;
         for (int i = 0; i < 3; ++i) {
             delta = std::max(0.0f, float(rawTarget[i] - rawStatus[i]));
-            rawStatus[i] += int16_t(ceil(delta * power));
+            rawStatus[i] += int16_t(std::ceil(delta * power));
         }
     }
 } // padi
