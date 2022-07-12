@@ -389,59 +389,61 @@ namespace padi {
             castCancel(lvl);
             return false;
         }
-        LimitedRangeAbility::cast(lvl, pos);
-        auto anim =  lvl->getApollo()->lookupAnim(m_direction.x != 0 ? "laser_x_burst" : "laser_y_burst");
-        for (size_t i = 0; i < getRange() - 1; ++i) {
-            auto iPos = m_user->getPosition() + m_direction * int(i + 1);
-            auto laserPart = std::make_shared<padi::OneshotEntity>(iPos);
-            laserPart->m_animation = anim;
-            laserPart->m_color = m_user->getColor();
-            lvl->getMap()->addEntity(laserPart);
-            auto tile = lvl->getMap()->getTile(iPos);
-            if(tile) {
-                auto col = tile->getColor();
-                uint16_t cSum = col.r + col.g + col.b;
-                if (cSum > 100) tile->lerpAdditiveColor(m_user->getColor(), 0.9);
-            }
-            lvl->addCycleEndListener(laserPart);
-            std::vector<std::shared_ptr<Entity>> ents;
-            if (lvl->getMap()->getEntities(iPos, ents)) {
-                for (auto &entity: ents) {
-                    if (entity->getType() & LIVING) {
-                        auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
-                        if (livingEntity->hasHPBar()) {
-                            auto hpBar = livingEntity->getHPBar().lock();
-                            auto hp = hpBar->getHP();
-                            hpBar->setHP(hp - 1);
-                            if(hp == 1) m_user->enemiesSlain++;
+        if(LimitedRangeAbility::cast(lvl, pos)) {
+            auto anim = lvl->getApollo()->lookupAnim(m_direction.x != 0 ? "laser_x_burst" : "laser_y_burst");
+            for (size_t i = 0; i < getRange() - 1; ++i) {
+                auto iPos = m_user->getPosition() + m_direction * int(i + 1);
+                auto laserPart = std::make_shared<padi::OneshotEntity>(iPos);
+                laserPart->m_animation = anim;
+                laserPart->m_color = m_user->getColor();
+                lvl->getMap()->addEntity(laserPart);
+                auto tile = lvl->getMap()->getTile(iPos);
+                if (tile) {
+                    auto col = tile->getColor();
+                    uint16_t cSum = col.r + col.g + col.b;
+                    if (cSum > 100) tile->lerpAdditiveColor(m_user->getColor(), 0.9);
+                }
+                lvl->addCycleEndListener(laserPart);
+                std::vector<std::shared_ptr<Entity>> ents;
+                if (lvl->getMap()->getEntities(iPos, ents)) {
+                    for (auto &entity: ents) {
+                        if (entity->getType() & LIVING) {
+                            auto livingEntity = std::static_pointer_cast<LivingEntity>(entity);
+                            if (livingEntity->hasHPBar()) {
+                                auto hpBar = livingEntity->getHPBar().lock();
+                                auto hp = hpBar->getHP();
+                                hpBar->setHP(hp - 1);
+                                if (hp == 1) m_user->enemiesSlain++;
+                            }
                         }
                     }
                 }
             }
+            auto strike = std::make_shared<padi::OneshotEntity>(m_user->getPosition());
+            strike->m_animation = lvl->getApollo()->lookupAnim("bubble");
+            strike->m_color = m_user->getColor();
+            lvl->getMap()->addEntity(strike);
+            lvl->addCycleEndListener(strike);
+            lvl->centerView(pos);
+            lvl->getMap()->moveEntity(m_user, pos);
+
+            strike = std::make_shared<padi::OneshotEntity>(pos);
+            strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
+            strike->m_color = m_user->getColor();
+            lvl->getMap()->addEntity(strike);
+            lvl->addCycleEndListener(strike);
+            lvl->centerView(pos);
+            m_direction = sf::Vector2i(0, 0);
+
+            lvl->addCycleEndListener(shared_from_this());
+            lvl->getCursor()->unlock();
+            m_complete = false;
+
+            auto ap = std::make_shared<AudioPlayback>(lvl->getApollo()->lookupAudio("zap"));
+            ap->start(level);
+            return true;
         }
-        auto strike = std::make_shared<padi::OneshotEntity>(m_user->getPosition());
-        strike->m_animation = lvl->getApollo()->lookupAnim("bubble");
-        strike->m_color = m_user->getColor();
-        lvl->getMap()->addEntity(strike);
-        lvl->addCycleEndListener(strike);
-        lvl->centerView(pos);
-        lvl->getMap()->moveEntity(m_user, pos);
-
-        strike = std::make_shared<padi::OneshotEntity>(pos);
-        strike->m_animation = lvl->getApollo()->lookupAnim("air_strike_large");
-        strike->m_color = m_user->getColor();
-        lvl->getMap()->addEntity(strike);
-        lvl->addCycleEndListener(strike);
-        lvl->centerView(pos);
-        m_direction = sf::Vector2i(0, 0);
-
-        lvl->addCycleEndListener(shared_from_this());
-        lvl->getCursor()->unlock();
-        m_complete = false;
-
-        auto ap = std::make_shared<AudioPlayback>(lvl->getApollo()->lookupAudio("zap"));
-        ap->start(level);
-        return true;
+        return false;
     }
 
     void content::Dash::castIndicator(const std::weak_ptr<Level> &level) {
