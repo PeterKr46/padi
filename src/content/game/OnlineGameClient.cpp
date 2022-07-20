@@ -90,7 +90,8 @@ namespace padi::content {
         if (host.receive() == -1) {
             m_next = std::make_shared<padi::content::MainMenu>(
                     "../media/ui.apollo",
-                    "../media/ui_sheet.png"
+                    "../media/ui_sheet.png",
+                    m_lobby.names[m_localChar].c_str()
             );
             return;
         }
@@ -269,6 +270,10 @@ namespace padi::content {
         for(size_t j = 0; j < num_ignored; ++j) ignored |= (ignore[j] == cid);
         if (!ignored)
             m_lobby.host.send(packet);
+    }
+
+    size_t ClientGame::getLobbySize() const {
+        return m_lobby.size;
     }
 
 }

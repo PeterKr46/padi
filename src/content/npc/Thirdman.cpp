@@ -87,7 +87,7 @@ namespace padi::content {
                          },
                          true,
                          awake,
-                         0
+                         30
         };
     }
 

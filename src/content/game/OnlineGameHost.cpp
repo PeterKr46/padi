@@ -104,25 +104,26 @@ namespace padi::content {
         sf::Vector2i nextMobPos;
         uint8_t nextMobType;
         while(m_level->popSpawnPosition(nextMobPos, nextMobType)) {
+            bool startAwake = false; //nextPlayerType & 1u
             if(nextMobType < 128){
                 auto mob = std::make_shared<ExplosiveMob>("mob", m_level->getApollo()->lookupAnimContext("bubbleboi"),
                                                           nextMobPos);
                 mob->initHPBar(1, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
-                mob->getHPBar().lock()->asleep = !mob->asCharacter(nextMobType & 1u).awake;
+                mob->getHPBar().lock()->asleep = !mob->asCharacter(startAwake).awake;
                 map->moveEntity(mob, nextMobPos);
-                spawnCharacter(mob->asCharacter(nextMobType & 1u), ~0u);
+                spawnCharacter(mob->asCharacter(startAwake), ~0u);
             } else if(nextMobType < 224) {
                 auto mob = std::make_shared<SlugMob>("mob", m_level->getApollo()->lookupAnimContext("tetrahedron"),
                                                      nextMobPos);
                 mob->initHPBar(2, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
                 mob->getHPBar().lock()->asleep = !mob->asCharacter(true).awake;
-                spawnCharacter(mob->asCharacter(true), ~0u);
+                spawnCharacter(mob->asCharacter(startAwake), ~0u);
             } else {
                 auto mob = std::make_shared<Thirdman>("volcano", m_level->getApollo()->lookupAnimContext("volcano"),
                                                      nextMobPos);
-                mob->initHPBar(4, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
-                mob->getHPBar().lock()->asleep = false;
-                spawnCharacter(mob->asCharacter(true), ~0u, false);
+                mob->initHPBar(3, m_level->getApollo()->lookupAnimContext("hp_bars"), sf::Color::White);
+                mob->getHPBar().lock()->asleep = !startAwake;
+                spawnCharacter(mob->asCharacter(startAwake), ~0u, false);
             }
         }
         for(auto & [id, chr] : m_characters) {
@@ -317,11 +318,31 @@ namespace padi::content {
         if(msg == "exit") {
             m_next = std::make_shared<MainMenu>(
                     "../media/ui.apollo",
-                    "../media/ui_sheet.png"
+                    "../media/ui_sheet.png",
+                    m_lobby.names[m_lobby.size - 1].c_str()
             );
-        } else if(msg == "restart") {
+        } else if(msg == "restart" || msg == "autowin") {
             signalLevelAdvance();
             sendChatGeneric("Restarting after this round.");
+            return;
+        } else if(msg == "give raze" && from < m_lobby.size) {
+            CharacterAbilityAssignPayload p{PayloadType::CharacterAbilityAssign, from, 3, AbilityType::Raze };
+            assignPlayerAbility(p);
+            auto pak = PackagePayload(p);
+            broadcast(pak);
+            return;
+        } else if(msg == "give tp" && from < m_lobby.size) {
+            CharacterAbilityAssignPayload p{PayloadType::CharacterAbilityAssign, from, 3, AbilityType::Teleport };
+            assignPlayerAbility(p);
+            auto pak = PackagePayload(p);
+            broadcast(pak);
+            return;
+        } else if(msg == "give wildfire" && from < m_lobby.size) {
+            CharacterAbilityAssignPayload p{PayloadType::CharacterAbilityAssign, from, 3, AbilityType::Wildfire };
+            Wildfire(nullptr, 14).writeProperties(p.abilityProps, 16);
+            auto pak = PackagePayload(p);
+            broadcast(pak);
+            assignPlayerAbility(p);
             return;
         } else if(msg[0] == '?') {
             if(std::strstr(msg.c_str(), "?BLESS") || std::strstr(msg.c_str(), "?BLESSED")) {
@@ -330,6 +351,9 @@ namespace padi::content {
             }
             else if(std::strstr(msg.c_str(), "?CURSE") ||std::strstr(msg.c_str(), "?CURSED")) {
                 sendChatGeneric("CURSED Tiles are too DARK for LIGHT Creatures (you) to enter. They can generally not be LIGHTened.");
+                return;
+            } else {
+                sendChatGeneric("exit ?BLESS ?CURSE restart/autowin");
                 return;
             }
         }

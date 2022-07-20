@@ -109,7 +109,7 @@ namespace padi {
         level->initCursor("cursor");
         level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{-4,4}, 1);
         level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{2,-3}, 161);
-        level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{-3,2}, 1);
+        level->m_spawnPoints.emplace(level->m_spawnPoints.end(), sf::Vector2i{-4,2}, 1);
         level->m_gridSize = {4,4};
         return level;
     }

@@ -119,7 +119,10 @@ namespace padi {
 
     bool Level::centerView(const sf::Vector2i &position, bool force) {
         if (!m_viewLocked) {
-            m_viewTarget.setCenter(padi::Map::mapTilePosToWorld(position));
+            auto target = padi::Map::mapTilePosToWorld(position);
+            target.x = floor(target.x) + 0.5f;
+            target.y = floor(target.y) + 0.5f;
+            m_viewTarget.setCenter(target);
             if (force) {
                 m_view.setCenter(m_viewTarget.getCenter());
             }

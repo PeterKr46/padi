@@ -71,7 +71,7 @@ namespace padi::content {
 
         void queue(NarratorEvent const& event);
 
-        float speed = 2.0f;
+        float speed = 1.0f;
 
         void queueText(const char* msg, bool center = true);
         void queueFrame(sf::FloatRect const& rect);

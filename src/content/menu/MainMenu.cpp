@@ -16,7 +16,7 @@
 namespace padi::content {
 
 
-    MainMenu::MainMenu(std::string const &apollo, std::string const &spritesheet)
+    MainMenu::MainMenu(std::string const &apollo, std::string const &spritesheet, const char *name)
             : m_chat({250, 194, 200, 60}) {
 
         m_uiContext.init(apollo, spritesheet);
@@ -40,7 +40,7 @@ namespace padi::content {
                 "Box"
         };
         m_uiContext.setText("nick_label", "Nick", {0, 0});
-        m_uiContext.setText("nick_input", defaultNames[rand.getElapsedTime().asMicroseconds() % 8], {32, 0});
+        m_uiContext.setText("nick_input", name ? name : defaultNames[rand.getElapsedTime().asMicroseconds() % 8], {32, 0});
         m_uiContext.popTransform();
 
         switchMode(NUM_MODES, PlayTutorial);

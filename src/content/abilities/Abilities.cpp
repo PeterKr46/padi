@@ -538,7 +538,7 @@ namespace padi {
         level->showCursor();
         std::shared_ptr<LivingEntity> e = std::static_pointer_cast<LivingEntity>(map->getEntity(cursor, 8));
         if (e) {
-            m_infoEntity->m_animation = level->getApollo()->lookupAnim("debug");
+            //m_infoEntity->m_animation = level->getApollo()->lookupAnim("debug");
             if(m_infoEntity->m_animation) {
                 map->moveEntity(m_infoEntity, cursor);
             }

@@ -39,6 +39,10 @@ namespace padi::content {
         if(padi::Controls::isKeyDown(sf::Keyboard::Tab)) {
             states.transform.scale(2/12.f, 2/12.f);
             m_crt.asTarget()->setView(sf::View({0,0},{453,255}));
+        } else if(padi::Controls::isKeyDown(sf::Keyboard::LShift)) {
+            states.transform.scale(2.f, 2.f);
+            auto view = m_crt.asTarget()->getView();
+            m_crt.asTarget()->setView(sf::View(view.getCenter() * 2.f,{453,255}));
         }
 
         states.transform.scale(255.f / m_crt.asTarget()->getView().getSize().y,
@@ -173,7 +177,11 @@ namespace padi::content {
         // This glorious copy prevents Apollo from going out of scope
         auto tmpCopy = m_level;
 
-        m_level = LevelGenerator().withSeed(m_seed).withArea({int(std::log2(m_stage + 1.f) * 24.f), int(std::log2(m_stage + 1.f) * 24.f)})
+        m_level = LevelGenerator().withSeed(m_seed).withArea({
+                                                                     int(std::log2(std::max(float(getLobbySize()),
+                                                                                            m_stage + 1.f)) * 24.f),
+                                                                     int(std::log2(std::max(float(getLobbySize()),
+                                                                                            m_stage + 1.f)) * 24.f)})
                 .withSpritesheet("../media/level_sheet.png")    // TODO
                 .withApollo("../media/level.apollo")            // TODO
                 .generateLevel();

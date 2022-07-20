@@ -137,7 +137,7 @@ namespace padi::content {
         queueSleep(2);
 
         queueText("This is you! Yup, a cube...", false);
-        queueSleep(5);
+        queueSleep(3);
         queueText(""
                   "This is you! Yup, a cube...\n\n"
                   "                        ... that would rather not be here.", false);
@@ -149,24 +149,23 @@ namespace padi::content {
         queueFrame({sf::Vector2f {226-19, 127-19-8} + Map::mapTilePosToWorld({0,0}), {38,38}});
         queueConfirm();
 
-        queueText("First, you must defeat a certain number of enemies.");
+        queueText(""
+                  "To achieve this,\n\n"
+                  "     you must defeat a certain number of enemies.");
         queueSleep(3);
         queueText("Enemies come in different flavors.");
         queueConfirm();
 
         queueText("Some  will chase you\n to go out with a bang!");
-        queueFrame({sf::Vector2f {226-19, 127-19-8} + Map::mapTilePosToWorld({-3,2}), {38,38}});
+        queueFrame({sf::Vector2f {226-19, 127-19-8} + Map::mapTilePosToWorld({-4,2}), {38,38}});
         queueConfirm();
 
         queueText("Others will pursue your light,\n cursing every place they step.");
         queueFrame({sf::Vector2f {226-19, 127-19-8} + Map::mapTilePosToWorld({2,-3}), {38,38}});
         queueConfirm();
 
-        queueText("Darkness is creeping all around you.");
+        queueText("Light up your surroundings as you go!\n Once darkness takes hold, you cannot pass.");
         queueConfirm();
-
-        queueText("Using a limited set of abilities,\n plan your every move carefully!");
-        queueSleep(3.0f);
         queueText("Let's give it a go, start your turn!");
         queueConfirm();
     }

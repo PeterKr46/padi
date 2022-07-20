@@ -48,6 +48,7 @@ namespace padi::content {
 
         const std::map<uint32_t, std::shared_ptr<Character>, std::less<>> & getCharacters() const;
 
+        virtual size_t getLobbySize() const = 0;
 
         size_t getSeed() const;
 
@@ -115,7 +116,7 @@ namespace padi::content {
 
         void advanceTurn();
 
-        size_t getLobbySize() const;
+        size_t getLobbySize() const override;
 
         void sendChatMessage(const std::string &msg) override;
 
@@ -167,6 +168,8 @@ namespace padi::content {
         void broadcast(sf::Packet &packet, const uint32_t *ignore, uint32_t num_ignored) override;
 
         void sendChatMessage(const std::string &msg) override;
+
+        size_t getLobbySize() const override;
 
     private:
         struct {

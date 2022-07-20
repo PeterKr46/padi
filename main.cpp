@@ -4,7 +4,7 @@
 #include "SFML/Audio/Music.hpp"
 
 
-int main() {
+int main(int argc, char * argv[]) {
     std::queue<std::pair<sf::VideoMode, uint8_t>> windowModes;
     windowModes.push({sf::VideoMode(1280, 720), sf::Style::Default});
     windowModes.push({sf::VideoMode::getFullscreenModes().front(), sf::Style::Fullscreen});
@@ -23,13 +23,14 @@ int main() {
     //ambient.setPitch(120.f / 88.f);
     //ambient.setPitch(90.f / 91.7f);
 
-    ambient.setVolume(8);
+    ambient.setVolume(12);
     ambient.play();
 
     std::shared_ptr<padi::Activity> activity = std::make_shared<padi::content::MainMenu>
             (
              "../media/ui.apollo",
-             "../media/ui_sheet.png"
+             "../media/ui_sheet.png",
+             argc > 1 ? argv[1] : nullptr
             );
     activity->handleResize(int(window.getSize().x), int(window.getSize().y));
 

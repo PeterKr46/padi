@@ -134,6 +134,18 @@ vec2 curveRemapUV(vec2 uv)
     return uv;
 }
 
+// https://www.shadertoy.com/view/lslGzl
+float gamma = 1.1;
+vec3 whitePreservingLumaBasedReinhardToneMapping(vec3 color)
+{
+    float white = 2.;
+    float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    float toneMappedLuma = luma * (1. + luma / (white*white)) / (1. + luma);
+    color *= toneMappedLuma / luma;
+    color = pow(color, vec3(1. / gamma));
+    return color;
+}
+
 // Entry.
 void main(){
     //out vec4 fragColor, in vec2 fragCoord
@@ -155,6 +167,7 @@ void main(){
     // vec3 add = Horz5(fragCoord, 0.0);
     // fragColor.rgb += ((add.r + add.g + add.b) / 6.0) - 0.0675;
 
+    fragColor.rgb = whitePreservingLumaBasedReinhardToneMapping(fragColor.rgb);
     fragColor.a=1.0;
 
     gl_FragColor = fragColor;

@@ -27,7 +27,7 @@ namespace padi::content {
 
     class MainMenu : public padi::Activity, public std::enable_shared_from_this<Activity> {
     public:
-        MainMenu(std::string const &apollo, std::string const &spritesheet);
+        MainMenu(std::string const &apollo, std::string const &spritesheet, const char *name = nullptr);
 
         void draw(sf::RenderTarget *target) override;
 

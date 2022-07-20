@@ -149,7 +149,7 @@ namespace padi::content {
                 },
                 true,
                 awake,
-                5
+                7
         };
     }
 
